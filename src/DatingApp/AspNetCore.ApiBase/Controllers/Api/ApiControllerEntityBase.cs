@@ -1,0 +1,42 @@
+﻿using AspNetCore.ApiBase.ApplicationServices;
+using AspNetCore.ApiBase.DomainEvents;
+using AspNetCore.ApiBase.Email;
+using AspNetCore.ApiBase.Reflection;
+using AspNetCore.ApiBase.Settings;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace AspNetCore.ApiBase.Controllers.Api
+{
+
+    //Edit returns a view of the resource being edited, the Update updates the resource it self
+
+    //C - Create - POST
+    //R - Read - GET
+    //U - Update - PUT
+    //D - Delete - DELETE
+
+    //If there is an attribute applied(via[HttpGet], [HttpPost], [HttpPut], [AcceptVerbs], etc), the action will accept the specified HTTP method(s).
+    //If the name of the controller action starts the words "Get", "Post", "Put", "Delete", "Patch", "Options", or "Head", use the corresponding HTTP method.
+    //Otherwise, the action supports the POST method.
+    //[Authorize(Roles = "admin")]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")] // 40
+    [AllowAnonymous]
+    public abstract class ApiControllerEntityBase<TCreateDto, TReadDto, TUpdateDto, TDeleteDto, IEntityService> : ApiControllerEntityAuthorizeBase<TCreateDto, TReadDto, TUpdateDto, TDeleteDto, IEntityService>
+        where TCreateDto : class
+        where TReadDto : class
+        where TUpdateDto : class
+        where TDeleteDto : class
+        where IEntityService : IApplicationServiceEntity<TCreateDto, TReadDto, TUpdateDto, TDeleteDto>
+    {   
+
+        public ApiControllerEntityBase(string resource, IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSettings, IAuthorizationService authorizationService, IActionEventsService actionEventService)
+        : base(resource, service, mapper , emailService, urlHelper, typeHelperService, appSettings, authorizationService, actionEventService)
+        {
+          
+        }
+
+    }
+}
+
