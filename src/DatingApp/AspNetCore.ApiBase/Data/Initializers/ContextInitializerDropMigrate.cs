@@ -1,33 +1,31 @@
 ﻿using AspNetCore.ApiBase.Data.Helpers;
+using AspNetCore.ApiBase.Data.Initializers;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace AspnetCore.ApiBase.Data.Initializers
 {
-    public abstract class ContextInitializerDropMigrate<TDbContext>
+    public abstract class ContextInitializerDropMigrate<TDbContext> : IDbContextInitializer<TDbContext>
          where TDbContext : DbContext
     {
-        private readonly TDbContext _context;
-
-        public ContextInitializerDropMigrate(
-            TDbContext context)
+        public async Task InitializeAsync(TDbContext context)
         {
-            _context = context;
-        }
+            context.EnsureDeleted();
 
-        public async Task InitializeAsync()
-        {
-            //Delete database relating to this context only
-            _context.EnsureDeleted();
+            var script = context.GenerateMigrationScript();
+            context.Database.Migrate();
 
-            var script = _context.GenerateMigrationScript();
-            _context.Database.Migrate();
+            Seed(context);
 
-            Seed(_context);
+            await context.SaveChangesAsync();
 
-            await _context.SaveChangesAsync();
+            await OnSeedCompleteAsync(context);
         }
 
         public abstract void Seed(TDbContext context);
+        public virtual Task OnSeedCompleteAsync(TDbContext context)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

@@ -1,9 +1,9 @@
-﻿using AspNetCore.ApiBase.Email;
+﻿using AspNetCore.ApiBase.Authorization;
+using AspNetCore.ApiBase.Email;
 using AspNetCore.ApiBase.Security;
 using AspNetCore.ApiBase.Settings;
 using AspNetCore.ApiBase.Users;
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.Controllers.Api.Authentication
 {
-
+    [Resource(ResourceOperationsCore.Auth.Name)]
     public abstract class ApiControllerAuthenticationBase<TUser> : ApiControllerBase
         where TUser : IdentityUser
     {
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly UserManager<TUser> _userManager;
+        protected readonly UserManager<TUser> _userManager;
         private readonly SignInManager<TUser> _signInManager;
 
         private readonly string _privateSymmetricKey;
@@ -32,7 +32,6 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
         private readonly int _tokenExpiryMinutes;
 
         public ApiControllerAuthenticationBase(
-            string resource,
             RoleManager<IdentityRole> roleManager,
             UserManager<TUser> userManager,
             SignInManager<TUser> signInManager,
@@ -42,9 +41,8 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
             IMapper mapper,
             PasswordSettings passwordSettings,
             EmailTemplates emailTemplates,
-            AppSettings appSettings,
-            IAuthorizationService authorizationService)
-            :base(resource, mapper, emailSender, urlHelper, appSettings, authorizationService)
+            AppSettings appSettings)
+            :base(mapper, emailSender, urlHelper, appSettings)
         {
             _resetPasswordEmailTemplate = emailTemplates.ResetPassword;
 
@@ -76,6 +74,7 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
         #endregion
 
         #region Authenticate
+        [ResourceAuthorize(ResourceOperationsCore.Auth.Operations.Authenticate)]
         [HttpPost("authenticate")]
         public async Task<IActionResult> Authenticate([FromBody] AuthenticateDto authenticateDto)
         {
@@ -152,6 +151,7 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
         #endregion
 
         #region Forgot Password
+        [ResourceAuthorize(ResourceOperationsCore.Auth.Operations.ForgotPassword)]
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
         {
@@ -172,6 +172,7 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
         #endregion
 
         #region Reset Password
+        [ResourceAuthorize(ResourceOperationsCore.Auth.Operations.ResetPassword)]
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {

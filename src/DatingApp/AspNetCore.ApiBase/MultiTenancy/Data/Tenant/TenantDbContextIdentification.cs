@@ -1,0 +1,14 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace AspNetCore.ApiBase.MultiTenancy.Data.Tenant
+{
+    public sealed class TenantDbContextIdentification
+    {
+        internal readonly IServiceCollection _services;
+
+        internal TenantDbContextIdentification(IServiceCollection services)
+        {
+            this._services = services;
+        }
+    }
+}

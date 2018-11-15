@@ -1,9 +1,10 @@
-﻿using AspNetCore.ApiBase.Data;
+﻿using AspNetCore.ApiBase.MultiTenancy;
+using AspNetCore.ApiBase.MultiTenancy.Data.Tenant;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatingApp.Data
 {
-    public class AppContext : DbContextBase
+    public class AppContext : DbContextTenantBase
     {
         public DbSet<Value> Values { get; set; }
 
@@ -12,14 +13,9 @@ namespace DatingApp.Data
 
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public AppContext(ITenantService tenantService) : base(tenantService)
         {
-            base.OnConfiguring(optionsBuilder);
 
-            if(optionsBuilder.IsConfigured == false)
-            {
-
-            }
         }
 
         public override void BuildQueries(ModelBuilder builder)

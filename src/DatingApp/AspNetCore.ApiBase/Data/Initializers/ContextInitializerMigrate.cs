@@ -1,30 +1,29 @@
 ﻿using AspNetCore.ApiBase.Data.Helpers;
+using AspNetCore.ApiBase.Data.Initializers;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace AspnetCore.ApiBase.Data.Initializers
 {
-    public abstract class ContextInitializerMigrate<TDbContext>
-        where TDbContext : DbContext
+    public abstract class ContextInitializerMigrate<TDbContext> : IDbContextInitializer<TDbContext>
+         where TDbContext : DbContext
     {
-        private readonly TDbContext _context;
-
-        public ContextInitializerMigrate(
-            TDbContext context)
+        public async Task InitializeAsync(TDbContext context)   
         {
-            _context = context;
-        }
+            var script = context.GenerateMigrationScript();
+            context.Database.Migrate();
 
-        public async Task InitializeAsync()
-        {
-            var script = _context.GenerateMigrationScript();
-            _context.Database.Migrate();
+            Seed(context);
 
-            Seed(_context);
+            await context.SaveChangesAsync();
 
-           await _context.SaveChangesAsync();
+            await OnSeedCompleteAsync(context);
         }
 
         public abstract void Seed(TDbContext context);
+        public virtual Task OnSeedCompleteAsync(TDbContext context)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

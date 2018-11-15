@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading;
@@ -11,13 +12,27 @@ namespace AspNetCore.ApiBase.Data.UnitOfWork
 {
     public abstract class DbContextIdentityBase<TUser> : IdentityDbContext<TUser> where TUser : IdentityUser
     {
+        protected DbContextIdentityBase()
+        {
+
+        }
+
         public DbContextIdentityBase(DbContextOptions options)
             : base(options)
         {
 
-            ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.TrackAll;
-            ChangeTracker.LazyLoadingEnabled = true;
-            ChangeTracker.AutoDetectChangesEnabled = true;
+        }
+
+        public bool LazyLoadingEnabled
+        {
+            get { return ChangeTracker.LazyLoadingEnabled; }
+            set { ChangeTracker.LazyLoadingEnabled = value; }
+        }
+
+        public bool AutoDetectChangesEnabled
+        {
+            get { return ChangeTracker.AutoDetectChangesEnabled; }
+            set { ChangeTracker.AutoDetectChangesEnabled = value; }
         }
 
         public static readonly ILoggerFactory CommandLoggerFactory
@@ -45,21 +60,21 @@ namespace AspNetCore.ApiBase.Data.UnitOfWork
             //builder.HasDefaultSchema("dbo"); //SQLite doesnt have schemas
 
             builder.RemovePluralizingTableNameConvention();
+            builder.AddSoftDeleteFilter();
+
             //modelBuilder.Entity<IdentityUser>().ToTable("User");
+            builder.Entity<TUser>().ToTable("User");
             builder.Entity<IdentityRole>().ToTable("Role");
             builder.Entity<IdentityUserRole<string>>().ToTable("UserRole");
             builder.Entity<IdentityUserLogin<string>>().ToTable("UserLogin");
             builder.Entity<IdentityUserClaim<string>>().ToTable("UserClaim");
             builder.Entity<IdentityUserToken<string>>().ToTable("UserToken");
             builder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaim");
+
             BuildQueries(builder);
         }
 
         public abstract void BuildQueries(ModelBuilder builder);
-
-        #region Seed
-        public abstract void Seed();
-        #endregion
 
         #region Migrate
         public void Migrate()
@@ -68,42 +83,33 @@ namespace AspNetCore.ApiBase.Data.UnitOfWork
         }
         #endregion
 
-        #region Timestamps
-        private void AddTimestamps()
-        {
-            var added = this.ChangeTracker.Entries().Where(e => e.State == EntityState.Added).Select(e => e.Entity);
-            var modified = this.ChangeTracker.Entries().Where(e => e.State == EntityState.Modified).Select(e => e.Entity);
-
-            DbContextTimestamps.AddTimestamps(added, modified);
-        }
-        #endregion
-
         #region Save Changes
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
         {
-            AddTimestamps();
+            this.SetTimestamps();
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
         public override int SaveChanges()
         {
-            AddTimestamps();
+            this.SetTimestamps();
             return base.SaveChanges();
         }
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
-            AddTimestamps();
+            this.SetTimestamps();
             return base.SaveChanges(acceptAllChangesOnSuccess);
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken
             = default(CancellationToken))
         {
-            AddTimestamps();
+            this.SetTimestamps();
             return base.SaveChangesAsync(cancellationToken);
         }
         #endregion
+
 
     }
 }

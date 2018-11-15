@@ -1,4 +1,5 @@
 ﻿using AspNetCore.ApiBase.ApplicationServices;
+using AspNetCore.ApiBase.Authorization;
 using AspNetCore.ApiBase.Data.Helpers;
 using AspNetCore.ApiBase.DomainEvents;
 using AspNetCore.ApiBase.Dtos;
@@ -10,6 +11,7 @@ using AspNetCore.ApiBase.ModelBinders;
 using AspNetCore.ApiBase.Reflection;
 using AspNetCore.ApiBase.Settings;
 using AutoMapper;
+using IdentityModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +40,10 @@ namespace AspNetCore.ApiBase.Controllers.Api
     //If there is an attribute applied(via[HttpGet], [HttpPost], [HttpPut], [AcceptVerbs], etc), the action will accept the specified HTTP method(s).
     //If the name of the controller action starts the words "Get", "Post", "Put", "Delete", "Patch", "Options", or "Head", use the corresponding HTTP method.
     //Otherwise, the action supports the POST method.
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Read)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize]
+    //[AllowAnonymous]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public abstract class ApiControllerEntityReadOnlyAuthorizeBase<TDto, IEntityService> : ApiControllerBase
         where TDto : class
         where IEntityService : IApplicationServiceEntityReadOnly<TDto>
@@ -47,8 +52,8 @@ namespace AspNetCore.ApiBase.Controllers.Api
         public ITypeHelperService TypeHelperService { get; private set; }
         public IActionEventsService ActionEventsService { get; private set; }
 
-        public ApiControllerEntityReadOnlyAuthorizeBase(string resource, IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSettings, IAuthorizationService authorizationService, IActionEventsService actionEventsService)
-        : base(resource, mapper, emailService, urlHelper, appSettings, authorizationService)
+        public ApiControllerEntityReadOnlyAuthorizeBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSettings, IActionEventsService actionEventsService)
+        : base(mapper, emailService, urlHelper, appSettings)
         {
             Service = service;
             TypeHelperService = typeHelperService;
@@ -56,11 +61,13 @@ namespace AspNetCore.ApiBase.Controllers.Api
         }
 
         #region List
+
         /// <summary>
         /// Gets the paged.
         /// </summary>
         /// <param name="resourceParameters">The resource parameters.</param>
         /// <returns></returns>
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner)]
         [FormatFilter]
         [Route("")]
         [Route(".{format}")]
@@ -68,6 +75,16 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [HttpHead]
         [ProducesResponseType(typeof(WebApiPagedResponseDto<object>), 200)]
         public virtual async Task<IActionResult> GetPaged([FromQuery] WebApiPagedSearchOrderingRequestDto resourceParameters)
+        {  
+            if(User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && c.Value.EndsWith(ResourceOperationsCore.CRUD.Operations.Read)).Count() == 0)
+            {
+                resourceParameters.UserId = UserId;
+            }
+
+            return await List(resourceParameters);
+        }
+
+        private async Task<IActionResult> List(WebApiPagedSearchOrderingRequestDto resourceParameters)
         {
             if (string.IsNullOrEmpty(resourceParameters.OrderBy))
                 resourceParameters.OrderBy = "Id";
@@ -79,9 +96,9 @@ namespace AspNetCore.ApiBase.Controllers.Api
 
             var cts = TaskHelper.CreateChildCancellationTokenSource(ClientDisconnectedToken());
 
-            var dataTask = Service.SearchAsync(cts.Token, resourceParameters.Search, null, AutoMapperHelper.GetOrderBy<TDto>(resourceParameters.OrderBy, resourceParameters.OrderType), resourceParameters.Page.HasValue ? resourceParameters.Page - 1 : null, resourceParameters.PageSize, true);
+            var dataTask = Service.SearchAsync(cts.Token, resourceParameters.UserId, resourceParameters.Search, null, AutoMapperHelper.GetOrderBy<TDto>(resourceParameters.OrderBy, resourceParameters.OrderType), resourceParameters.Page.HasValue ? resourceParameters.Page - 1 : null, resourceParameters.PageSize, true);
 
-            var totalTask = Service.GetSearchCountAsync(cts.Token, resourceParameters.Search, null);
+            var totalTask = Service.GetSearchCountAsync(cts.Token, resourceParameters.UserId, resourceParameters.Search, null);
 
             await TaskHelper.WhenAllOrException(cts, dataTask, totalTask);
 
@@ -138,6 +155,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// Gets all.
         /// </summary>
         /// <returns></returns>
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Read)]
         [FormatFilter]
         [Route("get-all")]
         [Route("get-all.{format}")]
@@ -158,6 +176,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// Gets all paged.
         /// </summary>
         /// <returns></returns>
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Read)]
         [FormatFilter]
         [Route("get-all-paged")]
         [Route("get-all-paged.{format}")]
@@ -199,6 +218,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// <param name="id">The identifier.</param>
         /// <param name="fields">The fields.</param>
         /// <returns></returns>
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner)]
         [FormatFilter]
         [Route("{id}"), Route("{id}.{format}")]
         //[Route("get/{id}"), Route("get/{id}.{format}")]
@@ -238,6 +258,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// </summary>
         /// <param name="ids">The ids.</param>
         /// <returns></returns>
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner)]
         [FormatFilter]
         [Route("({ids})"), Route("({ids}).{format}")]
         //[Route("get/({ids})"), Route("get/({ids}).{format}")]
@@ -266,6 +287,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         #endregion
 
         #region Details Full Graph
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner)]
         [FormatFilter]
         [Route("full-graph/{id}"), Route("full-graph/{id}.{format}")]
         [HttpGet]
@@ -306,6 +328,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// </summary>
         /// <param name="resourceParameters">The resource parameters.</param>
         /// <returns></returns>
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner)]
         [FormatFilter]
         [Route("{id}/{*collection}")]
         //[Route("{id}/{*collection}.{format}")]
@@ -458,6 +481,7 @@ ResourceUriType type)
                       new
                       {
                           fields = resourceParameters.Fields,
+                          userId = resourceParameters.UserId,
                           orderBy = resourceParameters.OrderBy,
                           search = resourceParameters.Search,
                           page = resourceParameters.Page - 1,
@@ -470,6 +494,7 @@ ResourceUriType type)
                       new
                       {
                           fields = resourceParameters.Fields,
+                          userId = resourceParameters.UserId,
                           orderBy = resourceParameters.OrderBy,
                           search = resourceParameters.Search,
                           page = resourceParameters.Page + 1,
@@ -483,6 +508,7 @@ ResourceUriType type)
                     new
                     {
                         fields = resourceParameters.Fields,
+                        userId = resourceParameters.UserId,
                         orderBy = resourceParameters.OrderBy,
                         search = resourceParameters.Search,
                         page = resourceParameters.Page,

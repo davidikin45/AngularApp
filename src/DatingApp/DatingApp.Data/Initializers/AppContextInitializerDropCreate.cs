@@ -1,18 +1,18 @@
-﻿using AspnetCore.ApiBase.Data.Initializers;
+﻿using System.Threading.Tasks;
+using AspnetCore.ApiBase.Data.Initializers;
 
 namespace DatingApp.Data.Initializers
 {
     public class AppContextInitializerDropCreate : ContextInitializerDropCreate<AppContext>
     {
-        public AppContextInitializerDropCreate(AppContext context)
-            :base(context)
-        {
-
-        }
-
         public override void Seed(AppContext context)
         {
             context.Seed();
+        }
+
+        public override Task OnSeedCompleteAsync(AppContext context)
+        {
+            return Task.CompletedTask; 
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AspNetCore.ApiBase.Data.Helpers;
+using AspNetCore.ApiBase.Domain;
 using AspNetCore.ApiBase.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -24,6 +25,7 @@ namespace AspNetCore.ApiBase.Data.Repository
 
         protected virtual IQueryable<TEntity> GetQueryable(
             bool tracking,
+            string ownedBy = null,
             string search = "",
             Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
@@ -47,6 +49,11 @@ namespace AspNetCore.ApiBase.Data.Repository
             if (filter != null)
             {
                 query = query.Where(filter);
+            }
+
+            if (ownedBy != null && typeof(IEntityOwned).IsAssignableFrom(typeof(TEntity)))
+            {
+                query = query.Where((e) => ((IEntityOwned)e).OwnedBy == ownedBy || ((IEntityOwned)e).OwnedBy == null);
             }
 
             if (!string.IsNullOrEmpty(search))
@@ -229,7 +236,7 @@ namespace AspNetCore.ApiBase.Data.Repository
          bool includeAllCompositionAndAggregationRelationshipProperties = false,
          params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return GetQueryable(true, null, null, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToList();
+            return GetQueryable(true, null, null, null, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToList();
         }
 
         public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken,
@@ -240,7 +247,7 @@ namespace AspNetCore.ApiBase.Data.Repository
             bool includeAllCompositionAndAggregationRelationshipProperties = false,
           params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return await GetQueryable(true, null, null, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToListAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(true, null, null, null, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public virtual IEnumerable<TEntity> GetAllNoTracking(
@@ -251,7 +258,7 @@ namespace AspNetCore.ApiBase.Data.Repository
         bool includeAllCompositionAndAggregationRelationshipProperties = false,
         params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return GetQueryable(false, null, null, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToList();
+            return GetQueryable(false, null, null, null, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToList();
         }
 
         public virtual async Task<IEnumerable<TEntity>> GetAllNoTrackingAsync(CancellationToken cancellationToken,
@@ -262,7 +269,7 @@ namespace AspNetCore.ApiBase.Data.Repository
             bool includeAllCompositionAndAggregationRelationshipProperties = false,
           params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return await GetQueryable(false, null, null, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToListAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(false, null, null, null, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
         #endregion
 
@@ -277,7 +284,7 @@ namespace AspNetCore.ApiBase.Data.Repository
           bool includeAllCompositionAndAggregationRelationshipProperties = false,
         params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return GetQueryable(true, null, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToList();
+            return GetQueryable(true, null, null, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToList();
         }
 
         public virtual async Task<IEnumerable<TEntity>> GetAsync(CancellationToken cancellationToken,
@@ -290,7 +297,7 @@ namespace AspNetCore.ApiBase.Data.Repository
             bool includeAllCompositionAndAggregationRelationshipProperties = false,
           params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return await GetQueryable(true, null, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToListAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(true, null, null, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public virtual IEnumerable<TEntity> GetNoTracking(
@@ -303,7 +310,7 @@ namespace AspNetCore.ApiBase.Data.Repository
           bool includeAllCompositionAndAggregationRelationshipProperties = false,
         params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return GetQueryable(false, null, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToList();
+            return GetQueryable(false, null, null, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToList();
         }
 
         public virtual async Task<IEnumerable<TEntity>> GetNoTrackingAsync(CancellationToken cancellationToken,
@@ -316,22 +323,23 @@ namespace AspNetCore.ApiBase.Data.Repository
             bool includeAllCompositionAndAggregationRelationshipProperties = false,
           params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return await GetQueryable(false, null, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToListAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(false, null, null, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public virtual int GetCount(Expression<Func<TEntity, bool>> filter = null)
         {
-            return GetQueryable(false, null, filter).Count();
+            return GetQueryable(false, null, null, filter).Count();
         }
 
         public virtual async Task<int> GetCountAsync(CancellationToken cancellationToken, Expression<Func<TEntity, bool>> filter = null)
         {
-            return await GetQueryable(false, null, filter).CountAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(false, null, null, filter).CountAsync(cancellationToken).ConfigureAwait(false);
         }
         #endregion
 
         #region Search
         public virtual IEnumerable<TEntity> Search(
+          string ownedBy = null,
           string search = "",
           Expression<Func<TEntity, bool>> filter = null,
           Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
@@ -342,10 +350,11 @@ namespace AspNetCore.ApiBase.Data.Repository
          bool includeAllCompositionAndAggregationRelationshipProperties = false,
         params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return GetQueryable(true, search, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToList();
+            return GetQueryable(true, ownedBy, search, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToList();
         }
 
         public virtual async Task<IEnumerable<TEntity>> SearchAsync(CancellationToken cancellationToken,
+             string ownedBy = null,
              string search = "",
             Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
@@ -356,10 +365,11 @@ namespace AspNetCore.ApiBase.Data.Repository
            bool includeAllCompositionAndAggregationRelationshipProperties = false,
           params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return await GetQueryable(true, search, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToListAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(true, ownedBy, search, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public virtual IEnumerable<TEntity> SearchNoTracking(
+          string ownedBy = null,
           string search = "",
           Expression<Func<TEntity, bool>> filter = null,
           Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
@@ -370,10 +380,11 @@ namespace AspNetCore.ApiBase.Data.Repository
           bool includeAllCompositionAndAggregationRelationshipProperties = false,
         params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return GetQueryable(false, search, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToList();
+            return GetQueryable(false, ownedBy, search, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToList();
         }
 
         public virtual async Task<IEnumerable<TEntity>> SearchNoTrackingAsync(CancellationToken cancellationToken,
+            string ownedBy = null,
              string search = "",
             Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
@@ -384,17 +395,17 @@ namespace AspNetCore.ApiBase.Data.Repository
             bool includeAllCompositionAndAggregationRelationshipProperties = false,
           params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return await GetQueryable(false, search, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToListAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(false, ownedBy, search, filter, orderBy, skip, take, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public virtual int GetSearchCount(string search = "", Expression<Func<TEntity, bool>> filter = null)
+        public virtual int GetSearchCount(string ownedBy = null, string search = "", Expression<Func<TEntity, bool>> filter = null)
         {
-            return GetQueryable(false, search, filter).Count();
+            return GetQueryable(false, ownedBy, search, filter).Count();
         }
 
-        public virtual async Task<int> GetSearchCountAsync(CancellationToken cancellationToken, string search = "", Expression<Func<TEntity, bool>> filter = null)
+        public virtual async Task<int> GetSearchCountAsync(CancellationToken cancellationToken, string ownedBy = null, string search = "", Expression<Func<TEntity, bool>> filter = null)
         {
-            return await GetQueryable(false, search, filter).CountAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(false, ownedBy, search, filter).CountAsync(cancellationToken).ConfigureAwait(false);
         }
         #endregion
 
@@ -405,7 +416,7 @@ namespace AspNetCore.ApiBase.Data.Repository
          bool includeAllCompositionAndAggregationRelationshipProperties = false,
          params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return GetQueryable(true, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefault();
+            return GetQueryable(true, null, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefault();
         }
 
         public virtual async Task<TEntity> GetOneAsync(CancellationToken cancellationToken,
@@ -414,7 +425,7 @@ namespace AspNetCore.ApiBase.Data.Repository
           bool includeAllCompositionAndAggregationRelationshipProperties = false,
           params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return await GetQueryable(true, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(true, null, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public virtual TEntity GetOneNoTracking(
@@ -423,7 +434,7 @@ namespace AspNetCore.ApiBase.Data.Repository
          bool includeAllCompositionAndAggregationRelationshipProperties = false,
          params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return GetQueryable(false, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefault();
+            return GetQueryable(false, null, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefault();
         }
 
         public virtual async Task<TEntity> GetOneNoTrackingAsync(CancellationToken cancellationToken,
@@ -432,7 +443,7 @@ namespace AspNetCore.ApiBase.Data.Repository
           bool includeAllCompositionAndAggregationRelationshipProperties = false,
           params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return await GetQueryable(false, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(false, null, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
         }
         #endregion
 
@@ -444,7 +455,7 @@ namespace AspNetCore.ApiBase.Data.Repository
            bool includeAllCompositionAndAggregationRelationshipProperties = false,
           params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return GetQueryable(true, null, filter, orderBy, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).FirstOrDefault();
+            return GetQueryable(true, null, null, filter, orderBy, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).FirstOrDefault();
         }
 
         public virtual async Task<TEntity> GetFirstAsync(CancellationToken cancellationToken,
@@ -454,7 +465,7 @@ namespace AspNetCore.ApiBase.Data.Repository
          bool includeAllCompositionAndAggregationRelationshipProperties = false,
           params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return await GetQueryable(true, null, filter, orderBy, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(true, null, null, filter, orderBy, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public virtual TEntity GetFirstNoTracking(
@@ -464,7 +475,7 @@ namespace AspNetCore.ApiBase.Data.Repository
         bool includeAllCompositionAndAggregationRelationshipProperties = false,
         params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return GetQueryable(false, null, filter, orderBy, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).FirstOrDefault();
+            return GetQueryable(false, null, null, filter, orderBy, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).FirstOrDefault();
         }
 
         public virtual async Task<TEntity> GetFirstNoTrackingAsync(CancellationToken cancellationToken,
@@ -474,7 +485,7 @@ namespace AspNetCore.ApiBase.Data.Repository
          bool includeAllCompositionAndAggregationRelationshipProperties = false,
           params Expression<Func<TEntity, Object>>[] includeProperties)
         {
-            return await GetQueryable(false, null, filter, orderBy, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(false, null, null, filter, orderBy, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
         }
         #endregion
 
@@ -484,7 +495,7 @@ namespace AspNetCore.ApiBase.Data.Repository
             if (includeAllCompositionRelationshipProperties || includeAllCompositionAndAggregationRelationshipProperties || (includeProperties != null && includeProperties.Count() > 0))
             {
                 Expression<Func<TEntity, bool>> filter = SearchForEntityById(id);
-                return GetQueryable(true, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefault();
+                return GetQueryable(true, null, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefault();
             }
             else
             {
@@ -495,7 +506,7 @@ namespace AspNetCore.ApiBase.Data.Repository
         public virtual TEntity GetByIdNoTracking(object id, bool includeAllCompositionRelationshipProperties = false, bool includeAllCompositionAndAggregationRelationshipProperties = false, params Expression<Func<TEntity, Object>>[] includeProperties)
         {
             Expression<Func<TEntity, bool>> filter = SearchForEntityById(id);
-            return GetQueryable(false, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefault();
+            return GetQueryable(false, null, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefault();
         }
 
         public async virtual Task<TEntity> GetByIdAsync(CancellationToken cancellationToken, object id, bool includeAllCompositionRelationshipProperties = false, bool includeAllCompositionAndAggregationRelationshipProperties = false, params Expression<Func<TEntity, Object>>[] includeProperties)
@@ -503,7 +514,7 @@ namespace AspNetCore.ApiBase.Data.Repository
             if (includeAllCompositionRelationshipProperties || includeAllCompositionAndAggregationRelationshipProperties || (includeProperties != null && includeProperties.Count() > 0))
             {
                 Expression<Func<TEntity, bool>> filter = SearchForEntityById(id);
-                return await GetQueryable(true, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+                return await GetQueryable(true, null, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
             }
             else
             {
@@ -514,7 +525,7 @@ namespace AspNetCore.ApiBase.Data.Repository
         public async virtual Task<TEntity> GetByIdNoTrackingAsync(CancellationToken cancellationToken, object id, bool includeAllCompositionRelationshipProperties = false, bool includeAllCompositionAndAggregationRelationshipProperties = false, params Expression<Func<TEntity, Object>>[] includeProperties)
         {
             Expression<Func<TEntity, bool>> filter = SearchForEntityById(id);
-            return await GetQueryable(false, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(false, null, null, filter, null, null, null, includeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties, includeProperties).SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public static Expression<Func<TEntity, bool>> SearchForEntityById(object id)
@@ -598,7 +609,7 @@ namespace AspNetCore.ApiBase.Data.Repository
             }
 
             Expression<Func<TEntity, bool>> filter = SearchForEntityByIds(list);
-            return GetQueryable(true, null, filter, null, null).ToList();
+            return GetQueryable(true, null, null, filter, null, null).ToList();
         }
 
         public virtual IEnumerable<TEntity> GetByIdsNoTracking(IEnumerable<object> ids,
@@ -613,7 +624,7 @@ namespace AspNetCore.ApiBase.Data.Repository
             }
 
             Expression<Func<TEntity, bool>> filter = SearchForEntityByIds(list);
-            return GetQueryable(false, null, filter, null, null).ToList();
+            return GetQueryable(false, null, null, filter, null, null).ToList();
         }
 
         public async virtual Task<IEnumerable<TEntity>> GetByIdsAsync(CancellationToken cancellationToken, IEnumerable<object> ids,
@@ -628,7 +639,7 @@ namespace AspNetCore.ApiBase.Data.Repository
             }
 
             Expression<Func<TEntity, bool>> filter = SearchForEntityByIds(list);
-            return await GetQueryable(false, null, filter, null, null).ToListAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(false, null, null, filter, null, null).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public async virtual Task<IEnumerable<TEntity>> GetByIdsNoTrackingAsync(CancellationToken cancellationToken, IEnumerable<object> ids,
@@ -643,7 +654,7 @@ namespace AspNetCore.ApiBase.Data.Repository
             }
 
             Expression<Func<TEntity, bool>> filter = SearchForEntityByIds(list);
-            return await GetQueryable(false, null, filter, null, null).ToListAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(false, null, null, filter, null, null).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public static Expression<Func<TEntity, bool>> SearchForEntityByIds(IEnumerable<object> ids)
@@ -673,22 +684,22 @@ namespace AspNetCore.ApiBase.Data.Repository
         #region Exists
         public virtual bool Exists(Expression<Func<TEntity, bool>> filter = null)
         {
-            return GetQueryable(true, null, filter).ToList().Any();
+            return GetQueryable(true, null, null, filter).ToList().Any();
         }
 
         public virtual async Task<bool> ExistsAsync(CancellationToken cancellationToken, Expression<Func<TEntity, bool>> filter = null)
         {
-            return (await GetQueryable(true, null, filter).ToListAsync(cancellationToken).ConfigureAwait(false)).Any();
+            return (await GetQueryable(true, null, null, filter).ToListAsync(cancellationToken).ConfigureAwait(false)).Any();
         }
 
         public virtual bool ExistsNoTracking(Expression<Func<TEntity, bool>> filter = null)
         {
-            return GetQueryable(false, null, filter).Any();
+            return GetQueryable(false, null, null, filter).Any();
         }
 
         public virtual async Task<bool> ExistsNoTrackingAsync(CancellationToken cancellationToken, Expression<Func<TEntity, bool>> filter = null)
         {
-            return await GetQueryable(false, null, filter).AnyAsync(cancellationToken).ConfigureAwait(false);
+            return await GetQueryable(false, null, null, filter).AnyAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public bool Exists(object id)

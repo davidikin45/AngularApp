@@ -31,8 +31,8 @@ namespace AspNetCore.ApiBase.Controllers.Api
         where IEntityService : IApplicationServiceEntity<TCreateDto, TReadDto, TUpdateDto, TDeleteDto>
     {   
 
-        public ApiControllerEntityBase(string resource, IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSettings, IAuthorizationService authorizationService, IActionEventsService actionEventService)
-        : base(resource, service, mapper , emailService, urlHelper, typeHelperService, appSettings, authorizationService, actionEventService)
+        public ApiControllerEntityBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSettings, IActionEventsService actionEventService)
+        : base(service, mapper , emailService, urlHelper, typeHelperService, appSettings, actionEventService)
         {
           
         }

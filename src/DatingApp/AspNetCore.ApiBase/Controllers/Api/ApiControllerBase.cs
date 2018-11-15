@@ -12,12 +12,11 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Security.Claims;
 using System.Threading;
 
 namespace AspNetCore.ApiBase.Controllers.Api
 {
-
-
     //C - Create - POST
     //R - Read - GET
     //U - Update - PUT
@@ -26,18 +25,14 @@ namespace AspNetCore.ApiBase.Controllers.Api
     //If there is an attribute applied(via[HttpGet], [HttpPost], [HttpPut], [AcceptVerbs], etc), the action will accept the specified HTTP method(s).
     //If the name of the controller action starts the words "Get", "Post", "Put", "Delete", "Patch", "Options", or "Head", use the corresponding HTTP method.
     //Otherwise, the action supports the POST method.
-    //[Consumes("application/json", "application/xml")]
+    [Consumes("application/json", "application/xml")]
     [Produces("application/json", "application/xml")]
     [ApiController]
     public abstract class ApiControllerBase : Controller
     {
-        public string Resource { get; }
         public IMapper Mapper { get; }
         public IEmailService EmailService { get; }
         public IUrlHelper UrlHelper { get; }
-
-        //a style known as imperative authorization rather than declarative authorization 
-        public IAuthorizationService AuthorizationService { get; }
 
         public AppSettings AppSettings { get; }
 
@@ -46,23 +41,12 @@ namespace AspNetCore.ApiBase.Controllers.Api
 
         }
 
-        public ApiControllerBase(string resource, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, AppSettings appSettings, IAuthorizationService authorizationService)
+        public ApiControllerBase(IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, AppSettings appSettings)
         {
-            Resource = resource;
             Mapper = mapper;
             EmailService = emailService;
             UrlHelper = urlHelper;
             AppSettings = appSettings;
-            AuthorizationService = authorizationService;
-        }
-
-        protected void AuthorizeOperationAsync(string operation)
-        {
-            var authorizationResult = AuthorizationService.AuthorizeAsync(User, Resource + operation).Result;
-            if (!authorizationResult.Succeeded)
-            {
-                throw new UnauthorizedErrors(new GeneralError(String.Format(Messages.UnauthorisedResourceOperation, Resource + operation)));
-            }
         }
 
         //https://docs.microsoft.com/en-us/aspnet/core/migration/claimsprincipal-current?view=aspnetcore-2.0
@@ -76,8 +60,27 @@ namespace AspNetCore.ApiBase.Controllers.Api
                 }
                 else
                 {
-                    return "Anonymous";
+                    return null;
                 }
+            }
+        }
+
+        public string UserId
+        {
+            get
+            {
+                if (!User.Identity.IsAuthenticated)
+                {
+                    return null;
+                }
+
+                var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (claim == null)
+                {
+                    return null;
+                }
+
+                return claim.Value;
             }
         }
 

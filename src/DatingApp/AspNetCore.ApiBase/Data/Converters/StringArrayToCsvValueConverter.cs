@@ -1,13 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
+using System.Drawing;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace AspNetCore.ApiBase.Data.Converters
 {
-    public class ArrayToCsvValueConverter : ValueConverter<string[], string>
+    public class StringArrayToCsvValueConverter : ValueConverter<string[], string>
     {
-        public ArrayToCsvValueConverter()
-        : base(Csv, ArrayObject)
+        public StringArrayToCsvValueConverter()
+        : base(Csv, Array)
         {
         }
 
@@ -15,6 +17,8 @@ namespace AspNetCore.ApiBase.Data.Converters
             Csv = v => string.Join(',', v);
 
         private static Expression<Func<string, string[]>>
-            ArrayObject = x => x.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            Array = x => x.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList().Select(h => h.Trim()).ToArray();
     }
 }
+
+

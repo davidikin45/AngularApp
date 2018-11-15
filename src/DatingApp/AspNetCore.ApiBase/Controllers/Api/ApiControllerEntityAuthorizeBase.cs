@@ -1,5 +1,6 @@
 ﻿using AspNetCore.ApiBase.Alerts;
 using AspNetCore.ApiBase.ApplicationServices;
+using AspNetCore.ApiBase.Authorization;
 using AspNetCore.ApiBase.Data.Helpers;
 using AspNetCore.ApiBase.DomainEvents;
 using AspNetCore.ApiBase.Dtos;
@@ -31,6 +32,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
     //If there is an attribute applied(via[HttpGet], [HttpPost], [HttpPut], [AcceptVerbs], etc), the action will accept the specified HTTP method(s).
     //If the name of the controller action starts the words "Get", "Post", "Put", "Delete", "Patch", "Options", or "Head", use the corresponding HTTP method.
     //Otherwise, the action supports the POST method.
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public abstract class ApiControllerEntityAuthorizeBase<TCreateDto, TReadDto, TUpdateDto, TDeleteDto, IEntityService> : ApiControllerEntityReadOnlyAuthorizeBase<TReadDto, IEntityService>
          where TCreateDto : class
          where TReadDto : class
@@ -38,19 +40,21 @@ namespace AspNetCore.ApiBase.Controllers.Api
          where TDeleteDto : class
         where IEntityService : IApplicationServiceEntity<TCreateDto, TReadDto, TUpdateDto, TDeleteDto>
     {
-        public ApiControllerEntityAuthorizeBase(string resource, IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSetings, IAuthorizationService authorizationService, IActionEventsService actionEventsService)
-        : base(resource, service, mapper, emailService, urlHelper, typeHelperService, appSetings, authorizationService, actionEventsService)
+        public ApiControllerEntityAuthorizeBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSetings, IActionEventsService actionEventsService)
+        : base(service, mapper, emailService, urlHelper, typeHelperService, appSetings, actionEventsService)
         {
 
         }
 
         #region New Instance
         [Route("new")]
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Create)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Create)]
         [HttpGet]
         [ProducesResponseType(typeof(WebApiMessage), 200)]
         public virtual IActionResult NewDefault()
         {
+
             var response = Service.GetCreateDefaultDto();
 
             var links = CreateLinksForCreate();
@@ -71,6 +75,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// </summary>
         /// <param name="dto">The dto.</param>
         /// <returns></returns>
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Create)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Create)]
         [HttpPost]
         [ProducesResponseType(typeof(WebApiMessage), 200)]
@@ -88,7 +93,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
 
             var cts = TaskHelper.CreateNewCancellationTokenSource();
 
-            var result = await Service.CreateAsync(dto, User.Identity.Name, cts.Token);
+            var result = await Service.CreateAsync(dto, UserId, cts.Token);
             if (result.IsFailure)
             {
                 return ValidationErrors(result);
@@ -113,6 +118,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         #endregion
 
         #region Bulk Create
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Create)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Create)]
         [Route("bulk")]
         [HttpPost]
@@ -121,7 +127,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         {
             var cts = TaskHelper.CreateNewCancellationTokenSource();
 
-            var results = await Service.BulkCreateAsync(dtos, Username, cts.Token);
+            var results = await Service.BulkCreateAsync(dtos, UserId, cts.Token);
 
             return BulkCreateResponse(results);
         }
@@ -134,6 +140,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// </summary>
         /// <param name="id">The identifier.</param>
         /// <returns></returns>
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [FormatFilter]
         [Route("edit/{id}"), Route("edit/{id}.{format}")]
@@ -164,6 +171,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         #endregion
 
         #region Bulk Get for Edit
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [FormatFilter]
         [Route("edit/({ids})"), Route("edit/({ids}).{format}")]
@@ -199,6 +207,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// <param name="id">The identifier.</param>
         /// <param name="dto">The dto.</param>
         /// <returns></returns>
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [Route("{id}")]
         [HttpPut]
@@ -228,7 +237,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
             //    return ApiNotFoundErrorMessage(Messages.NotFound);
             //}
 
-            var result = await Service.UpdateGraphAsync(id, dto, Username, cts.Token);
+            var result = await Service.UpdateGraphAsync(id, dto, UserId, cts.Token);
             if (result.IsFailure)
             {
                 return ValidationErrors(result);
@@ -245,6 +254,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// </summary>
         /// <param name="dto">The dto.</param>
         /// <returns></returns>
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [Route("bulk")]
         [HttpPut]
@@ -253,7 +263,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         {
             var cts = TaskHelper.CreateChildCancellationTokenSource(ClientDisconnectedToken());
 
-            var results = await Service.BulkUpdateGraphAsync(dtos, Username, cts.Token);
+            var results = await Service.BulkUpdateGraphAsync(dtos, UserId, cts.Token);
 
             return BulkUpdateResponse(results);
         }
@@ -266,6 +276,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// <param name="id">The identifier.</param>
         /// <param name="dtoPatch">The dto patch.</param>
         /// <returns></returns>
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [Route("{id}")]
         [HttpPatch]
@@ -279,7 +290,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
 
             var cts = TaskHelper.CreateNewCancellationTokenSource();
 
-            var result = await Service.UpdatePartialAsync(id, dtoPatch, Username, cts.Token);
+            var result = await Service.UpdatePartialAsync(id, dtoPatch, UserId, cts.Token);
             if (result.IsFailure)
             {
                 return ValidationErrors(result);
@@ -295,6 +306,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// </summary>
         /// <param name="dto">The dto.</param>
         /// <returns></returns>
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [Route("bulk")]
         [HttpPatch]
@@ -303,13 +315,14 @@ namespace AspNetCore.ApiBase.Controllers.Api
         {
             var cts = TaskHelper.CreateChildCancellationTokenSource(ClientDisconnectedToken());
 
-            var results = await Service.BulkUpdatePartialAsync(dtos, Username, cts.Token);
+            var results = await Service.BulkUpdatePartialAsync(dtos, UserId, cts.Token);
 
             return BulkUpdateResponse(results);
         }
         #endregion
 
         #region Get for Delete
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Delete)]
         [FormatFilter]
         [Route("Delete/{id}"), Route("Delete/{id}.{format}")]
@@ -339,6 +352,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         #endregion
 
         #region Bulk Get for Delete
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Delete)]
         [FormatFilter]
         [Route("delete/({ids})"), Route("delete/({ids}).{format}")]
@@ -373,6 +387,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// </summary>
         /// <param name="dto">The dto.</param>
         /// <returns></returns>
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Delete)]
         [Route("{id}")]
         [HttpDelete]
@@ -395,7 +410,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
                 }
             }
 
-            var result = await Service.DeleteAsync(dto, Username, cts.Token); // // This should give concurrency checking
+            var result = await Service.DeleteAsync(dto, UserId, cts.Token); // // This should give concurrency checking
             if (result.IsFailure)
             {
                 return ValidationErrors(result);
@@ -406,6 +421,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         #endregion
 
         #region Bulk Delete
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Delete)]
         [Route("bulk")]
         [HttpDelete]
@@ -414,13 +430,14 @@ namespace AspNetCore.ApiBase.Controllers.Api
         {
             var cts = TaskHelper.CreateNewCancellationTokenSource();
 
-            var results = await Service.BulkDeleteAsync(dtos, Username, cts.Token);
+            var results = await Service.BulkDeleteAsync(dtos, UserId, cts.Token);
 
             return BulkDeleteResponse(results);
         }
         #endregion
 
         #region Create New Collection Item Instance
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Create, ResourceOperationsCore.CRUD.Operations.Update)]
         [Route("new/{*collection}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Create)]
         [HttpGet]
@@ -439,6 +456,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         #endregion
 
         #region Trigger Actions
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [Route("{id}/trigger-action")]
         [HttpPost]
@@ -462,7 +480,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
 
             var cts = TaskHelper.CreateNewCancellationTokenSource();
 
-            var result = await Service.TriggerActionAsync(id, action, Username, cts.Token);
+            var result = await Service.TriggerActionAsync(id, action, UserId, cts.Token);
             if (result.IsFailure)
             {
                 return ValidationErrors(result);
@@ -478,6 +496,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// </summary>
         /// <param name="actions">The actions.</param>
         /// <returns></returns>
+        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [HttpPost]
         [Route("bulk/trigger-actions")]
@@ -498,7 +517,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
 
             var cts = TaskHelper.CreateNewCancellationTokenSource();
 
-            var results = await Service.TriggerActionsAsync(actions, Username, cts.Token);
+            var results = await Service.TriggerActionsAsync(actions, UserId, cts.Token);
 
             return BulkTriggerActionResponse(results);
         }

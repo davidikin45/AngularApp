@@ -1,4 +1,5 @@
-﻿using AspNetCore.ApiBase.Email;
+﻿using AspNetCore.ApiBase.Authorization;
+using AspNetCore.ApiBase.Email;
 using AspNetCore.ApiBase.Settings;
 using AspNetCore.ApiBase.Users;
 using AutoMapper;
@@ -9,16 +10,14 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.Controllers.Api.Authentication
 {
+    [Resource(ResourceOperationsCore.Auth.Name)]
     public abstract class ApiControllerRegistrationBase<TUser, TRegistrationDto> : ApiControllerAuthenticationBase<TUser>
         where TUser : IdentityUser
-        where TRegistrationDto : RegisterDto
+        where TRegistrationDto : RegisterDtoBase
     {
-        private readonly UserManager<TUser> _userManager;
-
         private readonly string _welcomeEmailTemplate;
 
         public ApiControllerRegistrationBase(
-            string resource,
             RoleManager<IdentityRole> roleManager,
             UserManager<TUser> userManager,
             SignInManager<TUser> signInManager,
@@ -28,14 +27,14 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
             IMapper mapper,
             PasswordSettings passwordSettings,
             EmailTemplates emailTemplates,
-            AppSettings appSettings,
-            IAuthorizationService authorizationService)
-            :base(resource, roleManager, userManager, signInManager, tokenSettings, urlHelper, emailSender, mapper, passwordSettings, emailTemplates, appSettings, authorizationService)
+            AppSettings appSettings)
+            :base(roleManager, userManager, signInManager, tokenSettings, urlHelper, emailSender, mapper, passwordSettings, emailTemplates, appSettings)
         {
             _welcomeEmailTemplate = emailTemplates.Welcome;
         }
 
         #region Register
+        [ResourceAuthorize(ResourceOperationsCore.Auth.Operations.Register)]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] TRegistrationDto registerDto)
         {

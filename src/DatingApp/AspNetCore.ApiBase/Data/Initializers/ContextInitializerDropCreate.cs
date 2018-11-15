@@ -1,33 +1,32 @@
 ﻿using AspNetCore.ApiBase.Data.Helpers;
+using AspNetCore.ApiBase.Data.Initializers;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace AspnetCore.ApiBase.Data.Initializers
 {
-    public abstract class ContextInitializerDropCreate<TDbContext>
+    public abstract class ContextInitializerDropCreate<TDbContext> : IDbContextInitializer<TDbContext>
         where TDbContext : DbContext
     {
-        private readonly TDbContext _context;
-
-        public ContextInitializerDropCreate(
-            TDbContext context)
-        {
-            _context = context;
-        }
-
-        public async Task InitializeAsync()
+        public async Task InitializeAsync(TDbContext context)
         {
             //Delete database relating to this context only
-            _context.EnsureDeleted();
+            context.EnsureDeleted();
 
             //Recreate databases with the current data model. This is useful for development as no migrations are applied.
-            _context.EnsureCreated();
+            context.EnsureCreated();
 
-            Seed(_context);
+            Seed(context);
 
-           await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+
+            await OnSeedCompleteAsync(context);
         }
 
         public abstract void Seed(TDbContext context);
+        public virtual Task OnSeedCompleteAsync(TDbContext context)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

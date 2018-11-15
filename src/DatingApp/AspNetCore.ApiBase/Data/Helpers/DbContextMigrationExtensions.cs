@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using System;
@@ -64,6 +65,11 @@ namespace AspNetCore.ApiBase.Data.Helpers
         #endregion
 
         #region Get Entity Model Types
+        public static IEnumerable<IEntityType> GetEntityTypes(this DbContext context)
+        {
+            return context.Model.GetEntityTypes();
+        }
+
         public static IEnumerable<Type> GetModelTypes(this DbContext context)
         {
             return context.Model.GetEntityTypes().Select(t => t.ClrType);

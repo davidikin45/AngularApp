@@ -20,13 +20,13 @@ namespace DatingApp.Data
         {
             if (_hostingEnvironment.IsDevelopment())
             {
-                var migrationInitializer = new AppContextInitializerDropCreate(_context);
-                await migrationInitializer.InitializeAsync();
+                var migrationInitializer = new AppContextInitializerDropCreate();
+                await migrationInitializer.InitializeAsync(_context);
             }
             else
             {
-                var migrationInitializer = new AppContextInitializerMigrate(_context);
-                await migrationInitializer.InitializeAsync();
+                var migrationInitializer = new AppContextInitializerMigrate();
+                await migrationInitializer.InitializeAsync(_context);
             }
         }
     }

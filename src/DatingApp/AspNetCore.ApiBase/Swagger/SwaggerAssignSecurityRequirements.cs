@@ -35,14 +35,14 @@ namespace AspNetCore.ApiBase.Swagger
 
             foreach (var item in authorizeAttributes)
             {
-                if (item.AuthenticationSchemes.Contains(JwtBearerDefaults.AuthenticationScheme))
+                if (item.AuthenticationSchemes == null || item.AuthenticationSchemes.Contains(JwtBearerDefaults.AuthenticationScheme))
                 {
                     if (!securityRequirements.ContainsKey(JwtBearerDefaults.AuthenticationScheme))
                     {
                         securityRequirements.Add(JwtBearerDefaults.AuthenticationScheme, Enumerable.Empty<string>());
                     }
                 }
-                if (item.AuthenticationSchemes.Contains(CookieAuthenticationDefaults.AuthenticationScheme))
+                if (item.AuthenticationSchemes == null || item.AuthenticationSchemes.Contains(CookieAuthenticationDefaults.AuthenticationScheme))
                 {
                     if (!securityRequirements.ContainsKey(CookieAuthenticationDefaults.AuthenticationScheme))
                     {

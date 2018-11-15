@@ -2,11 +2,13 @@
 
 namespace AspNetCore.ApiBase.Users
 {
-    public class RegisterDto
+    public abstract class RegisterDtoBase
     {
         [Required]
         [EmailAddress]
         public string Email { get; set; }
+
+        public string Username => Email;
 
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]

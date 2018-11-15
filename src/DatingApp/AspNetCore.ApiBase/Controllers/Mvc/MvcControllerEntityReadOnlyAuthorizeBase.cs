@@ -54,8 +54,8 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
 
             try
             {
-                var dataTask = Service.SearchAsync(cts.Token, search, null, AutoMapperHelper.GetOrderBy<TDto>(orderColumn, orderType), page - 1, pageSize, true, false, null);
-                var totalTask = Service.GetSearchCountAsync(cts.Token, search);
+                var dataTask = Service.SearchAsync(cts.Token, null, search, null, AutoMapperHelper.GetOrderBy<TDto>(orderColumn, orderType), page - 1, pageSize, true, false, null);
+                var totalTask = Service.GetSearchCountAsync(cts.Token, null, search);
 
                 await TaskHelper.WhenAllOrException(cts, dataTask, totalTask);
 

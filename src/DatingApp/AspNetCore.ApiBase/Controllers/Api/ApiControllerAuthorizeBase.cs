@@ -21,8 +21,8 @@ namespace AspNetCore.ApiBase.Controllers.Api
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")] // 40
     public abstract class ApiControllerAuthorizeBase : ApiControllerBase
     {
-        public ApiControllerAuthorizeBase(string resource, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, AppSettings appSettings, IAuthorizationService authorizationService)
-            :base(resource, mapper, emailService, urlHelper, appSettings, authorizationService)
+        public ApiControllerAuthorizeBase(IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, AppSettings appSettings)
+            :base(mapper, emailService, urlHelper, appSettings)
         {
            
         }

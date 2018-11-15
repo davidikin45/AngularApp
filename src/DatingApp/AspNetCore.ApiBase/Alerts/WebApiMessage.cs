@@ -91,11 +91,11 @@ namespace AspNetCore.ApiBase.Alerts
             {
                 return Errors.Count() == 0;
             }
-            private set { }
+            set { }
         }
 
         [DataMember]
-        public string Message { get; private set; }
+        public string Message { get; set; }
 
         [DataMember]
         public string Error
@@ -104,15 +104,15 @@ namespace AspNetCore.ApiBase.Alerts
             {
                 return string.Join("\n", Errors);
             }
-            private set { }
+            set { }
         }
 
         [DataMember]
-        public string[] Errors { get; private set; }
+        public string[] Errors { get; set; }
 
         [DataMember]
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public SerializableDictionary<string, List<AngularFormattedValidationError>> ModelState { get; private set; }
+        public SerializableDictionary<string, List<AngularFormattedValidationError>> ModelState { get; set; }
 
         public override string ToString()
         {

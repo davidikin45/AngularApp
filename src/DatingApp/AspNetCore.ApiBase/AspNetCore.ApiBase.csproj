@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Initializers\" />
     <Folder Include="ApplicationServices\" />
   </ItemGroup>
 

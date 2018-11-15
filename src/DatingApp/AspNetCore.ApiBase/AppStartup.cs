@@ -610,10 +610,7 @@ namespace AspNetCore.ApiBase
                 return new UrlHelper(actionContext);
             });
 
-            services.Configure<RazorViewEngineOptions>(options =>
-            {
-                options.ViewLocationExpanders.Add(new ViewExpander(appSettings.MvcImplementationFolder));
-            });
+            services.AddViewLocationExpander(appSettings.MvcImplementationFolder);
 
             //services.AddCustomModelMetadataProvider();
             //services.AddCustomObjectValidator();

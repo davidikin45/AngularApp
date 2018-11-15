@@ -30,6 +30,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             ;
 
         IEnumerable<TDto> Search(
+         string ownedBy = null,
          string search = "",
          Expression<Func<TDto, bool>> filter = null,
          Expression<Func<IQueryable<TDto>, IOrderedQueryable<TDto>>> orderBy = null,
@@ -42,6 +43,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         Task<IEnumerable<TDto>> SearchAsync(
             CancellationToken cancellationToken,
+            string ownedBy = null,
             string search = "",
             Expression<Func<TDto, bool>> filter = null,
             Expression<Func<IQueryable<TDto>, IOrderedQueryable<TDto>>> orderBy = null,
@@ -160,11 +162,12 @@ namespace AspNetCore.ApiBase.ApplicationServices
             Expression<Func<TDto, bool>> filter = null
             );
 
-        int GetSearchCount(string search = "", 
+        int GetSearchCount(string ownedBy = null, string search = "", 
             Expression<Func<TDto, bool>> filter = null);
 
         Task<int> GetSearchCountAsync(
           CancellationToken cancellationToken,
+          string ownedBy = null,
           string search = "",
           Expression<Func<TDto, bool>> filter = null
           );

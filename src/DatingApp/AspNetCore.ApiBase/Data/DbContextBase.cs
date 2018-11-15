@@ -10,12 +10,25 @@ namespace AspNetCore.ApiBase.Data
 {
     public abstract class DbContextBase : DbContext
     {
+        protected DbContextBase()
+        {
+        }
+
         public DbContextBase(DbContextOptions options)
             : base(options)
         {
-            ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.TrackAll;
-            ChangeTracker.LazyLoadingEnabled = true;
-            ChangeTracker.AutoDetectChangesEnabled = true;
+        }
+
+        public bool LazyLoadingEnabled
+        {
+            get { return ChangeTracker.LazyLoadingEnabled; }
+            set { ChangeTracker.LazyLoadingEnabled = value; }
+        }
+
+        public bool AutoDetectChangesEnabled
+        {
+            get { return ChangeTracker.AutoDetectChangesEnabled; }
+            set { ChangeTracker.AutoDetectChangesEnabled = value; }
         }
 
         public static readonly ILoggerFactory CommandLoggerFactory
@@ -36,7 +49,10 @@ namespace AspNetCore.ApiBase.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
             builder.RemovePluralizingTableNameConvention();
+            builder.AddSoftDeleteFilter();
+
             BuildQueries(builder);
         }
 
@@ -53,39 +69,29 @@ namespace AspNetCore.ApiBase.Data
         }
         #endregion
 
-        #region Timestamps
-        private void AddTimestamps()
-        {
-            var added = this.ChangeTracker.Entries().Where(e => e.State == EntityState.Added).Select(e => e.Entity);
-            var modified = this.ChangeTracker.Entries().Where(e => e.State == EntityState.Modified).Select(e => e.Entity);
-
-            DbContextTimestamps.AddTimestamps(added, modified);
-        }
-        #endregion
-
         #region Save Changes
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
         {
-            AddTimestamps();
+            this.SetTimestamps();
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
         public override int SaveChanges()
         {
-            AddTimestamps();
+            this.SetTimestamps();
             return base.SaveChanges();
         }
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
-            AddTimestamps();
+            this.SetTimestamps();
             return base.SaveChanges(acceptAllChangesOnSuccess);
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken
             = default(CancellationToken))
         {
-            AddTimestamps();
+            this.SetTimestamps();
             return base.SaveChangesAsync(cancellationToken);
         }
         #endregion

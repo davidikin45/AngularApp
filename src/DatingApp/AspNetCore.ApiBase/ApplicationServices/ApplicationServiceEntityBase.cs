@@ -1,4 +1,5 @@
-﻿using AspNetCore.ApiBase.Data.Helpers;
+﻿using AspNetCore.ApiBase.Authorization;
+using AspNetCore.ApiBase.Data.Helpers;
 using AspNetCore.ApiBase.Data.UnitOfWork;
 using AspNetCore.ApiBase.Domain;
 using AspNetCore.ApiBase.DomainEvents;
@@ -30,14 +31,14 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         private readonly IHubContext<ApiNotificationHub<TReadDto>> HubContext;
 
-        public ApplicationServiceEntityBase(string serviceName, TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IActionEventsService actionEventsService, IHubContext<ApiNotificationHub<TReadDto>> hubContext)
-          : this(serviceName, unitOfWork, mapper, authorizationService, userService, validationService, actionEventsService)
+        public ApplicationServiceEntityBase(TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IActionEventsService actionEventsService, IHubContext<ApiNotificationHub<TReadDto>> hubContext)
+          : this(unitOfWork, mapper, authorizationService, userService, validationService, actionEventsService)
         {
             HubContext = hubContext;
         }
 
-        public ApplicationServiceEntityBase(string serviceName, TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IActionEventsService actionEventsService)
-           : base(serviceName, unitOfWork, mapper, authorizationService, userService, validationService, actionEventsService)
+        public ApplicationServiceEntityBase(TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IActionEventsService actionEventsService)
+           : base(unitOfWork, mapper, authorizationService, userService, validationService, actionEventsService)
         {
 
         }
@@ -45,15 +46,18 @@ namespace AspNetCore.ApiBase.ApplicationServices
         #region GetCreateDefaultDto
         public virtual TCreateDto GetCreateDefaultDto()
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Create).Wait();
+
             var bo = (TEntity)Activator.CreateInstance(typeof(TEntity));
             return Mapper.Map<TCreateDto>(bo);
         }
         #endregion
 
         #region Create
-
         public virtual Result<TReadDto> Create(TCreateDto dto, string createdBy)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Create).Wait();
+
             var objectValidationErrors = ValidationService.ValidateObject(dto);
             if (objectValidationErrors.Any())
             {
@@ -89,6 +93,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public virtual async Task<Result<TReadDto>> CreateAsync(TCreateDto dto, string createdBy, CancellationToken cancellationToken)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Create);
+
             var objectValidationErrors = ValidationService.ValidateObject(dto);
             if (objectValidationErrors.Any())
             {
@@ -130,6 +136,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
         #region Bulk Create
         public virtual List<Result> BulkCreate(TCreateDto[] dtos, string createdBy)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Create).Wait();
+
             var results = new List<Result>();
             foreach (var dto in dtos)
             {
@@ -148,6 +156,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public async virtual Task<List<Result>> BulkCreateAsync(TCreateDto[] dtos, string createdBy, CancellationToken cancellationToken)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Create);
+
             var results = new List<Result>();
             foreach (var dto in dtos)
             {
@@ -161,14 +171,24 @@ namespace AspNetCore.ApiBase.ApplicationServices
         #region GetUpdateDtoById
         public virtual TUpdateDto GetUpdateDtoById(object id)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
+
             var bo = Repository.GetById(id, true);
+
+            AuthorizeResourceOperationAsync(bo, ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
+
             return Mapper.Map<TUpdateDto>(bo);
         }
 
         public virtual async Task<TUpdateDto> GetUpdateDtoByIdAsync(object id,
             CancellationToken cancellationToken = default(CancellationToken))
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
+
             var bo = await Repository.GetByIdAsync(cancellationToken, id, true);
+
+            await AuthorizeResourceOperationAsync(bo, ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
+
             return Mapper.Map<TUpdateDto>(bo);
         }
 
@@ -177,22 +197,43 @@ namespace AspNetCore.ApiBase.ApplicationServices
         #region GetUpdateDtosByIds
         public virtual IEnumerable<TUpdateDto> GetUpdateDtosByIds(IEnumerable<object> ids)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
+
             var result = Repository.GetByIds(ids);
-            return Mapper.Map<IEnumerable<TUpdateDto>>(result);
+
+            var entities = result.ToList();
+
+            foreach (var entity in entities)
+            {
+                AuthorizeResourceOperationAsync(entity, ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
+            }
+
+            return Mapper.Map<IEnumerable<TUpdateDto>>(entities);
         }
 
         public virtual async Task<IEnumerable<TUpdateDto>> GetUpdateDtosByIdsAsync(CancellationToken cancellationToken,
        IEnumerable<object> ids)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
+
             var result = await Repository.GetByIdsAsync(cancellationToken, ids).ConfigureAwait(false);
+
+            var entities = result.ToList();
+
+            foreach (var entity in entities)
+            {
+                await AuthorizeResourceOperationAsync(entity, ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
+            }
+
             return Mapper.Map<IEnumerable<TUpdateDto>>(result);
         }
         #endregion
 
         #region Update
-
         public virtual Result Update(object id, TUpdateDto dto, string updatedBy)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
+
             var objectValidationErrors = ValidationService.ValidateObject(dto);
             if (objectValidationErrors.Any())
             {
@@ -200,6 +241,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             }
 
             var persistedBO = Repository.GetById(id);
+
+            AuthorizeResourceOperationAsync(persistedBO, ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
 
             Mapper.Map(dto, persistedBO);
 
@@ -236,6 +279,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public virtual Result UpdateGraph(object id, TUpdateDto dto, string updatedBy)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
+
             var objectValidationErrors = ValidationService.ValidateObject(dto);
             if (objectValidationErrors.Any())
             {
@@ -243,6 +288,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             }
 
             var persistedBO = Repository.GetById(id, true);
+
+            AuthorizeResourceOperationAsync(persistedBO, ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
 
             Mapper.Map(dto, persistedBO);
 
@@ -279,6 +326,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public virtual async Task<Result> UpdateAsync(object id, TUpdateDto dto, string updatedBy, CancellationToken cancellationToken)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
+
             var objectValidationErrors = ValidationService.ValidateObject(dto);
             if (objectValidationErrors.Any())
             {
@@ -286,6 +335,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             }
 
             var persistedBO = await Repository.GetByIdAsync(cancellationToken, id);
+
+            await AuthorizeResourceOperationAsync(persistedBO, ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
 
             Mapper.Map(dto, persistedBO);
 
@@ -322,6 +373,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public virtual async Task<Result> UpdateGraphAsync(object id, TUpdateDto dto, string updatedBy, CancellationToken cancellationToken)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
+
             var objectValidationErrors = ValidationService.ValidateObject(dto);
             if (objectValidationErrors.Any())
             {
@@ -329,6 +382,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             }
 
             var persistedBO = await Repository.GetByIdAsync(cancellationToken, id, true);
+
+            await AuthorizeResourceOperationAsync(persistedBO, ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
 
             Mapper.Map(dto, persistedBO);
 
@@ -368,6 +423,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
         #region Bulk Update
         public virtual List<Result> BulkUpdate(BulkDto<TUpdateDto>[] dtos, string updatedBy)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
+
             var results = new List<Result>();
             foreach (var dto in dtos)
             {
@@ -387,6 +444,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public virtual List<Result> BulkUpdateGraph(BulkDto<TUpdateDto>[] dtos, string updatedBy)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
+
             var results = new List<Result>();
             foreach (var dto in dtos)
             {
@@ -405,6 +464,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public async virtual Task<List<Result>> BulkUpdateAsync(BulkDto<TUpdateDto>[] dtos, string updatedBy, CancellationToken cancellationToken)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
+
             var results = new List<Result>();
             foreach (var dto in dtos)
             {
@@ -423,6 +484,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public async virtual Task<List<Result>> BulkUpdateGraphAsync(BulkDto<TUpdateDto>[] dtos, string updatedBy, CancellationToken cancellationToken)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
+
             var results = new List<Result>();
             foreach (var dto in dtos)
             {
@@ -441,9 +504,10 @@ namespace AspNetCore.ApiBase.ApplicationServices
         #endregion
 
         #region Update Partial
-
         public virtual Result UpdatePartial(object id, JsonPatchDocument dtoPatch, string updatedBy)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
+
             var dto = GetUpdateDtoById(id);
 
             if (dto == null)
@@ -468,6 +532,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public virtual async Task<Result> UpdatePartialAsync(object id, JsonPatchDocument dtoPatch, string updatedBy, CancellationToken cancellationToken = default(CancellationToken))
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
+
             var dto = await GetUpdateDtoByIdAsync(id, cancellationToken);
 
             if (dto == null)
@@ -494,6 +560,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
         #region Bulk Partial Update
         public virtual List<Result> BulkUpdatePartial(BulkDto<JsonPatchDocument>[] dtoPatches, string updatedBy)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
+
             var results = new List<Result>();
             foreach (var dto in dtoPatches)
             {
@@ -512,6 +580,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public virtual async Task<List<Result>> BulkUpdatePartialAsync(BulkDto<JsonPatchDocument>[] dtoPatches, string updatedBy, CancellationToken cancellationToken = default(CancellationToken))
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
+
             var results = new List<Result>();
             foreach (var dto in dtoPatches)
             {
@@ -532,14 +602,24 @@ namespace AspNetCore.ApiBase.ApplicationServices
         #region GetDeleteDtoById
         public virtual TDeleteDto GetDeleteDtoById(object id)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner).Wait();
+
             var bo = Repository.GetById(id);
+
+            AuthorizeResourceOperationAsync(bo, ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner).Wait();
+
             return Mapper.Map<TDeleteDto>(bo);
         }
 
         public virtual async Task<TDeleteDto> GetDeleteDtoByIdAsync(object id,
             CancellationToken cancellationToken = default(CancellationToken))
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner);
+
             var bo = await Repository.GetByIdAsync(cancellationToken, id);
+
+            await AuthorizeResourceOperationAsync(bo, ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner);
+
             return Mapper.Map<TDeleteDto>(bo);
         }
         #endregion
@@ -547,35 +627,62 @@ namespace AspNetCore.ApiBase.ApplicationServices
         #region GetDeleteDtosByIds
         public virtual IEnumerable<TDeleteDto> GetDeleteDtosByIds(IEnumerable<object> ids)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner).Wait();
+
             var result = Repository.GetByIds(ids);
-            return Mapper.Map<IEnumerable<TDeleteDto>>(result);
+
+            var entities = result.ToList();
+
+            foreach (var entity in entities)
+            {
+                AuthorizeResourceOperationAsync(entity, ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner).Wait();
+            }
+
+            return Mapper.Map<IEnumerable<TDeleteDto>>(entities);
         }
 
         public virtual async Task<IEnumerable<TDeleteDto>> GetDeleteDtosByIdsAsync(CancellationToken cancellationToken,
        IEnumerable<object> ids)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner);
+
             var result = await Repository.GetByIdsAsync(cancellationToken, ids).ConfigureAwait(false);
-            return Mapper.Map<IEnumerable<TDeleteDto>>(result);
+
+            var entities = result.ToList();
+
+            foreach (var entity in entities)
+            {
+                await AuthorizeResourceOperationAsync(entity, ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner);
+            }
+
+            return Mapper.Map<IEnumerable<TDeleteDto>>(entities);
         }
         #endregion
 
         #region Delete
-
         public virtual Result Delete(object id, string deletedBy)
         {
+
             TDeleteDto deleteDto = GetDeleteDtoById(id);
             return Delete(deleteDto, deletedBy);
         }
 
         public virtual async Task<Result> DeleteAsync(object id, string deletedBy, CancellationToken cancellationToken)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner);
+
             TDeleteDto deleteDto = await GetDeleteDtoByIdAsync(id, cancellationToken);
             return await DeleteAsync(deleteDto, deletedBy, cancellationToken).ConfigureAwait(false);
         }
 
         public virtual Result Delete(TDeleteDto dto, string deletedBy)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner).Wait();
+
             var bo = Mapper.Map<TEntity>(dto);
+
+            AuthorizeResourceOperationAsync(bo, ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner).Wait();
+
             Repository.Delete(bo, deletedBy);
 
             var result = UnitOfWork.Save();
@@ -607,7 +714,11 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public virtual async Task<Result> DeleteAsync(TDeleteDto dto, string deletedBy, CancellationToken cancellationToken)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner);
+
             var bo = Mapper.Map<TEntity>(dto);
+
+            await AuthorizeResourceOperationAsync(bo, ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner);
 
             Repository.Delete(bo, deletedBy);
 
@@ -643,6 +754,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
         #region Bulk Delete
         public virtual List<Result> BulkDelete(TDeleteDto[] dtos, string deletedBy)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner).Wait();
+
             var results = new List<Result>();
             foreach (var dto in dtos)
             {
@@ -661,6 +774,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public async virtual Task<List<Result>> BulkDeleteAsync(TDeleteDto[] dtos, string deletedBy, CancellationToken cancellationToken)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner);
+
             var results = new List<Result>();
             foreach (var dto in dtos)
             {
@@ -681,17 +796,21 @@ namespace AspNetCore.ApiBase.ApplicationServices
         #region GetCreateDefaultCollectionItemDto
         public virtual object GetCreateDefaultCollectionItemDto(string collectionExpression)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Create, ResourceOperationsCore.CRUD.Operations.Update).Wait();
+
             var type = RelationshipHelper.GetCollectionExpressionCreateType(collectionExpression, typeof(TUpdateDto));
             return Activator.CreateInstance(type);
         }
         #endregion
 
         #region TriggerActions
-
         public virtual Result TriggerAction(object id, ActionDto action, string triggeredBy)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
 
             var entity = Repository.GetById(id);
+
+            AuthorizeResourceOperationAsync(entity, ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
 
             if (entity is IEntityAggregateRoot)
             {
@@ -728,7 +847,11 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public async virtual Task<Result> TriggerActionAsync(object id, ActionDto action, string triggeredBy, CancellationToken cancellationToken = default(CancellationToken))
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
+
             var entity = await Repository.GetByIdAsync(cancellationToken, id);
+
+            await AuthorizeResourceOperationAsync(entity, ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
 
             if (entity is IEntityAggregateRoot)
             {
@@ -768,6 +891,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
         #region Bulk Trigger Actions
         public virtual List<Result> TriggerActions(BulkDto<ActionDto>[] actions, string triggeredBy)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
+
             var results = new List<Result>();
             foreach (var action in actions)
             {
@@ -786,6 +911,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public async virtual Task<List<Result>> TriggerActionsAsync(BulkDto<ActionDto>[] actions, string triggeredBy, CancellationToken cancellationToken)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
+
             var results = new List<Result>();
             foreach (var action in actions)
             {

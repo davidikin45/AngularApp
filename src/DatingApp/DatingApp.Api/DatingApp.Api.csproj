@@ -42,6 +42,7 @@
     <ProjectReference Include="..\DatingApp.ApplicationServices\DatingApp.ApplicationServices.csproj" />
     <ProjectReference Include="..\DatingApp.Core\DatingApp.Core.csproj" />
     <ProjectReference Include="..\DatingApp.Data.Identity\DatingApp.Data.Identity.csproj" />
+    <ProjectReference Include="..\DatingApp.Data.Tenants\DatingApp.Data.Tenants.csproj" />
     <ProjectReference Include="..\DatingApp.Data\DatingApp.Data.csproj" />
   </ItemGroup>
 

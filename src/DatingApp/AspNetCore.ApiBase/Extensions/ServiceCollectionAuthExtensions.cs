@@ -180,7 +180,7 @@ namespace AspNetCore.ApiBase.Extensions
             where TUser : class
             where TRole : class
         {
-            services.AddIdentityCore<TUser>(options =>
+           services.AddIdentityCore<TUser>(options =>
             {
                 options.Password.RequireDigit = requireDigit;
                 options.Password.RequiredLength = requiredLength;
@@ -200,7 +200,10 @@ namespace AspNetCore.ApiBase.Extensions
                 .AddEntityFrameworkStores<TContext>()
                 .AddDefaultTokenProviders()
                 .AddTokenProvider<EmailConfirmationTokenProvider<TUser>>("emailconf")
-                .AddPasswordValidator<DoesNotContainPasswordValidator<TUser>>();
+                .AddPasswordValidator<DoesNotContainPasswordValidator<TUser>>()
+                .AddRoleValidator<RoleValidator<IdentityRole>>()
+                .AddRoleManager<RoleManager<IdentityRole>>()
+                .AddSignInManager<SignInManager<TUser>>();
 
             //registration email confirmation days
             services.Configure<EmailConfirmationTokenProviderOptions>(options =>

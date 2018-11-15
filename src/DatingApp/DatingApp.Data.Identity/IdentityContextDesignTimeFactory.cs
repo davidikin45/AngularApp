@@ -13,7 +13,7 @@ namespace DatingApp.Data.Identity
 
         protected override IdentityContext CreateNewInstance(DbContextOptions<IdentityContext> options)
         {
-            return new IdentityContext(options);
+            return IdentityContext.Create(options);
         }
     }
 }

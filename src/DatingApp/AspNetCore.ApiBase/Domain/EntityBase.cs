@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AspNetCore.ApiBase.Domain
 {
-    public abstract class EntityBase<T> : IEntity<T>, IEntityAuditable, IEntityOwned where T : IEquatable<T>
+    public abstract class EntityBase<T> : IEntity<T>, IEntityAuditable where T : IEquatable<T>
     {
         public virtual T Id { get; set; }
 
@@ -13,8 +11,6 @@ namespace AspNetCore.ApiBase.Domain
             get { return this.Id; }
             set { this.Id = (T)value; }
         }
-
-        public string OwnedBy { get; set; }
 
         public DateTime CreatedOn { get; set; }
         public string CreatedBy { get; set; }

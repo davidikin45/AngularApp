@@ -14,15 +14,22 @@ namespace AspNetCore.ApiBase.Authorization
                                                        OperationAuthorizationRequirement requirement,
                                                        IEntityOwned entity)
         {
-            if (context.User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && c.Value == requirement.Name).Count() > 0)
+            if (context.User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && c.Value == ResourceOperationsCore.Admin.Scopes.Full).Count() > 0)
             {
                 context.Succeed(requirement);
             }
-            else if (context.User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && c.Value == requirement.Name + "-if-owner").Count() > 0)
+            else if (!requirement.Name.Contains("-if-owner") && context.User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && c.Value == requirement.Name).Count() > 0)
+            {
+                context.Succeed(requirement);
+            }
+            else if (requirement.Name.Contains("-if-owner") && context.User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && c.Value == requirement.Name).Count() > 0)
             {
                 var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                if (entity.OwnedBy == null || entity.OwnedBy == userId)
+                if (entity.OwnedBy == userId)
+                {
+                    context.Succeed(requirement);
+                }else if(entity.OwnedBy == null && requirement.Name.Contains("read"))
                 {
                     context.Succeed(requirement);
                 }

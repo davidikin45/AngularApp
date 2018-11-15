@@ -23,6 +23,8 @@ namespace AspNetCore.ApiBase.Data.Repository
             {
                 auditableEntity.CreatedOn = DateTime.UtcNow;
                 auditableEntity.CreatedBy = addedBy;
+                auditableEntity.UpdatedOn = DateTime.UtcNow;
+                auditableEntity.UpdatedBy = addedBy;
             }
 
             var ownedEntity = entity as IEntityOwned;
@@ -58,7 +60,23 @@ namespace AspNetCore.ApiBase.Data.Repository
 
         public virtual void Delete(TEntity entity, string deletedBy)
         {
-            context.RemoveEntity(entity);
+            if(entity is IEntitySoftDelete)
+            {
+                var softDeleteEntity = entity as IEntitySoftDelete;
+                SoftDelete(softDeleteEntity, deletedBy);
+            }
+            else
+            {
+                context.RemoveEntity(entity);
+            }
+        }
+
+        public void SoftDelete(IEntitySoftDelete entity, string deletedBy)
+        {
+            entity.IsDeleted = true;
+            entity.DeletedBy = deletedBy;
+            entity.DeletedOn = DateTime.UtcNow;
+            context.UpdateEntity((TEntity)entity);
         }
         #endregion
 

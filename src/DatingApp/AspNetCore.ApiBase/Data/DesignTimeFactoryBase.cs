@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AspNetCore.ApiBase.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -77,7 +78,7 @@ IDesignTimeDbContextFactory<TContext> where TContext : DbContext
                 "MyDesignTimeDbContextFactory.Create(string): Connection string: {0}",
                 connectionString);
 
-            optionsBuilder.UseSqlServer(connectionString, sqlServerOptions => sqlServerOptions.MigrationsAssembly(migrationsAssemblyName));
+            optionsBuilder.SetConnectionString(connectionString, migrationsAssemblyName);
 
             DbContextOptions<TContext> options = optionsBuilder.Options;
 

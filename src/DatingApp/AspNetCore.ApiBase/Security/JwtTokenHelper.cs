@@ -15,6 +15,8 @@ namespace AspNetCore.ApiBase.Security
         {
             var claims = new List<Claim>()
                         {
+                            new Claim(ClaimTypes.NameIdentifier, userId),
+                            new Claim(ClaimTypes.Name, userName),
                             new Claim(JwtRegisteredClaimNames.Sub, userId),
                             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                             new Claim(JwtRegisteredClaimNames.UniqueName, userName)
@@ -42,6 +44,8 @@ namespace AspNetCore.ApiBase.Security
         {
             var claims = new List<Claim>()
                         {
+                            new Claim(ClaimTypes.NameIdentifier, userId),
+                            new Claim(ClaimTypes.Name, userName),
                             new Claim(JwtRegisteredClaimNames.Sub, userId),
                             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                             new Claim(JwtRegisteredClaimNames.UniqueName, userName)
@@ -69,6 +73,8 @@ namespace AspNetCore.ApiBase.Security
         {
             var claims = new List<Claim>()
                         {
+                            new Claim(ClaimTypes.NameIdentifier, userId),
+                            new Claim(ClaimTypes.Name, userName),
                             new Claim(JwtRegisteredClaimNames.Sub, userId),
                             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                             new Claim(JwtRegisteredClaimNames.UniqueName, userName)

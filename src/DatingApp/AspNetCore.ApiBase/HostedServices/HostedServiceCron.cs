@@ -18,24 +18,40 @@ namespace AspNetCore.ApiBase.HostedServices
         private CancellationTokenSource _cts;
 
         private readonly ILogger _logger;
+        private readonly IServiceProvider _services;
 
-        public HostedServiceCron(IServiceProvider services, ILogger<HostedServiceCron<TService>> logger)
+        public string[] CronSchedules { get; private set; }
+
+        public HostedServiceCron(IServiceProvider services, ILogger<HostedServiceCron<TService>> logger, params string[] cronSchedules)
         {
-            Services = services;
+            CronSchedules = cronSchedules;
+            _services = services;
             _logger = logger;
         }
 
-        public IServiceProvider Services { get; }
+        public HostedServiceCron(IServiceProvider services, ILogger<HostedServiceCron<TService>> logger)
+        {
+            _services = services;
+            _logger = logger;
+        }
 
         private async Task ScheduledTask(CancellationToken ct)
         {
-            var cronSchedule = (CronJobAttribute)typeof(TService).GetCustomAttributes(typeof(CronJobAttribute), true).FirstOrDefault();
-            if(cronSchedule == null)
+            if (CronSchedules == null || CronSchedules.Length == 0)
             {
-                throw new Exception("Job must have a CronJobAttribute");
+                var cronSchedule = (CronJobAttribute)typeof(TService).GetCustomAttributes(typeof(CronJobAttribute), true).FirstOrDefault();
+                if (cronSchedule != null)
+                {
+                    CronSchedules = cronSchedule.Schedules;
+                }
             }
 
-            var schedules = cronSchedule.Schedules.Select(schedule => CrontabSchedule.Parse(schedule));
+            if (CronSchedules == null || CronSchedules.Length == 0)
+            {
+                throw new Exception("Job must pass cron schedules or have a CronJobAttribute");
+            }
+
+            var schedules = CronSchedules.Select(schedule => CrontabSchedule.Parse(schedule));
 
             do
             {
@@ -48,7 +64,7 @@ namespace AspNetCore.ApiBase.HostedServices
                     await Task.Delay(delay);
                 }
 
-                using (var scope = Services.CreateScope())
+                using (var scope = _services.CreateScope())
                 {
                     var scopedProcessingService =
                         scope.ServiceProvider

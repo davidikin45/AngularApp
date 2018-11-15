@@ -50,7 +50,8 @@ namespace AspNetCore.ApiBase.Data.Repository
                 ;
 
         IEnumerable<TEntity> Search(
-             string search = "",
+           string ownedBy = null,
+           string search = "",
            Expression<Func<TEntity, bool>> filter = null,
            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
            int? skip = null,
@@ -62,6 +63,7 @@ namespace AspNetCore.ApiBase.Data.Repository
 
         Task<IEnumerable<TEntity>> SearchAsync(
             CancellationToken cancellationToken,
+            string ownedBy = null,
             string search = "",
             Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
@@ -73,6 +75,7 @@ namespace AspNetCore.ApiBase.Data.Repository
             ;
 
         IEnumerable<TEntity> SearchNoTracking(
+         string ownedBy = null,
          string search = "",
        Expression<Func<TEntity, bool>> filter = null,
        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
@@ -85,6 +88,7 @@ namespace AspNetCore.ApiBase.Data.Repository
 
         Task<IEnumerable<TEntity>> SearchNoTrackingAsync(
             CancellationToken cancellationToken,
+            string ownedBy = null,
             string search = "",
             Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
@@ -288,11 +292,11 @@ namespace AspNetCore.ApiBase.Data.Repository
             Expression<Func<TEntity, bool>> filter = null)
             ;
 
-        int GetSearchCount(string search = "", Expression<Func<TEntity, bool>> filter = null)
+        int GetSearchCount(string ownedBy = null, string search = "", Expression<Func<TEntity, bool>> filter = null)
           ;
 
         Task<int> GetSearchCountAsync(CancellationToken cancellationToken,
-            string search = "", Expression<Func<TEntity, bool>> filter = null)
+              string ownedBy = null, string search = "", Expression<Func<TEntity, bool>> filter = null)
             ;
 
 

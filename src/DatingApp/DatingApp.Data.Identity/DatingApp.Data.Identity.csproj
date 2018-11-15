@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AspNetCore.ApiBase\AspNetCore.ApiBase.csproj" />
+    <ProjectReference Include="..\DatingApp.Core\DatingApp.Core.csproj" />
     <ProjectReference Include="..\DatingApp.Domain\DatingApp.Domain.csproj" />
   </ItemGroup>
 

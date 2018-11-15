@@ -1,4 +1,5 @@
 ﻿using AspnetCore.ApiBase.Validation.Errors;
+using AspNetCore.ApiBase.Authorization;
 using AspNetCore.ApiBase.Mapping;
 using AspNetCore.ApiBase.Users;
 using AspNetCore.ApiBase.Validation;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Authorization.Infrastructure;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.ApplicationServices
 {
@@ -15,35 +17,84 @@ namespace AspNetCore.ApiBase.ApplicationServices
     {
         public IMapper Mapper { get; }
 
-        public string ServiceName { get; }
         public IAuthorizationService AuthorizationService { get; }
         public IUserService UserService { get; }
         public IValidationService ValidationService { get; }
 
-        public ApplicationServiceBase(string serviceName, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService)
+        public ApplicationServiceBase(IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService)
         {
-            ServiceName = serviceName;
             Mapper = mapper;
             AuthorizationService = authorizationService;
             UserService = userService;
             ValidationService = validationService;
         }
 
-        public async void AuthorizeOperationAsync(string operation)
+        public async Task AuthorizeResourceOperationAsync(params string[] operations)
         {
-            var authorizationResult = await AuthorizationService.AuthorizeAsync(UserService.User, ServiceName + operation);
-            if (!authorizationResult.Succeeded)
+            string resourceName = null;
+
+            var resourceAttribute = (ResourceAttribute)this.GetType().GetCustomAttributes(typeof(ResourceAttribute), true).FirstOrDefault();
+            if (resourceAttribute != null)
             {
-                throw new UnauthorizedErrors(new GeneralError(String.Format(Messages.UnauthorisedServiceOperation, ServiceName + operation)));
+                resourceName = resourceAttribute.Name;
+            }
+
+            bool success = false;
+            foreach (var operation in operations)
+            {
+                var operationName = operation;
+                if(!string.IsNullOrWhiteSpace(resourceName))
+                {
+                    operationName = resourceName + "." + operationName;
+                }
+
+                var authorizationResult = await AuthorizationService.AuthorizeAsync(UserService.User, operationName);
+                if(authorizationResult.Succeeded)
+                {
+                    success = true;
+                    break;
+                }
+            }
+           
+            if (!success)
+            {
+                throw new UnauthorizedErrors(new GeneralError(String.Format(Messages.UnauthorisedServiceOperation, resourceAttribute.Name + "." + operations.FirstOrDefault())));
             }
         }
 
-        public async void AuthorizeResourceOperationAsync(string operation, object resource)
+        public async Task AuthorizeResourceOperationAsync(object resource, params string[] operations)
         {
-            var authorizationResult = await AuthorizationService.AuthorizeAsync(UserService.User, resource, new OperationAuthorizationRequirement() { Name = ServiceName + operation });
-            if (!authorizationResult.Succeeded)
+            if(resource != null)
             {
-                throw new UnauthorizedErrors(new GeneralError(String.Format(Messages.UnauthorisedServiceOperation, ServiceName + operation)));
+                string resourceName = null;
+
+                var resourceAttribute = (ResourceAttribute)this.GetType().GetCustomAttributes(typeof(ResourceAttribute), true).FirstOrDefault();
+                if (resourceAttribute != null)
+                {
+                    resourceName = resourceAttribute.Name;
+                }
+
+                bool success = false;
+                foreach (var operation in operations)
+                {
+                    var operationName = operation;
+                    if (!string.IsNullOrWhiteSpace(resourceName))
+                    {
+                        operationName = resourceName + "." + operationName;
+                    }
+
+                    var authorizationResult = await AuthorizationService.AuthorizeAsync(UserService.User, resource, new OperationAuthorizationRequirement() { Name = operationName });
+                        if (authorizationResult.Succeeded)
+                        {
+                            success = true;
+                            break;
+                        }
+                }
+
+                if (!success)
+                {
+                    throw new UnauthorizedErrors(new GeneralError(String.Format(Messages.UnauthorisedServiceOperation, resourceAttribute.Name + "." + operations.FirstOrDefault())));
+                }
             }
         }
 

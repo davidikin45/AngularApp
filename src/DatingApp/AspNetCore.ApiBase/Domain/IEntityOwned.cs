@@ -1,12 +1,7 @@
-﻿using System;
-
-namespace AspNetCore.ApiBase.Domain
+﻿namespace AspNetCore.ApiBase.Domain
 {
-    public interface IEntityAuditable
+    public interface IEntityOwned
     {
-        DateTime CreatedOn { get; set; }
-        string CreatedBy { get; set; }
-        DateTime? UpdatedOn { get; set; }
-        string UpdatedBy { get; set; }
+        string OwnedBy { get; set; }
     }
 }

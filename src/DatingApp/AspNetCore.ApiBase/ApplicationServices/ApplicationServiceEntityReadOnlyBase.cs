@@ -23,8 +23,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
         protected virtual IGenericRepository<TEntity> Repository => UnitOfWork.Repository<TEntity>();
         protected virtual IActionEventsService ActionEventsService { get; }
 
-        public ApplicationServiceEntityReadOnlyBase(string serviceName, TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IActionEventsService actionEventsService)
-           : base(serviceName, mapper, authorizationService, userService, validationService)
+        public ApplicationServiceEntityReadOnlyBase(TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IActionEventsService actionEventsService)
+           : base(mapper, authorizationService, userService, validationService)
         {
             UnitOfWork = unitOfWork;
             ActionEventsService = actionEventsService;
@@ -47,6 +47,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
         bool includeAllCompositionAndAggregationRelationshipProperties = false,
         params Expression<Func<TDto, Object>>[] includeProperties)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read).Wait();
+
             var orderByConverted = GetMappedOrderBy<TDto, TEntity>(orderBy);
             var includesConverted = GetMappedIncludes<TDto, TEntity>(includeProperties);
             var list = includesConverted.ToList();
@@ -69,6 +71,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             bool includeAllCompositionAndAggregationRelationshipProperties = false,
             params Expression<Func<TDto, Object>>[] includeProperties)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read);
+
             var orderByConverted = GetMappedOrderBy<TDto, TEntity>(orderBy);
             var includesConverted = GetMappedIncludes<TDto, TEntity>(includeProperties);
             var list = includesConverted.ToList();
@@ -85,6 +89,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         #region Search
         public virtual IEnumerable<TDto> Search(
+       string ownedBy = null,
        string search = "",
        Expression<Func<TDto, bool>> filter = null,
        Expression<Func<IQueryable<TDto>, IOrderedQueryable<TDto>>> orderBy = null,
@@ -94,6 +99,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
        bool includeAllCompositionAndAggregationRelationshipProperties = false,
        params Expression<Func<TDto, Object>>[] includeProperties)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
+
             var filterConverted = GetMappedSelector<TDto, TEntity, bool>(filter);
             var orderByConverted = GetMappedOrderBy<TDto, TEntity>(orderBy);
             var includesConverted = GetMappedIncludes<TDto, TEntity>(includeProperties);
@@ -101,15 +108,23 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var entityList = Repository.Search(search, filterConverted, orderByConverted, pageNo, pageSize, includeAllCompositionRelationshipProperties || IncludeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties || IncludeAllCompositionAndAggregationRelationshipProperties, includesConverted);
+            var entityList = Repository.Search(ownedBy, search, filterConverted, orderByConverted, pageNo, pageSize, includeAllCompositionRelationshipProperties || IncludeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties || IncludeAllCompositionAndAggregationRelationshipProperties, includesConverted);
 
-            IEnumerable<TDto> dtoList = entityList.ToList().Select(Mapper.Map<TEntity, TDto>);
+            var entities = entityList.ToList();
+
+            foreach (var entity in entities)
+            {
+                AuthorizeResourceOperationAsync(entity, ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
+            }
+
+            IEnumerable<TDto> dtoList = entities.Select(Mapper.Map<TEntity, TDto>);
 
             return dtoList;
         }
 
         public virtual async Task<IEnumerable<TDto>> SearchAsync(
             CancellationToken cancellationToken,
+             string ownedBy = null,
              string search = "",
             Expression<Func<TDto, bool>> filter = null,
             Expression<Func<IQueryable<TDto>, IOrderedQueryable<TDto>>> orderBy = null,
@@ -119,6 +134,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             bool includeAllCompositionAndAggregationRelationshipProperties = false,
             params Expression<Func<TDto, Object>>[] includeProperties)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
+
             var filterConverted = GetMappedSelector<TDto, TEntity, bool>(filter);
             var orderByConverted = GetMappedOrderBy<TDto, TEntity>(orderBy);
             var includesConverted = GetMappedIncludes<TDto, TEntity>(includeProperties);
@@ -126,30 +143,43 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var entityList = await Repository.SearchAsync(cancellationToken, search, filterConverted, orderByConverted, pageNo, pageSize, includeAllCompositionRelationshipProperties || IncludeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties || IncludeAllCompositionAndAggregationRelationshipProperties, includesConverted).ConfigureAwait(false);
+            var entityList = await Repository.SearchAsync(cancellationToken, ownedBy, search, filterConverted, orderByConverted, pageNo, pageSize, includeAllCompositionRelationshipProperties || IncludeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties || IncludeAllCompositionAndAggregationRelationshipProperties, includesConverted).ConfigureAwait(false);
 
-            IEnumerable<TDto> dtoList = entityList.ToList().Select(Mapper.Map<TEntity, TDto>);
+            var entities = entityList.ToList();
+
+            foreach (var entity in entities)
+            {
+               await AuthorizeResourceOperationAsync(entity, ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
+            }
+
+            IEnumerable<TDto> dtoList = entityList.Select(Mapper.Map<TEntity, TDto>);
 
             return dtoList;
         }
 
         public virtual int GetSearchCount(
+        string ownedBy = null,
         string search = "",
        Expression<Func<TDto, bool>> filter = null)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
+
             var filterConverted = GetMappedSelector<TDto, TEntity, bool>(filter);
 
-            return Repository.GetSearchCount(search, filterConverted);
+            return Repository.GetSearchCount(ownedBy, search, filterConverted);
         }
 
         public virtual async Task<int> GetSearchCountAsync(
             CancellationToken cancellationToken,
+             string ownedBy = null,
              string search = "",
             Expression<Func<TDto, bool>> filter = null)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
+
             var filterConverted = GetMappedSelector<TDto, TEntity, bool>(filter);
 
-            return await Repository.GetSearchCountAsync(cancellationToken, search, filterConverted).ConfigureAwait(false);
+            return await Repository.GetSearchCountAsync(cancellationToken, ownedBy, search, filterConverted).ConfigureAwait(false);
         }
         #endregion
 
@@ -163,6 +193,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
            bool includeAllCompositionAndAggregationRelationshipProperties = false,
            params Expression<Func<TDto, Object>>[] includeProperties)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
+
             var filterConverted = GetMappedSelector<TDto, TEntity, bool>(filter);
             var orderByConverted = GetMappedOrderBy<TDto, TEntity>(orderBy);
             var includesConverted = GetMappedIncludes<TDto, TEntity>(includeProperties);
@@ -172,7 +204,14 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
             var entityList = Repository.Get(filterConverted, orderByConverted, pageNo, pageSize, includeAllCompositionRelationshipProperties || IncludeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties || IncludeAllCompositionAndAggregationRelationshipProperties, includesConverted);
 
-            IEnumerable<TDto> dtoList = entityList.ToList().Select(Mapper.Map<TEntity, TDto>);
+            var entities = entityList.ToList();
+
+            foreach (var entity in entities)
+            {
+                AuthorizeResourceOperationAsync(entity, ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
+            }
+
+            IEnumerable<TDto> dtoList = entities.Select(Mapper.Map<TEntity, TDto>);
 
             return dtoList;
         }
@@ -187,6 +226,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             bool includeAllCompositionAndAggregationRelationshipProperties = false,
             params Expression<Func<TDto, Object>>[] includeProperties)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
+
             var filterConverted = GetMappedSelector<TDto, TEntity, bool>(filter);
             var orderByConverted = GetMappedOrderBy<TDto, TEntity>(orderBy);
             var includesConverted = GetMappedIncludes<TDto, TEntity>(includeProperties);
@@ -196,6 +237,13 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
             var entityList = await Repository.GetAsync(cancellationToken, filterConverted, orderByConverted, pageNo, pageSize, includeAllCompositionRelationshipProperties || IncludeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties || IncludeAllCompositionAndAggregationRelationshipProperties, includesConverted).ConfigureAwait(false);
 
+            var entities = entityList.ToList();
+
+            foreach (var entity in entities)
+            {
+                await AuthorizeResourceOperationAsync(entity, ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
+            }
+
             IEnumerable<TDto> dtoList = entityList.ToList().Select(Mapper.Map<TEntity, TDto>);
 
             return dtoList;
@@ -204,6 +252,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
         public virtual int GetCount(
         Expression<Func<TDto, bool>> filter = null)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
+
             var filterConverted = GetMappedSelector<TDto, TEntity, bool>(filter);
 
             return Repository.GetCount(filterConverted);
@@ -213,6 +263,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             CancellationToken cancellationToken,
             Expression<Func<TDto, bool>> filter = null)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
+
             var filterConverted = GetMappedSelector<TDto, TEntity, bool>(filter);
 
             return await Repository.GetCountAsync(cancellationToken, filterConverted).ConfigureAwait(false);
@@ -227,6 +279,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
           bool includeAllCompositionAndAggregationRelationshipProperties = false,
           params Expression<Func<TDto, Object>>[] includeProperties)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
+
             var filterConverted = GetMappedSelector<TDto, TEntity, bool>(filter);
             var includesConverted = GetMappedIncludes<TDto, TEntity>(includeProperties);
             var list = includesConverted.ToList();
@@ -234,6 +288,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             includesConverted = list.ToArray();
 
             var bo = Repository.GetOne(filterConverted, includeAllCompositionRelationshipProperties || IncludeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties || IncludeAllCompositionAndAggregationRelationshipProperties, includesConverted);
+
+            AuthorizeResourceOperationAsync(bo, ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
 
             return Mapper.Map<TDto>(bo);
         }
@@ -245,6 +301,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             bool includeAllCompositionAndAggregationRelationshipProperties = false,
             params Expression<Func<TDto, Object>>[] includeProperties)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
+
             var filterConverted = GetMappedSelector<TDto, TEntity, bool>(filter);
             var includesConverted = GetMappedIncludes<TDto, TEntity>(includeProperties);
             var list = includesConverted.ToList();
@@ -252,6 +310,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             includesConverted = list.ToArray();
 
             var bo = await Repository.GetOneAsync(cancellationToken, filterConverted, includeAllCompositionRelationshipProperties || IncludeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties || IncludeAllCompositionAndAggregationRelationshipProperties, includesConverted).ConfigureAwait(false);
+
+            await AuthorizeResourceOperationAsync(bo, ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
 
             return Mapper.Map<TDto>(bo);
         }
@@ -265,6 +325,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
          bool includeAllCompositionAndAggregationRelationshipProperties = false,
          params Expression<Func<TDto, Object>>[] includeProperties)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
+
             var filterConverted = GetMappedSelector<TDto, TEntity, bool>(filter);
             var orderByConverted = GetMappedOrderBy<TDto, TEntity>(orderBy);
             var includesConverted = GetMappedIncludes<TDto, TEntity>(includeProperties);
@@ -273,6 +335,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             includesConverted = list.ToArray();
 
             var bo = Repository.GetFirst(filterConverted, orderByConverted, includeAllCompositionRelationshipProperties || IncludeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties || IncludeAllCompositionAndAggregationRelationshipProperties, includesConverted);
+
+            AuthorizeResourceOperationAsync(bo, ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
 
             return Mapper.Map<TDto>(bo);
         }
@@ -285,6 +349,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             bool includeAllCompositionAndAggregationRelationshipProperties = false,
             params Expression<Func<TDto, Object>>[] includeProperties)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
+
             var filterConverted = GetMappedSelector<TDto, TEntity, bool>(filter);
             var orderByConverted = GetMappedOrderBy<TDto, TEntity>(orderBy);
             var includesConverted = GetMappedIncludes<TDto, TEntity>(includeProperties);
@@ -293,6 +359,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             includesConverted = list.ToArray();
 
             var bo = await Repository.GetFirstAsync(cancellationToken, filterConverted, orderByConverted, includeAllCompositionRelationshipProperties || IncludeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties || IncludeAllCompositionAndAggregationRelationshipProperties, includesConverted).ConfigureAwait(false);
+
+            await AuthorizeResourceOperationAsync(bo, ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
 
             return Mapper.Map<TDto>(bo);
         }
@@ -304,12 +372,16 @@ namespace AspNetCore.ApiBase.ApplicationServices
            bool includeAllCompositionAndAggregationRelationshipProperties = false,
            params Expression<Func<TDto, Object>>[] includeProperties)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
             var includesConverted = GetMappedIncludes<TDto, TEntity>(includeProperties);
             var list = includesConverted.ToList();
             AddIncludes(list);
             includesConverted = list.ToArray();
 
             var bo = Repository.GetById(id, includeAllCompositionRelationshipProperties || IncludeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties || IncludeAllCompositionAndAggregationRelationshipProperties, includesConverted);
+
+            AuthorizeResourceOperationAsync(bo, ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
+
             return Mapper.Map<TDto>(bo);
         }
 
@@ -319,12 +391,17 @@ namespace AspNetCore.ApiBase.ApplicationServices
             bool includeAllCompositionAndAggregationRelationshipProperties = false,
             params Expression<Func<TDto, Object>>[] includeProperties)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
+
             var includesConverted = GetMappedIncludes<TDto, TEntity>(includeProperties);
             var list = includesConverted.ToList();
             AddIncludes(list);
             includesConverted = list.ToArray();
 
             var bo = await Repository.GetByIdAsync(cancellationToken, id, includeAllCompositionRelationshipProperties || IncludeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties || IncludeAllCompositionAndAggregationRelationshipProperties, includesConverted).ConfigureAwait(false);
+
+            await AuthorizeResourceOperationAsync(bo, ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
+
             return Mapper.Map<TDto>(bo);
         }
         #endregion
@@ -338,7 +415,11 @@ namespace AspNetCore.ApiBase.ApplicationServices
            int? pageNo = null,
            int? pageSize = null)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
             var bo = Repository.GetByIdWithPagedCollectionProperty(id, collectionExpression, search, orderBy, ascending, pageNo, pageSize);
+
+            AuthorizeResourceOperationAsync(bo, ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
+
             return Mapper.Map<TDto>(bo);
         }
 
@@ -351,8 +432,12 @@ namespace AspNetCore.ApiBase.ApplicationServices
             int? pageNo = null,
             int? pageSize = null)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
 
             var bo = await Repository.GetByIdWithPagedCollectionPropertyAsync(cancellationToken, id, collectionExpression, search, orderBy, ascending, pageNo, pageSize);
+
+            await AuthorizeResourceOperationAsync(bo, ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
+
             return Mapper.Map<TDto>(bo);
         }
 
@@ -360,6 +445,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             string collectionExpression,
             string search = "")
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
             //var mappedCollectionProperty = Mapper.GetDestinationMappedProperty<TDto, TEntity>(collectionProperty).Name;
             return Repository.GetByIdWithPagedCollectionPropertyCount(id, collectionExpression, search);
         }
@@ -369,7 +455,9 @@ namespace AspNetCore.ApiBase.ApplicationServices
             string collectionExpression,
             string search = "")
         {
-           // var mappedCollectionProperty = Mapper.GetDestinationMappedProperty<TDto, TEntity>(collectionProperty).Name;
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
+
+            // var mappedCollectionProperty = Mapper.GetDestinationMappedProperty<TDto, TEntity>(collectionProperty).Name;
             return await Repository.GetByIdWithPagedCollectionPropertyCountAsync(cancellationToken, id, collectionExpression, search);
         }
         #endregion
@@ -380,13 +468,22 @@ namespace AspNetCore.ApiBase.ApplicationServices
         bool includeAllCompositionAndAggregationRelationshipProperties = false,
         params Expression<Func<TDto, Object>>[] includeProperties)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
             var includesConverted = GetMappedIncludes<TDto, TEntity>(includeProperties);
             var list = includesConverted.ToList();
             AddIncludes(list);
             includesConverted = list.ToArray();
 
             var result = Repository.GetByIds(ids, includeAllCompositionRelationshipProperties || IncludeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties || IncludeAllCompositionAndAggregationRelationshipProperties, includesConverted);
-            return Mapper.Map<IEnumerable<TDto>>(result);
+
+            var entities = result.ToList();
+
+            foreach (var entity in entities)
+            {
+                AuthorizeResourceOperationAsync(entity, ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
+            }
+
+            return Mapper.Map<IEnumerable<TDto>>(entities);
         }
 
         public virtual async Task<IEnumerable<TDto>> GetByIdsAsync(CancellationToken cancellationToken,
@@ -395,19 +492,30 @@ namespace AspNetCore.ApiBase.ApplicationServices
          bool includeAllCompositionAndAggregationRelationshipProperties = false,
          params Expression<Func<TDto, Object>>[] includeProperties)
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
+
             var includesConverted = GetMappedIncludes<TDto, TEntity>(includeProperties);
             var list = includesConverted.ToList();
             AddIncludes(list);
             includesConverted = list.ToArray();
 
             var result = await Repository.GetByIdsAsync(cancellationToken, ids, includeAllCompositionRelationshipProperties || IncludeAllCompositionRelationshipProperties, includeAllCompositionAndAggregationRelationshipProperties || IncludeAllCompositionAndAggregationRelationshipProperties, includesConverted).ConfigureAwait(false);
-            return Mapper.Map<IEnumerable<TDto>>(result);
+
+            var entities = result.ToList();
+
+            foreach (var entity in entities)
+            {
+                AuthorizeResourceOperationAsync(entity, ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
+            }
+
+            return Mapper.Map<IEnumerable<TDto>>(entities);
         }
         #endregion
 
         #region Exists
         public virtual bool Exists(Expression<Func<TDto, bool>> filter = null)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
             var filterConverted = GetMappedSelector<TDto, TEntity, bool>(filter);
 
             return Repository.Exists(filterConverted);
@@ -418,6 +526,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             Expression<Func<TDto, bool>> filter = null
             )
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
+
             var filterConverted = GetMappedSelector<TDto, TEntity, bool>(filter);
 
             return await Repository.ExistsAsync(cancellationToken, filterConverted).ConfigureAwait(false);
@@ -425,6 +535,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public virtual bool Exists(object id)
         {
+            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner).Wait();
             return Repository.Exists(id);
         }
 
@@ -433,6 +544,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             object id
             )
         {
+            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner);
+
             return await Repository.ExistsAsync(cancellationToken, id).ConfigureAwait(false);
         }
         #endregion
