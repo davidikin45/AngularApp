@@ -3,8 +3,10 @@ using AspNetCore.ApiBase.Data.Initializers;
 using AspNetCore.ApiBase.MultiTenancy;
 using AspNetCore.ApiBase.MultiTenancy.Data.Tenant;
 using AspNetCore.ApiBase.MultiTenancy.Data.Tenants;
+using AspNetCore.ApiBase.MultiTenancy.Data.Tenants.Initializers;
 using AspNetCore.ApiBase.Settings;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,11 +19,11 @@ namespace AspnetCore.ApiBase.Data.Tenants.Initializers
     {
         private Dictionary<Type, Type> _contextInitializers = new Dictionary<Type, Type>();
 
-        private readonly IDbContextTenantStrategy _strategy;
+        private readonly IServiceProvider _serviceProvider;
         protected readonly TenantSettings<TTenant> settings;
-        public TenantsContextInitializerDropMigrate(IDbContextTenantStrategy strategy, TenantSettings<TTenant> settings)
+        public TenantsContextInitializerDropMigrate(IServiceProvider serviceProvider, TenantSettings<TTenant> settings)
         {
-            _strategy = strategy;
+            _serviceProvider = serviceProvider;
             this.settings = settings;
         }
 
@@ -34,20 +36,7 @@ namespace AspnetCore.ApiBase.Data.Tenants.Initializers
 
         public async override Task OnSeedCompleteAsync(TDbContextTenants context)
         {
-            foreach (var contextInitializer in _contextInitializers)
-            {
-                var migrator = Activator.CreateInstance(contextInitializer.Value);
-                foreach (var tenant in context.Tenants)
-                {
-                    var multiTenantService = MultiTenantService<TDbContextTenants, TTenant>.Create(tenant, _strategy);
-                    using (var dbContext = (IDisposable)Activator.CreateInstance(contextInitializer.Key, multiTenantService))
-                    {
-                        var genericType = typeof(IDbContextInitializer<>).MakeGenericType(contextInitializer.Key);
-                        var result = (Task)genericType.GetMethod(nameof(IDbContextInitializer<DbContext>.InitializeAsync)).Invoke(migrator, new object[] { dbContext });
-                        await result;
-                    }
-                }
-            }
+            await TenantContenInitializerHelper.InitializeContextsAsync<TDbContextTenants, TTenant>(context, _contextInitializers, _serviceProvider);
         }
     }
 }

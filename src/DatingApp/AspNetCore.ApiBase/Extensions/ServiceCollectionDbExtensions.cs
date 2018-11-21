@@ -1,5 +1,7 @@
 ﻿using AspNetCore.ApiBase.Data.UnitOfWork;
 using AspNetCore.ApiBase.Helpers;
+using AspNetCore.ApiBase.MultiTenancy;
+using AspNetCore.ApiBase.MultiTenancy.Data.Tenant;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -8,22 +10,32 @@ namespace AspNetCore.ApiBase.Extensions
 {
     public static class ServiceCollectionDbExtensions
     {
-        public static IServiceCollection AddDbContextTenant<TContext>(this IServiceCollection services) where TContext : DbContext
+        public static TenantDbContextIdentification<TContext> AddDbContextTenant<TContext>(this IServiceCollection services, ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
         {
-            return services.AddDbContext<TContext>();
+            return services.AddDbContextTenant<TContext>(null, contextLifetime);
+        }
+
+        public static TenantDbContextIdentification<TContext> AddDbContextTenant<TContext>(this IServiceCollection services, string defaultConnectionString, ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
+        {
+            return services.AddDbContext<TContext>(defaultConnectionString, contextLifetime).AddTenantDbContextIdentification<TContext>();
         }
 
         public static IServiceCollection AddDbContext<TContext>(this IServiceCollection services, string connectionString, ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
         {
             return services.AddDbContext<TContext>(options =>
-                    options.SetConnectionString(connectionString), contextLifetime);
+                    options.SetConnectionString<TContext>(connectionString), contextLifetime);
         }
 
-        public static DbContextOptionsBuilder SetConnectionString(this DbContextOptionsBuilder options, string connectionString, string migrationsAssembly = "")
+        public static DbContextOptionsBuilder SetConnectionString<TContext>(this DbContextOptionsBuilder options, string connectionString, string migrationsAssembly = "")
+            where TContext : DbContext
         {
-            if (string.IsNullOrWhiteSpace(connectionString))
+            if (connectionString == null)
             {
-                return options.UseInMemoryDatabase(Guid.NewGuid().ToString());
+                return options;
+            }
+            else if (connectionString == string.Empty)
+            {
+                return options.UseInMemoryDatabase(typeof(TContext).FullName);
             }
             if (ConnectionStringHelper.IsSQLite(connectionString))
             {

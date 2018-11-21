@@ -7,53 +7,54 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Data.Tenant
 {
-    public abstract class DbContextIdentityTentantBase<TUser> : DbContextIdentityBase<TUser> where TUser : IdentityUser
+    public abstract class DbContextIdentityTentantBase<TUser> : DbContextIdentityBase<TUser>, IDbContextTenantBase where TUser : IdentityUser
     {
-        public DbContextIdentityTentantBase(DbContextOptions options)
+        public DbContextIdentityTentantBase(DbContextOptions options, ITenantService tenantService)
             :base(options)
         {
-
+            TenantService = tenantService;
         }
 
-        private readonly ITenantService _tenantService;
+        public ITenantService TenantService { get; }
 
         public DbContextIdentityTentantBase(ITenantService tenantService)
         {
-            _tenantService = tenantService;
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            _tenantService?.TenantStrategy?.OnModelCreating(modelBuilder, this, _tenantService.GetTenant(), _tenantService.TenantPropertyName);
+            TenantService = tenantService;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
 
-            _tenantService?.TenantStrategy?.OnConfiguring(optionsBuilder, _tenantService.GetTenant(), _tenantService.TenantPropertyName);
+            TenantService?.GetTenantStrategy(this)?.OnConfiguring(optionsBuilder, TenantService.GetTenant(), TenantService.TenantPropertyName);
+            optionsBuilder.ReplaceService<IModelCacheKeyFactory, TenantModelCacheKeyFactory>();
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            TenantService?.GetTenantStrategy(this)?.OnModelCreating(modelBuilder, this, TenantService.GetTenant(), TenantService.TenantPropertyName);
         }
 
         #region Save Changes
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
         {
-            _tenantService?.TenantStrategy?.OnSaveChanges(this, _tenantService.GetTenant(), _tenantService.TenantPropertyName);
+            TenantService?.GetTenantStrategy(this)?.OnSaveChanges(this, TenantService.GetTenant(), TenantService.TenantPropertyName);
 
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
         public override int SaveChanges()
         {
-            _tenantService?.TenantStrategy?.OnSaveChanges(this, _tenantService.GetTenant(), _tenantService.TenantPropertyName);
+            TenantService?.GetTenantStrategy(this)?.OnSaveChanges(this, TenantService.GetTenant(), TenantService.TenantPropertyName);
 
             return base.SaveChanges();
         }
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
-            _tenantService?.TenantStrategy?.OnSaveChanges(this, _tenantService.GetTenant(), _tenantService.TenantPropertyName);
+            TenantService?.GetTenantStrategy(this)?.OnSaveChanges(this, TenantService.GetTenant(), TenantService.TenantPropertyName);
 
             return base.SaveChanges(acceptAllChangesOnSuccess);
         }
@@ -61,7 +62,7 @@ namespace AspNetCore.ApiBase.MultiTenancy.Data.Tenant
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken
             = default(CancellationToken))
         {
-            _tenantService?.TenantStrategy?.OnSaveChanges(this, _tenantService.GetTenant(), _tenantService.TenantPropertyName);
+            TenantService?.GetTenantStrategy(this)?.OnSaveChanges(this, TenantService.GetTenant(), TenantService.TenantPropertyName);
 
             return base.SaveChangesAsync(cancellationToken);
         }

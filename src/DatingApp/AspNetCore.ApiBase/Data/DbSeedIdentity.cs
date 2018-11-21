@@ -87,25 +87,28 @@ namespace AspNetCore.ApiBase.Data
         {
             foreach (var seedUser in users)
             {
-                var dbUser = context.Users.Find(seedUser.User.Id);
+                var dbUser = context.Users.Where(u => u.Email == seedUser.User.Email).FirstOrDefault();
 
+                bool newUser = false;
                 if (dbUser == null)
                 {
+                    newUser = true;
                     context.Users.Add(seedUser.User);
+                    dbUser = seedUser.User;
                 }
 
-                if(dbUser == null || seedUser.SyncRoles)
+                if(newUser || seedUser.SyncRoles)
                 {
                     foreach (var role in seedUser.Roles)
                     {
-                        if (context.UserRoles.Where(ur => ur.UserId == seedUser.User.Id && ur.RoleId == role).FirstOrDefault() == null)
+                        if (context.UserRoles.Where(ur => ur.UserId == dbUser.Id && ur.RoleId == role).FirstOrDefault() == null)
                         {
-                            var userRole = new IdentityUserRole<string>() { UserId = seedUser.User.Id, RoleId = role };
+                            var userRole = new IdentityUserRole<string>() { UserId = dbUser.Id, RoleId = role };
                             context.UserRoles.Add(userRole);
                         }
                     }
 
-                    var remove = context.UserRoles.Where(ur => ur.UserId == seedUser.User.Id && !seedUser.Roles.Contains(ur.RoleId)).ToList();
+                    var remove = context.UserRoles.Where(ur => ur.UserId == dbUser.Id && !seedUser.Roles.Contains(ur.RoleId)).ToList();
                     context.UserRoles.RemoveRange(remove);
                 }
             }

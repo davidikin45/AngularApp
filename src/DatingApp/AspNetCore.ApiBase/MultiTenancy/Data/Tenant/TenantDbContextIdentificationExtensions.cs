@@ -1,29 +1,39 @@
 ﻿using AspNetCore.ApiBase.MultiTenancy.Data.Tenant.IdentificationStrategies;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Data.Tenant
 {
     public static class DbContextIdentificationStrategyExtensions
     {
-        public static IServiceCollection DifferentConnectionForTenant<TTenant>(this TenantDbContextIdentification identification)
-            where TTenant : AppTenant
+        public static IServiceCollection DifferentConnectionForTenant<TDbContext>(this TenantDbContextIdentification<TDbContext> identification, string connectionStringName)
+            where TDbContext : DbContext
         {
-            return identification._services.AddScoped<IDbContextTenantStrategy, DifferentConnectionTenantDbContext<TTenant>>();
+            return identification._services.AddSingleton<IDbContextTenantStrategy<TDbContext>>(x => new DifferentConnectionTenantDbContext<TDbContext>(connectionStringName));
         }
 
-        public static IServiceCollection DifferentSchemaForTenant(this TenantDbContextIdentification identification)
+        public static IServiceCollection AllowDifferentSchemaForTenant<TDbContext>(this TenantDbContextIdentification<TDbContext> identification)
+             where TDbContext : DbContext
         {
-            return identification._services.AddScoped<IDbContextTenantStrategy, DifferentSchemaTenantDbContext>();
+            return identification._services.AddSingleton<IDbContextTenantStrategy<TDbContext>, DifferentSchemaTenantDbContex<TDbContext>>();
         }
 
-        public static IServiceCollection FilterByTenant(this TenantDbContextIdentification identification)
+        public static IServiceCollection AllowFilterByTenant<TDbContext>(this TenantDbContextIdentification<TDbContext> identification)
+              where TDbContext : DbContext
         {
-            return identification._services.AddScoped<IDbContextTenantStrategy, FilterTenantDbContext>();
+            return identification._services.AddSingleton<IDbContextTenantStrategy<TDbContext>, FilterTenantDbContext<TDbContext>>();
         }
 
-        public static IServiceCollection Dummy(this TenantDbContextIdentification identification)
+        public static IServiceCollection AllowDifferentConnectionFilterByTenantAndDifferentSchemaForTenant<TDbContext>(this TenantDbContextIdentification<TDbContext> identification, string connectionStringName)
+              where TDbContext : DbContext
         {
-            return identification._services.AddScoped<IDbContextTenantStrategy, DummyTenantDbContext>();
+            return identification._services.AddSingleton<IDbContextTenantStrategy<TDbContext>>(x => new DifferentConnectionFilterTenantDifferentSchemaDbContext<TDbContext>(connectionStringName));
+        }
+
+        public static IServiceCollection Dummy<TDbContext>(this TenantDbContextIdentification<TDbContext> identification)
+              where TDbContext : DbContext
+        {
+            return identification._services.AddSingleton<IDbContextTenantStrategy<TDbContext>, DummyTenantDbContext<TDbContext>>();
         }
     }
 }

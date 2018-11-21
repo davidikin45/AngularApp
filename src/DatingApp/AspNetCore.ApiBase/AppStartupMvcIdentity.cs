@@ -69,9 +69,9 @@ namespace AspNetCore.ApiBase
 
         }
 
-        public override void AddDatabases(IServiceCollection services, string defaultConnectionString)
+        public override void AddDatabases(IServiceCollection services, string defaultConnectionString, string identityConnectionString, string tenantConnectionString)
         {
-            services.AddDbContextSqlServer<TIdentiyDbContext>(defaultConnectionString);
+            services.AddDbContext<TIdentiyDbContext>(identityConnectionString);
         }
     }
 }

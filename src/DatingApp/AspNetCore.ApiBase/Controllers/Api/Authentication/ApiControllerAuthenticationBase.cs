@@ -78,7 +78,7 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
         [HttpPost("authenticate")]
         public async Task<IActionResult> Authenticate([FromBody] AuthenticateDto authenticateDto)
         {
-            var user = await _userManager.FindByNameAsync(authenticateDto.Username);
+            var user = await _userManager.FindByEmailAsync(authenticateDto.Email);
             if (user != null)
             {
                 var result = await _signInManager.CheckPasswordSignInAsync(user, authenticateDto.Password, true);
@@ -155,7 +155,7 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
         {
-            var user = await _userManager.FindByNameAsync(forgotPasswordDto.Email);
+            var user = await _userManager.FindByEmailAsync(forgotPasswordDto.Email);
             if (user == null)
             {
                 return Ok();
@@ -176,7 +176,7 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {
-            var user = await _userManager.FindByNameAsync(resetPasswordDto.Email);
+            var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
             if (user != null)
             {
                 var result = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Code, resetPasswordDto.Password);

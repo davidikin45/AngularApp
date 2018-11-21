@@ -1,16 +1,19 @@
 ﻿using AspNetCore.ApiBase.MultiTenancy.Data.Tenant;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace AspNetCore.ApiBase.MultiTenancy
 {
-    public interface ITenantService<TTentant> : ITenantService
-        where TTentant : AppTenant
+    public interface ITenantService<TTenant> : ITenantService
+        where TTenant : AppTenant
     {
-        new TTentant GetTenant();
+        new TTenant GetTenant();
+        void SetTenant(TTenant tenant);
     }
 
     public interface ITenantService
     {
-        IDbContextTenantStrategy TenantStrategy { get; }
+        IDbContextTenantStrategy GetTenantStrategy(DbContext context);
         AppTenant GetTenant();
         string GetTenantId();
         string TenantPropertyName { get; }

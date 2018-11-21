@@ -1,19 +1,32 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AspNetCore.ApiBase.Domain;
+using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 
 namespace DatingApp.Domain
 {
-    public class User : IdentityUser
+    public class User : IdentityUser, IEntityTenant
     {
+        public override string UserName
+        {
+            get
+            {
+                return Id;
+            }
+            set
+            {
+
+            }
+        }
+
         public string Name { get; set; }
+
         public virtual ICollection<IdentityUserRole<string>> Roles { get; } = new List<IdentityUserRole<string>>();
 
-        public static User CreateUser(IPasswordHasher<User> passwordHasher, string id, string name, string email, string password)
+        public static User CreateUser(IPasswordHasher<User> passwordHasher, string name, string email, string password)
         {
             var user = new User();
-            user.Id = id;
             user.Name = name;
-            user.UserName = email;
             user.Email = email;
             user.EmailConfirmed = true;
             user.LockoutEnabled = true;

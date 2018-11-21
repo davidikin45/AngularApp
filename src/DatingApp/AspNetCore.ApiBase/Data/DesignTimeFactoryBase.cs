@@ -3,9 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace AspNetCore.ApiBase.Data
 {
@@ -78,7 +76,7 @@ IDesignTimeDbContextFactory<TContext> where TContext : DbContext
                 "MyDesignTimeDbContextFactory.Create(string): Connection string: {0}",
                 connectionString);
 
-            optionsBuilder.SetConnectionString(connectionString, migrationsAssemblyName);
+            optionsBuilder.SetConnectionString<TContext>(connectionString, migrationsAssemblyName);
 
             DbContextOptions<TContext> options = optionsBuilder.Options;
 

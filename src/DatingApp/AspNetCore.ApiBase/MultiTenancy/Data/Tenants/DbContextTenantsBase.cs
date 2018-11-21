@@ -19,6 +19,7 @@ namespace AspNetCore.ApiBase.MultiTenancy.Data.Tenants
         {
             base.OnModelCreating(builder);
             builder.Entity<TTenant>().Property(t => t.HostNames).HasConversion(new StringArrayToCsvValueConverter());
+            builder.Entity<TTenant>().Property(t => t.ConnectionStrings).HasConversion(new DictionaryToJsonValueConverter());
             builder.Entity<TTenant>().Property(t => t.RequestIpAddresses).HasConversion(new StringArrayToCsvValueConverter());
         }
     }

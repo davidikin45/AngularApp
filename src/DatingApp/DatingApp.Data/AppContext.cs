@@ -8,12 +8,7 @@ namespace DatingApp.Data
     {
         public DbSet<Value> Values { get; set; }
 
-        public AppContext(DbContextOptions<AppContext> options) : base(options)
-        {
-
-        }
-
-        public AppContext(ITenantService tenantService) : base(tenantService)
+        public AppContext(DbContextOptions<AppContext> options = null, ITenantService tenantService = null) : base(options, tenantService)
         {
 
         }

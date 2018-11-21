@@ -4,6 +4,7 @@ using AspNetCore.ApiBase.Extensions;
 using AspNetCore.ApiBase.Hangfire;
 using AspNetCore.ApiBase.HostedServices;
 using AspNetCore.ApiBase.MultiTenancy;
+using AspNetCore.ApiBase.MultiTenancy.Data.Tenant;
 using AspNetCore.ApiBase.Tasks;
 using DatingApp.Api.Jobs;
 using DatingApp.Api.UnitOfWork;
@@ -29,14 +30,14 @@ namespace DatingApp.Api
 
         }
 
-        public override void AddDatabases(IServiceCollection services, string defaultConnectionString)
+        public override void AddDatabases(IServiceCollection services, string defaultConnectionString, string identityConnectionString, string tenantConnectionString)
         {
-            //services.AddDbContext<AppContext>(defaultConnectionString);
-            services.AddDbContext<IdentityContext>(defaultConnectionString);
+            //services.AddDbContext<IdentityContext>(defaultConnectionString);
 
-            services.AddDbContextMultiTenancy<AppTenantsContext, AppTenant>(defaultConnectionString, Configuration);
+            services.AddDbContextMultiTenancy<AppTenantsContext, AppTenant>(tenantConnectionString, Configuration);
 
-            services.AddDbContextTenant<AppContext>();
+            services.AddDbContextTenant<IdentityContext>(identityConnectionString).AllowDifferentConnectionFilterByTenantAndDifferentSchemaForTenant("IdentityConnection");
+            services.AddDbContextTenant<AppContext>().AllowDifferentConnectionFilterByTenantAndDifferentSchemaForTenant("DefaultConnection");
         }
 
         public override void AddUnitOfWorks(IServiceCollection services)

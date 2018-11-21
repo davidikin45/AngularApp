@@ -10,6 +10,11 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
     {
         public TTenant GetTenant(HttpContext httpContext, DbContextTenantsBase<TTenant> context)
         {
+            if (httpContext == null)
+            {
+                return null;
+            }
+
             //destination
             var host = httpContext.Request.Host.Value.Replace("www.","");
             var hostWithoutPort = host.Split(":")[0];

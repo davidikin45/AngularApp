@@ -9,6 +9,11 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
     {
         public TTenant GetTenant(HttpContext httpContext, DbContextTenantsBase<TTenant> context)
         {
+            if (httpContext == null)
+            {
+                return null;
+            }
+
             //origin
             var ip = httpContext.Connection.RemoteIpAddress.ToString();
             return context.Tenants.FirstOrDefault(t => t.RequestIpAddresses != null && t.RequestIpAddresses.Any(i => ip.StartsWith(i)));

@@ -2,8 +2,10 @@
 
 namespace AspNetCore.ApiBase.MultiTenancy.Data.Tenant.IdentificationStrategies
 {
-    public class DummyTenantDbContext : IDbContextTenantStrategy
+    public class DummyTenantDbContext<TDbContext> : IDbContextTenantStrategy<TDbContext>
+        where TDbContext : DbContext
     {
+        public string ConnectionStringName => null;
 
         public void OnConfiguring(DbContextOptionsBuilder optionsBuilder, AppTenant tenant, string tenantPropertyName)
         {

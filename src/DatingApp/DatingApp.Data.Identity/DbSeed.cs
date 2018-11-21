@@ -42,7 +42,7 @@ namespace DatingApp.Data.Identity
         {
             return new List<SeedUser>()
             {
-                 new SeedUser(User.CreateUser(_passwordHasher, "a0cc60d8-3cc5-4a54-8454-afd6cfd62f32", "admin", "admin@admin.com", "password"), true, Role.administrator.ToString())
+                 new SeedUser(User.CreateUser(_passwordHasher, "admin", "admin@admin.com", "password"), true, Role.administrator.ToString())
             };
         }
     }

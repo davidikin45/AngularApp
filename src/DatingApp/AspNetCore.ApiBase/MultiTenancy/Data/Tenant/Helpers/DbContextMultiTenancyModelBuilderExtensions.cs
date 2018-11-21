@@ -21,15 +21,11 @@ namespace AspNetCore.ApiBase.MultiTenancy.Data.Tenant.Helpers
             return lambda;
         }
 
-        public static void AddTenantSchema(this ModelBuilder modelBuilder, string tenantId, string tenantPropertyName = "TenantId")
+        public static void AddTenantSchema(this ModelBuilder modelBuilder, string tenantId, bool selectGenericInterface = false)
         {
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes().Where(x => typeof(IEntityTenantSchema).IsAssignableFrom(x.ClrType) || (selectGenericInterface && typeof(IEntityTenant).IsAssignableFrom(x.ClrType))))
             {
-                var tenantProperty = entityType.FindProperty(tenantPropertyName);
-                if (tenantProperty != null && tenantProperty.ClrType == typeof(string))
-                {
-                    entityType.Relational().Schema = tenantId;
-                }
+                entityType.Relational().Schema = tenantId;
             }
         }
 
@@ -45,9 +41,9 @@ namespace AspNetCore.ApiBase.MultiTenancy.Data.Tenant.Helpers
             }
         }
 
-        public static void AddTenantShadowPropertyFilter(this ModelBuilder modelBuilder, string tenantId, string tenantPropertyName = "TenantId")
+        public static void AddTenantShadowPropertyFilter(this ModelBuilder modelBuilder, string tenantId, string tenantPropertyName = "TenantId", bool selectGenericInterface = false)
         {
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes().Where(x => typeof(IEntityTenant).IsAssignableFrom(x.ClrType)))
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes().Where(x => typeof(IEntityTenantFilterShadowProperty).IsAssignableFrom(x.ClrType) || (selectGenericInterface && typeof(IEntityTenant).IsAssignableFrom(x.ClrType))))
             {
                 entityType.AddProperty(tenantPropertyName, typeof(string));
                 modelBuilder

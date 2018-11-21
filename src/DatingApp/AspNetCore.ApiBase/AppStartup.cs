@@ -262,11 +262,13 @@ namespace AspNetCore.ApiBase
         {
             Logger.LogInformation("Configuring Databases");
 
-            var connectionString = Configuration.GetConnectionString("DefaultConnection");
-            AddDatabases(services, connectionString);
+            var defaultConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "DefaultConnection") ? Configuration.GetConnectionString("DefaultConnection") : null;
+            var identityConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "IdentityConnection") ? Configuration.GetConnectionString("IdentityConnection") : null;
+            var tenantConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "TenantConnection") ? Configuration.GetConnectionString("TenantConnection") : null;
+            AddDatabases(services, defaultConnectionString, identityConnectionString, tenantConnectionString);
             AddUnitOfWorks(services);
 
-            services.AddHangfire(connectionString);
+            services.AddHangfire(defaultConnectionString);
         }
         #endregion
 
@@ -1184,7 +1186,7 @@ namespace AspNetCore.ApiBase
             taskRunner.RunTasksAfterApplicationConfiguration();
         }
 
-        public abstract void AddDatabases(IServiceCollection services, string defaultConnectionString);
+        public abstract void AddDatabases(IServiceCollection services, string defaultConnectionString, string identityConnectionString, string tenantConnectionString);
         public abstract void AddUnitOfWorks(IServiceCollection services);
         public abstract void AddHostedServices(IServiceCollection services);
         public abstract void AddHangfireJobServices(IServiceCollection services);

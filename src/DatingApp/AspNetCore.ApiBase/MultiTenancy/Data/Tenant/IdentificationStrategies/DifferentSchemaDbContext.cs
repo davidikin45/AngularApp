@@ -3,9 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Data.Tenant.IdentificationStrategies
 {
-    public class DifferentSchemaTenantDbContext : IDbContextTenantStrategy
+    public class DifferentSchemaTenantDbContex<TDbContext> : IDbContextTenantStrategy<TDbContext>
+        where TDbContext : DbContext
     {
-
+        public string ConnectionStringName => null;
 
         public void OnConfiguring(DbContextOptionsBuilder optionsBuilder, AppTenant tenant, string tenantPropertyName)
         {
@@ -14,7 +15,7 @@ namespace AspNetCore.ApiBase.MultiTenancy.Data.Tenant.IdentificationStrategies
 
         public void OnModelCreating(ModelBuilder modelBuilder, DbContext context, AppTenant tenant, string tenantPropertyName)
         {
-            modelBuilder.AddTenantSchema(tenant.Id, tenantPropertyName);
+            modelBuilder.AddTenantSchema(tenant.Id, true);
         }
 
         public void OnSaveChanges(DbContext context, AppTenant tenant, string tenantPropertyName)

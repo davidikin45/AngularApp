@@ -3,6 +3,7 @@ using AspNetCore.ApiBase.ActionResults;
 using AspNetCore.ApiBase.Alerts;
 using AspNetCore.ApiBase.Email;
 using AspNetCore.ApiBase.Extensions;
+using AspNetCore.ApiBase.MultiTenancy;
 using AspNetCore.ApiBase.Settings;
 using AspNetCore.ApiBase.Validation;
 using AutoMapper;
@@ -81,6 +82,18 @@ namespace AspNetCore.ApiBase.Controllers.Api
                 }
 
                 return claim.Value;
+            }
+        }
+
+        public AppTenant Tenant
+        {
+            get
+            {
+                object multiTenant;
+                if (!HttpContext.Items.TryGetValue("tenant", out multiTenant))
+                    throw new ApplicationException("Could not find tenant.");
+
+                return (AppTenant)multiTenant;
             }
         }
 

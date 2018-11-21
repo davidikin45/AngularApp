@@ -1,19 +1,14 @@
-﻿using AspNetCore.ApiBase.Data.UnitOfWork;
-using AspNetCore.ApiBase.MultiTenancy;
+﻿using AspNetCore.ApiBase.MultiTenancy;
+using AspNetCore.ApiBase.MultiTenancy.Data.Tenant;
 using DatingApp.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatingApp.Data.Identity
 {
-    public class IdentityContext : DbContextIdentityBase<User>
+    public class IdentityContext : DbContextIdentityTentantBase<User>
     {
-      
-        public static IdentityContext Create(DbContextOptions<IdentityContext> options)
-        {
-            return new IdentityContext(options);
-        }
-
-        public IdentityContext(DbContextOptions<IdentityContext> options) : base(options)
+    
+        public IdentityContext(DbContextOptions<IdentityContext> options = null, ITenantService tenantService = null) : base(options, tenantService)
         {
 
         }

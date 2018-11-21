@@ -1,21 +1,24 @@
-﻿using AspnetCore.ApiBase.Data.Initializers;
-using AspnetCore.ApiBase.Data.Tenants.Initializers;
+﻿using AspnetCore.ApiBase.Data.Tenants.Initializers;
 using AspNetCore.ApiBase.MultiTenancy;
 using AspNetCore.ApiBase.MultiTenancy.Data.Tenant;
 using AspNetCore.ApiBase.Settings;
+using DatingApp.Data.Identity;
+using DatingApp.Data.Identity.Initializers;
 using DatingApp.Data.Initializers;
+using System;
 
 namespace DatingApp.Data.Tenants.Initializers
 {
     public class AppTenantsContextInitializerDropCreate: TenantsContextInitializerDropCreate<AppTenantsContext, AppTenant>
     {
-        public AppTenantsContextInitializerDropCreate(IDbContextTenantStrategy strategy, TenantSettings<AppTenant> settings)
-            : base(strategy, settings)
+        public AppTenantsContextInitializerDropCreate(IServiceProvider serviceProvider, TenantSettings<AppTenant> settings)
+            : base(serviceProvider, settings)
         {
             AddContextInitializer<AppContext, AppContextInitializerDropCreate>();
+            AddContextInitializer<IdentityContext, IdentityContextInitializerDropCreate>();
         }
 
-        public override void Seed(AppTenantsContext context)
+        public override void Seed(AppTenantsContext context, string tenantId)
         {
             var dbSeeder = new DbSeed();
             dbSeeder.Seed(context, settings.SeedTenants);

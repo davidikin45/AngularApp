@@ -5,7 +5,7 @@ namespace DatingApp.Data.Initializers
 {
     public class AppContextInitializerDropMigrate : ContextInitializerDropMigrate<AppContext>
     {
-        public override void Seed(AppContext context)
+        public override void Seed(AppContext context, string tenantId)
         {
             context.Seed();
         }

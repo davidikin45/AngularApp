@@ -3,7 +3,6 @@ using AspNetCore.ApiBase.Email;
 using AspNetCore.ApiBase.Settings;
 using AspNetCore.ApiBase.Users;
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;

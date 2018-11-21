@@ -18,7 +18,7 @@ namespace DatingApp.Data.Identity.Initializers
             _passwordHasher = new PasswordHasher<User>();
         }
 
-        public override void Seed(IdentityContext context)
+        public override void Seed(IdentityContext context, string tenantId)
         {
             var dbSeeder = new DbSeed(_passwordHasher);
             dbSeeder.SeedData(context);

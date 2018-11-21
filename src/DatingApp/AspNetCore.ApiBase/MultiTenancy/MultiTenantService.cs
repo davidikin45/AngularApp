@@ -2,6 +2,7 @@
 using AspNetCore.ApiBase.MultiTenancy.Data.Tenant;
 using AspNetCore.ApiBase.MultiTenancy.Data.Tenants;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCore.ApiBase.MultiTenancy
 {
@@ -11,11 +12,11 @@ namespace AspNetCore.ApiBase.MultiTenancy
     {
         private TTenant _tenant;
 
-        public IDbContextTenantStrategy TenantStrategy { get; }
-        public MultiTenantService(IHttpContextAccessor accessor, TContext context, ITenantIdentificationService<TTenant> service, IDbContextTenantStrategy strategy)
+        private readonly ITenantDbContextStrategyService _strategyService;
+        public MultiTenantService(IHttpContextAccessor accessor, TContext context, ITenantIdentificationService<TTenant> service, ITenantDbContextStrategyService strategyService)
             :this(accessor, context, service)
         {
-            TenantStrategy = strategy;
+            _strategyService = strategyService;
         }
 
         public MultiTenantService(IHttpContextAccessor accessor, TContext context, ITenantIdentificationService<TTenant> service)
@@ -23,18 +24,7 @@ namespace AspNetCore.ApiBase.MultiTenancy
             _tenant = service.GetTenant(accessor.HttpContext, context);
         }
 
-        private MultiTenantService(TTenant tenant, IDbContextTenantStrategy strategy)
-        {
-            _tenant = tenant;
-            TenantStrategy = strategy;
-        }
-        
-        public static MultiTenantService<TContext, TTenant> Create(TTenant tenant, IDbContextTenantStrategy strategy)
-        {
-            return new MultiTenantService<TContext, TTenant>(tenant, strategy);
-        }
-
-        public string TenantPropertyName => nameof(IEntityTenant.TenantId);
+        public string TenantPropertyName => nameof(IEntityTenantFilter.TenantId);
 
         public TTenant GetTenant()
         {
@@ -49,6 +39,16 @@ namespace AspNetCore.ApiBase.MultiTenancy
         AppTenant ITenantService.GetTenant()
         {
             return _tenant;
+        }
+
+        public void SetTenant(TTenant tenant)
+        {
+            _tenant = tenant;
+        }
+
+        public IDbContextTenantStrategy GetTenantStrategy(DbContext context)
+        {
+            return _strategyService.GetStrategy(context);
         }
     }
 }

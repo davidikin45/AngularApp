@@ -1,14 +1,15 @@
 ﻿using AspNetCore.ApiBase.Extensions;
+using AspNetCore.ApiBase.MultiTenancy.Data.Tenant.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Data.Tenant.IdentificationStrategies
 {
-    public class DifferentConnectionTenantDbContext<TDbContext> : IDbContextTenantStrategy<TDbContext>
+    public sealed class DifferentConnectionFilterTenantDifferentSchemaDbContext<TDbContext> : IDbContextTenantStrategy<TDbContext>
         where TDbContext : DbContext
     {
         public string ConnectionStringName { get; }
 
-        public DifferentConnectionTenantDbContext(string connectionStringName)
+        public DifferentConnectionFilterTenantDifferentSchemaDbContext(string connectionStringName)
         {
             ConnectionStringName = connectionStringName;
         }
@@ -21,12 +22,14 @@ namespace AspNetCore.ApiBase.MultiTenancy.Data.Tenant.IdentificationStrategies
 
         public void OnModelCreating(ModelBuilder modelBuilder, DbContext context, AppTenant tenant, string tenantPropertyName)
         {
-          
+            modelBuilder.AddTenantSchema(tenant.Id);
+            modelBuilder.AddTenantFilter(tenant.Id, tenantPropertyName);
+            modelBuilder.AddTenantShadowPropertyFilter(tenant.Id, tenantPropertyName, true);
         }
 
         public void OnSaveChanges(DbContext context, AppTenant tenant, string tenantPropertyName)
         {
-
+            context.SetTenantIds(tenant.Id, tenantPropertyName);
         }
     }
 }

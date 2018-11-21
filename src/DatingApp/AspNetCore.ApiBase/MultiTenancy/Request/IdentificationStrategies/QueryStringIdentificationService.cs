@@ -8,6 +8,11 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
     {
         public TTenant GetTenant(HttpContext httpContext, DbContextTenantsBase<TTenant> context)
         {
+            if (httpContext == null)
+            {
+                return null;
+            }
+
             var tenantId = httpContext.Request.Query["TenantId"].ToString();
             if (!string.IsNullOrWhiteSpace(tenantId))
             {

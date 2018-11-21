@@ -8,6 +8,7 @@ using AspNetCore.ApiBase.Settings;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -31,10 +32,10 @@ namespace AspNetCore.ApiBase.MultiTenancy
         {
             services.AddDbContext<TContext>(connectionString)
                     .AddTenantService<TContext, TTentant>()
+                    .AddTenantStrategyService<TContext, TTentant>()
                     .AddTenantMiddleware<TContext, TTentant>()
                     .AddTenantLocations<TTentant>()
                     .AddTenantRequestIdentification().TenantForHostQueryStringSourceIP<TTentant>()
-                    .AddTenantDbContextIdentitication().DifferentConnectionForTenant<TTentant>()
                     .AddTenantConfiguration<TTentant>()
                     .AddTenantSettings<TTentant>(configuration);
 
@@ -60,14 +61,22 @@ namespace AspNetCore.ApiBase.MultiTenancy
                 .AddScoped(sp => sp.GetService<ITenantService<TTentant>>().GetTenant());
         }
 
+        public static IServiceCollection AddTenantStrategyService<TContext, TTentant>(this IServiceCollection services)
+            where TContext : DbContextTenantsBase<TTentant>
+            where TTentant : AppTenant
+        {
+            return services.AddSingleton<ITenantDbContextStrategyService, MultiTenantDbContextStrategyService>();
+        }
+
         public static TenantRequestIdentification AddTenantRequestIdentification(this IServiceCollection services)
         {
             return new TenantRequestIdentification(services);
         }
 
-        public static TenantDbContextIdentification AddTenantDbContextIdentitication(this IServiceCollection services)
+        public static TenantDbContextIdentification<TContext> AddTenantDbContextIdentification<TContext>(this IServiceCollection services)
+            where TContext : DbContext
         {
-            return new TenantDbContextIdentification(services);
+            return new TenantDbContextIdentification<TContext>(services);
         }
 
         public static IServiceCollection AddTenantLocations<TTenant>(this IServiceCollection services, string mvcImplementationFolder = "Mvc/")

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace AspNetCore.ApiBase.Users
 {
@@ -7,8 +8,6 @@ namespace AspNetCore.ApiBase.Users
         [Required]
         [EmailAddress]
         public string Email { get; set; }
-
-        public string Username => Email;
 
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]

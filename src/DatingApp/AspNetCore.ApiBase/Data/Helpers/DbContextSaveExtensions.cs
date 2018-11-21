@@ -38,21 +38,5 @@ namespace AspNetCore.ApiBase.Data.Helpers
 
             return context;
         }
-
-        public static TDbContext SetTenantIds<TDbContext>(this TDbContext context, string tenantId) where TDbContext : DbContext
-        {
-            var added = context.ChangeTracker.Entries().Where(e => e.State == EntityState.Added);
-
-            foreach (var entityEntry in added)
-            {
-                var property = entityEntry.Metadata.FindProperty(nameof(IEntityTenant.TenantId));
-                if (property != null)
-                {
-                    entityEntry.Property(nameof(IEntityTenant.TenantId)).CurrentValue = tenantId;
-                }
-            }
-
-            return context;
-        }
     }
 }
