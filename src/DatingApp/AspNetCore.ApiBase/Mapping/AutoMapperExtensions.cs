@@ -23,7 +23,7 @@ namespace AspNetCore.ApiBase.Mapping
             var map = mapper.ConfigurationProvider.FindTypeMapFor(sourceType, destinationType);
 
             PropertyMap propmap = map
-            .GetPropertyMaps()
+            .PropertyMaps
             .SingleOrDefault(m =>
                 m.SourceMember != null &&
                 m.SourceMember.MetadataToken == sourceProperty.MetadataToken);
@@ -35,7 +35,7 @@ namespace AspNetCore.ApiBase.Mapping
                     "Can't map selector. Could not find a PropertyMap for {0}", sourceProperty.Name));
             }
 
-            return propmap.DestinationProperty;
+            return propmap.DestinationMember;
         }
     }
 

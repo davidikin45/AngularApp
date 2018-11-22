@@ -6,7 +6,6 @@ using AspNetCore.ApiBase.MultiTenancy.Mvc;
 using AspNetCore.ApiBase.MultiTenancy.Request;
 using AspNetCore.ApiBase.Settings;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -30,13 +29,13 @@ namespace AspNetCore.ApiBase.MultiTenancy
             where TContext : DbContextTenantsBase<TTentant>
             where TTentant : AppTenant
         {
-            services.AddDbContext<TContext>(connectionString)
+            services.AddDbContext<TContext>(connectionString, ServiceLifetime.Singleton)
                     .AddTenantService<TContext, TTentant>()
                     .AddTenantStrategyService<TContext, TTentant>()
                     .AddTenantMiddleware<TContext, TTentant>()
                     .AddTenantLocations<TTentant>()
-                    .AddTenantRequestIdentification().TenantForHostQueryStringSourceIP<TTentant>()
-                    .AddTenantConfiguration<TTentant>()
+                    .AddTenantRequestIdentification<TContext, TTentant>().TenantForHostQueryStringSourceIP()
+                    .AddTenantConfiguration<TTentant>(Assembly.GetCallingAssembly())
                     .AddTenantSettings<TTentant>(configuration);
 
             return services;
@@ -49,28 +48,30 @@ namespace AspNetCore.ApiBase.MultiTenancy
             return services.AddTransient(sp => sp.GetService<IOptions<TenantSettings<TTenant>>>().Value);
         }
 
-        public static IServiceCollection AddTenantService<TContext, TTentant>(this IServiceCollection services)
-            where TContext : DbContextTenantsBase<TTentant>
-            where TTentant : AppTenant
+        public static IServiceCollection AddTenantService<TContext, TTenant>(this IServiceCollection services)
+            where TContext : DbContextTenantsBase<TTenant>
+            where TTenant : AppTenant
         {
             return services
                 .AddHttpContextAccessor()
-                .AddScoped<MultiTenantService<TContext, TTentant>>()
-                .AddScoped<ITenantService>(x => x.GetRequiredService<MultiTenantService<TContext, TTentant>>())
-                .AddScoped<ITenantService<TTentant>>(x => x.GetRequiredService<MultiTenantService<TContext, TTentant>>())
-                .AddScoped(sp => sp.GetService<ITenantService<TTentant>>().GetTenant());
+                .AddScoped<MultiTenantService<TContext, TTenant>>()
+                .AddScoped<ITenantService>(x => x.GetRequiredService<MultiTenantService<TContext, TTenant>>())
+                .AddScoped<ITenantService<TTenant>>(x => x.GetRequiredService<MultiTenantService<TContext, TTenant>>())
+                .AddScoped(sp => sp.GetService<ITenantService<TTenant>>().GetTenant());
         }
 
-        public static IServiceCollection AddTenantStrategyService<TContext, TTentant>(this IServiceCollection services)
-            where TContext : DbContextTenantsBase<TTentant>
-            where TTentant : AppTenant
+        public static IServiceCollection AddTenantStrategyService<TContext, TTenant>(this IServiceCollection services)
+            where TContext : DbContextTenantsBase<TTenant>
+            where TTenant : AppTenant
         {
             return services.AddSingleton<ITenantDbContextStrategyService, MultiTenantDbContextStrategyService>();
         }
 
-        public static TenantRequestIdentification AddTenantRequestIdentification(this IServiceCollection services)
+        public static TenantRequestIdentification<TContext,TTenant> AddTenantRequestIdentification<TContext, TTenant>(this IServiceCollection services)
+             where TContext : DbContextTenantsBase<TTenant>
+            where TTenant : AppTenant
         {
-            return new TenantRequestIdentification(services);
+            return new TenantRequestIdentification<TContext, TTenant>(services);
         }
 
         public static TenantDbContextIdentification<TContext> AddTenantDbContextIdentification<TContext>(this IServiceCollection services)
@@ -110,13 +111,9 @@ namespace AspNetCore.ApiBase.MultiTenancy
                     .OfType<ITenantConfiguration>()
                     .SingleOrDefault(x => x.TenantId == tenantId);
 
-
                 if (instance != null)
                 {
                     instance.Configure(configuration);
-                    instance.ConfigureServices(services);
-
-                    sp.GetRequiredService<IHttpContextAccessor>().HttpContext.RequestServices = services.BuildServiceProvider();
 
                     return instance;
                 }

@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using AspNetCore.ApiBase;
+﻿using AspNetCore.ApiBase;
 using AspNetCore.ApiBase.Extensions;
 using AspNetCore.ApiBase.Hangfire;
 using AspNetCore.ApiBase.HostedServices;
@@ -19,6 +18,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace DatingApp.Api
 {

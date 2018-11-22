@@ -90,7 +90,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
             get
             {
                 object multiTenant;
-                if (!HttpContext.Items.TryGetValue("tenant", out multiTenant))
+                if (!HttpContext.Items.TryGetValue("_tenant", out multiTenant))
                     throw new ApplicationException("Could not find tenant.");
 
                 return (AppTenant)multiTenant;

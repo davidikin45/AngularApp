@@ -31,7 +31,8 @@ namespace AspNetCore.ApiBase.DependencyInjection
 
             public IServiceProvider CreateServiceProvider(ContainerBuilder builder)
             {
-                return new AutofacServiceProvider(builder.Build());
+                var container = builder.Build();
+                return new AutofacServiceProvider(container);
             }
         }
     }

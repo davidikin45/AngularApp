@@ -41,7 +41,10 @@ namespace AspNetCore.ApiBase.Data.UnitOfWork
                     contextsByEntityType.Add(modelType, context);
                 }
             }
+            InitializeRepositories(contextsByEntityType);
         }
+
+        public abstract void InitializeRepositories(Dictionary<Type, DbContext> contextsByEntityType);
 
         public IGenericRepository<TEntity> Repository<TEntity>() where TEntity : class
         {

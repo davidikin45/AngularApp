@@ -1,8 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AspNetCore.ApiBase.MultiTenancy.Data.Tenants;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Request
 {
-    public class TenantRequestIdentification
+    public class TenantRequestIdentification<TContext, TTenant>
+      where TContext : DbContextTenantsBase<TTenant>
+      where TTenant : AppTenant
     {
         internal readonly IServiceCollection _services;
 

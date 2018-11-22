@@ -13,15 +13,15 @@ namespace AspNetCore.ApiBase.MultiTenancy
         private TTenant _tenant;
 
         private readonly ITenantDbContextStrategyService _strategyService;
-        public MultiTenantService(IHttpContextAccessor accessor, TContext context, ITenantIdentificationService<TTenant> service, ITenantDbContextStrategyService strategyService)
+        public MultiTenantService(IHttpContextAccessor accessor, TContext context, ITenantIdentificationService<TContext,TTenant> service, ITenantDbContextStrategyService strategyService)
             :this(accessor, context, service)
         {
             _strategyService = strategyService;
         }
 
-        public MultiTenantService(IHttpContextAccessor accessor, TContext context, ITenantIdentificationService<TTenant> service)
+        public MultiTenantService(IHttpContextAccessor accessor, TContext context, ITenantIdentificationService<TContext, TTenant> service)
         {
-            _tenant = service.GetTenant(accessor.HttpContext, context);
+            _tenant = service.GetTenant(accessor.HttpContext);
         }
 
         public string TenantPropertyName => nameof(IEntityTenantFilter.TenantId);

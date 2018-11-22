@@ -1,16 +1,26 @@
-﻿using Microsoft.Extensions.Configuration.Json;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 
 namespace AspNetCore.ApiBase.MultiTenancy
 {
     public sealed class TenantJsonConfigurationProvider : JsonConfigurationProvider
     {
-        public TenantJsonConfigurationProvider(string path) : base(new JsonConfigurationSource { Path = path, Optional = true })
+        public TenantJsonConfigurationProvider(TenantJsonConfigurationSource config) : base(config)
         {
         }
 
         public override void Load()
         {
             base.Load();
+        }
+    }
+
+    public class TenantJsonConfigurationSource : JsonConfigurationSource
+    {
+        public override IConfigurationProvider Build(IConfigurationBuilder builder)
+        {
+            EnsureDefaults(builder);
+            return new TenantJsonConfigurationProvider(this);
         }
     }
 }

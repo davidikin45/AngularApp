@@ -43,6 +43,7 @@ using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -114,6 +115,9 @@ namespace AspNetCore.ApiBase
         public List<Assembly> ApplicationParts { get; }
         public string AssetsFolder { get; } = "/files";
 
+        // Add services to the collection. Don't build or return
+        // any IServiceProvider or the ConfigureContainer method
+        // won't get called.
         public virtual void ConfigureServices(IServiceCollection services)
         {
             ConfigureSettingsServices(services);
@@ -262,10 +266,11 @@ namespace AspNetCore.ApiBase
         {
             Logger.LogInformation("Configuring Databases");
 
-            var defaultConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "DefaultConnection") ? Configuration.GetConnectionString("DefaultConnection") : null;
-            var identityConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "IdentityConnection") ? Configuration.GetConnectionString("IdentityConnection") : null;
             var tenantConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "TenantConnection") ? Configuration.GetConnectionString("TenantConnection") : null;
-            AddDatabases(services, defaultConnectionString, identityConnectionString, tenantConnectionString);
+            var identityConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "IdentityConnection") ? Configuration.GetConnectionString("IdentityConnection") : null;
+            var defaultConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "DefaultConnection") ? Configuration.GetConnectionString("DefaultConnection") : null;
+
+            AddDatabases(services, tenantConnectionString, identityConnectionString, defaultConnectionString);
             AddUnitOfWorks(services);
 
             services.AddHangfire(defaultConnectionString);
@@ -603,6 +608,7 @@ namespace AspNetCore.ApiBase
 
             services.AddCookiePolicy(appSettings.CookieConsentName);
 
+            //singleton
             services.AddHttpContextAccessor();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped<IUrlHelper>(factory =>
@@ -1186,7 +1192,7 @@ namespace AspNetCore.ApiBase
             taskRunner.RunTasksAfterApplicationConfiguration();
         }
 
-        public abstract void AddDatabases(IServiceCollection services, string defaultConnectionString, string identityConnectionString, string tenantConnectionString);
+        public abstract void AddDatabases(IServiceCollection services, string tenantConnectionString, string identityConnectionString, string defaultConnectionString);
         public abstract void AddUnitOfWorks(IServiceCollection services);
         public abstract void AddHostedServices(IServiceCollection services);
         public abstract void AddHangfireJobServices(IServiceCollection services);

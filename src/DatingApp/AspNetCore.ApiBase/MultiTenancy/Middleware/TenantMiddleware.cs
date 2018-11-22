@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,26 +23,32 @@ namespace AspNetCore.ApiBase.MultiTenancy.Middleware
 
         public Task InvokeAsync(HttpContext context)
         {
-            if (context.Items.ContainsKey("Tenant") == false)
+            if (context.Items.ContainsKey("_tenantMiddleware") == false)
             {
                 var tenantConfiguration = context.RequestServices.GetServices<ITenantConfiguration>();
-                var service = context.RequestServices.GetService<ITenantIdentificationService<TTenant>>();
-                var dbContext = context.RequestServices.GetService<TContext>();
-                var tenant = service.GetTenant(context, dbContext);
-                var configuration = context.RequestServices.GetService<IConfiguration>();
-                var environment = context.RequestServices.GetService<IHostingEnvironment>();
-                var providers = ((configuration as ConfigurationRoot).Providers as List<IConfigurationProvider>);
-                var provider = providers.OfType<TenantJsonConfigurationProvider>().SingleOrDefault();
-                if (provider == null)
+                var service = context.RequestServices.GetService<ITenantService<TTenant>>();
+                var tenant = service.GetTenant();
+                if(tenant != null)
                 {
-                    providers.Insert(0, new TenantJsonConfigurationProvider($"appsettings.{tenant}.{environment.EnvironmentName}.json"));
-                }
-                else
-                {
-                    provider.Source.Path = $"appsettings.{tenant}.{environment.EnvironmentName}.json";
-                }
+                    var configuration = context.RequestServices.GetService<IConfiguration>();
+                    var environment = context.RequestServices.GetService<IHostingEnvironment>();
+                    var providers = (configuration as ConfigurationRoot).Providers as List<IConfigurationProvider>;
 
-                context.Items["Tenant"] = tenant;
+                    var tenatProviders = providers.OfType<TenantJsonConfigurationProvider>().ToList();
+                    if (tenatProviders.Count == 0)
+                    {
+                        //var tenantProviders = (TenantConfig.BuildTenantConfiguration(environment, tenant.Id) as ConfigurationRoot).Providers as List<IConfigurationProvider>;
+                        //providers.Insert(2, tenantProviders[0]);
+                        //providers.Insert(4, tenantProviders[1]);
+                    }
+                    else
+                    {
+                        //var tenantProviders = (TenantConfig.BuildTenantConfiguration(environment, tenant.Id) as ConfigurationRoot).Providers as List<IConfigurationProvider>;
+                        //providers[2] = tenantProviders[0];
+                        //providers[4] = tenantProviders[1];
+                    }
+                }
+                context.Items["_tenantMiddleware"] = tenant;
             }
 
             return this._next(context);

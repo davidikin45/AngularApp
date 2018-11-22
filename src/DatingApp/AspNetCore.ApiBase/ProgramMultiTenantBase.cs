@@ -1,6 +1,8 @@
 ﻿using AspnetCore.ApiBase;
-using AspNetCore.ApiBase.DependencyInjection;
 using AspNetCore.ApiBase.Hosting;
+using AspNetCore.ApiBase.MultiTenancy;
+using AspNetCore.ApiBase.MultiTenancy.Data.Tenants;
+using AspNetCore.ApiBase.MultiTenancy.DependencyInjection;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +13,10 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase
 {
-    public abstract class ProgramBase<TStartup> where TStartup : class
+    public abstract class ProgramMultiTenantBase<TStartup, TContext, TTenant>
+        where TContext : DbContextTenantsBase<TTenant>
+        where TTenant : AppTenant
+        where TStartup : class
     {
         public static IConfiguration Configuration;
 
@@ -60,11 +65,11 @@ namespace AspNetCore.ApiBase
                     options.AddServerHeader = false;
                 }
                 )
-                .UseAutofac()
-                .UseConfiguration(Configuration) ////IWebHostBuilder configuration is added to the app's configuration, but the converse isn't true. ConfigureAppConfiguration doesn't affect the IWebHostBuilder configuration.
+                .UseAutofacMultiTenant<TContext,TTenant>(typeof(TStartup).Assembly)
+                .UseConfiguration(Configuration) ////IWebHostBuilder configuration is added to the app's configuration, but the converse isn't true—ConfigureAppConfiguration doesn't affect the IWebHostBuilder configuration
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
-
+                    
                 })
                 .UseSerilog()
                 .UseStartup<TStartup>();
