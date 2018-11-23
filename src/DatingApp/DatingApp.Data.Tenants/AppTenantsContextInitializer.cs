@@ -1,5 +1,4 @@
 ﻿using AspNetCore.ApiBase.MultiTenancy;
-using AspNetCore.ApiBase.MultiTenancy.Data.Tenant;
 using AspNetCore.ApiBase.Settings;
 using AspNetCore.ApiBase.Tasks;
 using DatingApp.Data.Tenants.Initializers;

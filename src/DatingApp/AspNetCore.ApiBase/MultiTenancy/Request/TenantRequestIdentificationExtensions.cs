@@ -14,35 +14,35 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request
             where TContext : DbContextTenantsBase<TTenant>
             where TTenant : AppTenant
         {
-            return identification._services.AddSingleton<ITenantIdentificationService<TContext,TTenant>>(sp => new DynamicTenantIdentificationService<TContext,TTenant>(sp.GetRequiredService<IHttpContextAccessor>(), sp.GetRequiredService<ILogger<ITenantIdentificationService<TContext, TTenant>>>(), currentTenant, allTenants));
+            return identification._services.AddScoped<ITenantIdentificationService<TContext,TTenant>>(sp => new DynamicTenantIdentificationService<TContext,TTenant>(sp.GetRequiredService<IHttpContextAccessor>(), sp.GetRequiredService<ILogger<ITenantIdentificationService<TContext, TTenant>>>(), currentTenant, allTenants));
         }
 
         public static IServiceCollection TenantForHostQueryStringSourceIP<TContext,TTenant>(this TenantRequestIdentification<TContext, TTenant> identification)
             where TContext : DbContextTenantsBase<TTenant>
             where TTenant : AppTenant
         {
-            return identification._services.AddSingleton<ITenantIdentificationService<TContext, TTenant>, TenantHostQueryStringRequestIpIdentificationService<TContext, TTenant>>();
+            return identification._services.AddScoped<ITenantIdentificationService<TContext, TTenant>, TenantHostQueryStringRequestIpIdentificationService<TContext, TTenant>>();
         }
 
         public static IServiceCollection TenantForHost<TContext,TTenant>(this TenantRequestIdentification<TContext, TTenant> identification)
             where TContext : DbContextTenantsBase<TTenant>
             where TTenant : AppTenant
         {
-            return identification._services.AddSingleton<ITenantIdentificationService<TContext, TTenant>, HostIdentificationService<TContext, TTenant>>();
+            return identification._services.AddScoped<ITenantIdentificationService<TContext, TTenant>, HostIdentificationService<TContext, TTenant>>();
         }
 
         public static IServiceCollection TenantForQueryString<TContext,TTenant>(this TenantRequestIdentification<TContext, TTenant> identification)
             where TContext : DbContextTenantsBase<TTenant>
             where TTenant : AppTenant
         {
-            return identification._services.AddSingleton<ITenantIdentificationService<TContext, TTenant>, QueryStringIdentificationService<TContext, TTenant>>();
+            return identification._services.AddScoped<ITenantIdentificationService<TContext, TTenant>, QueryStringIdentificationService<TContext, TTenant>>();
         }
 
         public static IServiceCollection TenantForSourceIP<TContext,TTenant>(this TenantRequestIdentification<TContext, TTenant> identification)
             where TContext : DbContextTenantsBase<TTenant>
             where TTenant : AppTenant
         {
-            return identification._services.AddSingleton<ITenantIdentificationService<TContext, TTenant>, SourceIPIdentificationService<TContext, TTenant>>();
+            return identification._services.AddScoped<ITenantIdentificationService<TContext, TTenant>, SourceIPIdentificationService<TContext, TTenant>>();
         }
     }
 }

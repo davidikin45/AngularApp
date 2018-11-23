@@ -7,6 +7,7 @@ using AspNetCore.ApiBase.Filters;
 using AspNetCore.ApiBase.Hangfire;
 using AspNetCore.ApiBase.Hosting;
 using AspNetCore.ApiBase.Middleware;
+using AspNetCore.ApiBase.MultiTenancy;
 using AspNetCore.ApiBase.Reflection;
 using AspNetCore.ApiBase.Routing;
 using AspNetCore.ApiBase.Routing.Constraints;
@@ -1168,7 +1169,9 @@ namespace AspNetCore.ApiBase
 
             if (switchSettings.EnableHangfire)
             {
-                app.UseHangfire();
+                //app.UseHangfire();
+
+                app.UseHangfireDashboardMultiTenant();
             }
 
             if (switchSettings.EnableCookieConsent)

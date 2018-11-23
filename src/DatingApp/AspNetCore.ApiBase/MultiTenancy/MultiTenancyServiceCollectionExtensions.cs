@@ -29,7 +29,7 @@ namespace AspNetCore.ApiBase.MultiTenancy
             where TContext : DbContextTenantsBase<TTentant>
             where TTentant : AppTenant
         {
-            services.AddDbContext<TContext>(connectionString, ServiceLifetime.Singleton)
+            services.AddDbContext<TContext>(connectionString, ServiceLifetime.Scoped)
                     .AddTenantService<TContext, TTentant>()
                     .AddTenantStrategyService<TContext, TTentant>()
                     .AddTenantMiddleware<TContext, TTentant>()
@@ -105,7 +105,7 @@ namespace AspNetCore.ApiBase.MultiTenancy
                 var svc = sp.GetRequiredService<ITenantService<TTenant>>();
                 var configuration = sp.GetRequiredService<IConfiguration>();
 
-                var tenantId = svc.GetTenant().Id;
+                var tenantId = svc.GetTenantId();
                 var instance = types
                     .Select(type => ActivatorUtilities.CreateInstance(sp, type))
                     .OfType<ITenantConfiguration>()

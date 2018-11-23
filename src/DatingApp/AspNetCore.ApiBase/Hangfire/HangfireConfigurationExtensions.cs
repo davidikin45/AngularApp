@@ -15,7 +15,7 @@ namespace AspNetCore.ApiBase.Hangfire
             {
                 return services.AddHangfireInMemory();
             }
-            if (ConnectionStringHelper.IsSQLite(connectionString))
+            else if (ConnectionStringHelper.IsSQLite(connectionString))
             {
                 return services.AddHangfireSqlLite(connectionString);
             }
