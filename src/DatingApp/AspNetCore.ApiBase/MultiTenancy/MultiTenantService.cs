@@ -21,7 +21,7 @@ namespace AspNetCore.ApiBase.MultiTenancy
 
         public MultiTenantService(IHttpContextAccessor accessor, TContext context, ITenantIdentificationService<TContext, TTenant> service)
         {
-            _tenant = service.GetTenant(accessor.HttpContext);
+            _tenant = service.GetTenantAsync(accessor.HttpContext).Result;
         }
 
         public string TenantPropertyName => nameof(IEntityTenantFilter.TenantId);

@@ -1,6 +1,7 @@
 ﻿using AspNetCore.ApiBase.MultiTenancy.Data.Tenants;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
 {
@@ -19,27 +20,27 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
             _logger = logger;
         }
 
-        public TTenant GetTenant(HttpContext httpContext)
+        public async Task<TTenant> GetTenantAsync(HttpContext httpContext)
         {
             var hostIdentificationService = new HostIdentificationService<TContext,TTenant>(_context, _contextAccessor, _logger);
             var queryStringIdentificationService = new QueryStringIdentificationService<TContext,TTenant>(_context, _contextAccessor, _logger);
             var requestIpIdentificationService = new SourceIPIdentificationService<TContext,TTenant>(_context, _contextAccessor, _logger);
 
             //destination
-            var tenant = hostIdentificationService.GetTenant(httpContext);
+            var tenant = await hostIdentificationService.GetTenantAsync(httpContext);
             if (tenant != null)
             {
                 return tenant;
             }
 
-            tenant = queryStringIdentificationService.GetTenant(httpContext);
+            tenant = await queryStringIdentificationService.GetTenantAsync(httpContext);
             if (tenant != null)
             {
                 return tenant;
             }
 
             //origin
-            tenant = requestIpIdentificationService.GetTenant(httpContext);
+            tenant = await requestIpIdentificationService.GetTenantAsync(httpContext);
 
             return tenant;
         }
@@ -66,7 +67,7 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
                 return tenantId != null;
             }
 
-            var tenant = GetTenant(httpContext);
+            var tenant = GetTenantAsync(httpContext).Result;
             if (tenant != null)
             {
                 tenantId = tenant.Id;

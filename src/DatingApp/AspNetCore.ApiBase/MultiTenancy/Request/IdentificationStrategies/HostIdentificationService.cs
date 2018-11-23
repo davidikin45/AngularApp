@@ -1,8 +1,10 @@
 ﻿using AspNetCore.ApiBase.MultiTenancy.Data.Tenants;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
 {
@@ -21,7 +23,7 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
             _logger = logger;
         }
 
-        public TTenant GetTenant(HttpContext httpContext)
+        public async Task<TTenant> GetTenantAsync(HttpContext httpContext)
         {
             if (httpContext == null)
             {
@@ -32,14 +34,60 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
             var host = httpContext.Request.Host.Value.Replace("www.","");
             var hostWithoutPort = host.Split(":")[0];
 
-            var tenants = _context.Tenants.Where(t => t.HostNames.Contains(host) || t.HostNames.Contains(hostWithoutPort)).ToList();
-            if(tenants.Count == 1)
+            //ip restriction security
+            var ip = httpContext.Connection.RemoteIpAddress.ToString();
+
+            Func<TTenant, bool> exactMatchHostWithPortCondition = t => t.HostNames.Contains(host);
+            Func<TTenant, bool> exactMatchHostWithoutPortCondition = t => t.HostNames.Contains(hostWithoutPort);
+            Func<TTenant, bool> endWildcardCondition = t => t.HostNames.Any(h => h.EndsWith("*") && host.StartsWith(h.Replace("*", "")));
+            Func<TTenant, bool> startWildcardWithPortCondition = t => t.HostNames.Any(h => h.StartsWith("*") && host.EndsWith(h.Replace("*","")));
+            Func<TTenant, bool> startWildcardCondition = t => t.HostNames.Any(h => h.StartsWith("*") && hostWithoutPort.EndsWith(h.Replace("*", "")));
+
+            var tenants = await _context.Tenants.ToListAsync();
+
+            var exactMatchHostWithPort = tenants.Where(exactMatchHostWithPortCondition).ToList();
+            var exactMatchHostWithoutPort = tenants.Where(exactMatchHostWithoutPortCondition).ToList();
+            var endWildcard = tenants.Where(endWildcardCondition).ToList();
+            var startWildcardWithPort = tenants.Where(startWildcardWithPortCondition).ToList();
+            var startWildcard = tenants.Where(startWildcardCondition).ToList();
+
+            TTenant tenant = null;
+            if(exactMatchHostWithPort.Count > 0)
             {
-                var tenant = tenants.First();
-                httpContext.Items["_tenant"] = tenant;
-                httpContext.Items["_tenantId"] = tenant.Id;
-                this._logger.LogInformation("Identified tenant from host: {tenant}", tenant.Id);
-                return tenant;
+                if(exactMatchHostWithPort.Count == 1)
+                {
+                    tenant = exactMatchHostWithPort.First();
+                }
+            }
+            else if(exactMatchHostWithoutPort.Count() > 0)
+            {
+                if (exactMatchHostWithoutPort.Count == 1)
+                {
+                    tenant = exactMatchHostWithoutPort.First();
+                }
+            }
+            else if (endWildcard.Count > 0)
+            {
+                tenant = endWildcard.OrderByDescending(t => t.HostNames.Max(hn => hn.Length)).First();
+            }
+            else if(startWildcardWithPort.Count > 0)
+            {
+                tenant = startWildcardWithPort.OrderByDescending(t => t.HostNames.Max(hn => hn.Length)).First();
+            }
+            else if(startWildcard.Count > 0)
+            {
+                tenant = startWildcard.OrderByDescending(t => t.HostNames.Max(hn => hn.Length)).First();
+            }
+
+            if (tenant != null)
+            {
+                if(tenant.IpAddressAllowed(ip))
+                {
+                    this._logger.LogInformation("Identified tenant: {tenant} from host: {host}", tenant.Id, host);
+                    httpContext.Items["_tenant"] = tenant;
+                    httpContext.Items["_tenantId"] = tenant.Id;
+                    return tenant;
+                }
             }
 
             httpContext.Items["_tenant"] = null;
@@ -70,7 +118,7 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
                 return tenantId != null;
             }
 
-            var tenant = GetTenant(httpContext);
+            var tenant = GetTenantAsync(httpContext).Result;
             if(tenant != null)
             {
                 tenantId = tenant.Id;

@@ -1,12 +1,10 @@
 ﻿using AspnetCore.ApiBase.Data.Initializers;
 using AspNetCore.ApiBase.Data.Initializers;
 using AspNetCore.ApiBase.MultiTenancy;
-using AspNetCore.ApiBase.MultiTenancy.Data.Tenant;
 using AspNetCore.ApiBase.MultiTenancy.Data.Tenants;
 using AspNetCore.ApiBase.MultiTenancy.Data.Tenants.Initializers;
 using AspNetCore.ApiBase.Settings;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

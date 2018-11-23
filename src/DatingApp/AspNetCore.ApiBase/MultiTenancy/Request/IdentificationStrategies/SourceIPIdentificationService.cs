@@ -1,7 +1,10 @@
 ﻿using AspNetCore.ApiBase.MultiTenancy.Data.Tenants;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
 {
@@ -20,7 +23,7 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
             _logger = logger;
         }
 
-        public TTenant GetTenant(HttpContext httpContext)
+        public async Task<TTenant> GetTenantAsync(HttpContext httpContext)
         {
             if (httpContext == null)
             {
@@ -29,12 +32,24 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
 
             //origin
             var ip = httpContext.Connection.RemoteIpAddress.ToString();
-            var tenant = _context.Tenants.FirstOrDefault(t => t.RequestIpAddresses != null && t.RequestIpAddresses.Any(i => ip.StartsWith(i)));
+
+            Func<TTenant, bool> whereClause = t => t.RequestIpAddresses != null && t.HostNames.Count() == 0
+            && (
+              t.RequestIpAddresses.Where(i => !i.Contains("*") || i.EndsWith("*")).Any(i => ip.StartsWith(i.Replace("*", "")))
+             || t.RequestIpAddresses.Where(i => i.StartsWith("*")).Any(i => ip.EndsWith(i.Replace("*", "")))
+             );
+
+            var tenants = await _context.Tenants.ToListAsync();
+
+            var filteredTenants = tenants.Where(whereClause).ToList();
+
+            var tenant = filteredTenants.OrderByDescending(t => t.RequestIpAddresses.Max(hn => hn.Length)).FirstOrDefault();
+
             if (tenant != null)
             {
                 httpContext.Items["_tenant"] = tenant;
                 httpContext.Items["_tenantId"] = tenant.Id;
-                _logger.LogInformation("Identified tenant from ip address: {tenant}", tenant.Id);
+                _logger.LogInformation("Identified tenant: {tenant} from ip: {ip}", tenant.Id, ip);
                 return tenant;
             }
 
@@ -66,7 +81,7 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
                 return tenantId != null;
             }
 
-            var tenant = GetTenant(httpContext);
+            var tenant = GetTenantAsync(httpContext).Result;
             if (tenant != null)
             {
                 tenantId = tenant.Id;

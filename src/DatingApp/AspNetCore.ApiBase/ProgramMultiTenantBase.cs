@@ -71,6 +71,9 @@ namespace AspNetCore.ApiBase
                 {
                     
                 })
+                .ConfigureServices(services => {
+
+                 })
                 .UseSerilog()
                 .UseStartup<TStartup>();
 

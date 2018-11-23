@@ -1,6 +1,7 @@
 ﻿using AspNetCore.ApiBase.MultiTenancy.Data.Tenants;
 using Autofac.Multitenant;
 using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy
 {
@@ -9,6 +10,6 @@ namespace AspNetCore.ApiBase.MultiTenancy
         where TTenant : AppTenant
 
     {
-        TTenant GetTenant(HttpContext httpContext);
+        Task<TTenant> GetTenantAsync(HttpContext httpContext);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Autofac.Multitenant;
+using Hangfire;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,13 +20,14 @@ namespace AspNetCore.ApiBase.MultiTenancy
         {
         }
 
-        public void ConfigureServices(IServiceCollection services)
-        {
-        }
-
         public void ConfigureServices(ConfigurationActionBuilder services, IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
            
+        }
+
+        public void ConfigureHangfireJobs(IRecurringJobManager recurringJobManager, IConfiguration configuration, IHostingEnvironment hostingEnvironment)
+        {
+
         }
     }
 }

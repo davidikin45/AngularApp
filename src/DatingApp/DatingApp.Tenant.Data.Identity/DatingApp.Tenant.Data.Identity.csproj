@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="IdentityContextInitializer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AspNetCore.ApiBase\AspNetCore.ApiBase.csproj" />
+    <ProjectReference Include="..\DatingApp.Tenant.Core\DatingApp.Tenant.Core.csproj" />
+    <ProjectReference Include="..\DatingApp.Tenant.Domain\DatingApp.Tenant.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
+</Project>

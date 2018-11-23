@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Middleware
@@ -47,6 +48,11 @@ namespace AspNetCore.ApiBase.MultiTenancy.Middleware
                         //providers[2] = tenantProviders[0];
                         //providers[4] = tenantProviders[1];
                     }
+                }
+                else
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                    return Task.CompletedTask;
                 }
                 context.Items["_tenantMiddleware"] = tenant;
             }

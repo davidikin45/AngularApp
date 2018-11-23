@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
 {
@@ -39,13 +40,13 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
             return this._allTenants();
         }
 
-        public TTenant GetTenant(HttpContext httpContext)
+        public Task<TTenant> GetTenantAsync(HttpContext httpContext)
         {
             var tenant = this._currentTenant(httpContext);
             httpContext.Items["_tenant"] = tenant;
             httpContext.Items["_tenantId"] = tenant?.Id;
 
-            return tenant;
+            return Task.FromResult(tenant);
         }
 
         public bool TryIdentifyTenant(out object tenantId)
@@ -70,7 +71,7 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
                 return tenantId != null;
             }
 
-            var tenant = GetTenant(httpContext);
+            var tenant = GetTenantAsync(httpContext).Result;
             if (tenant != null)
             {
                 tenantId = tenant.Id;

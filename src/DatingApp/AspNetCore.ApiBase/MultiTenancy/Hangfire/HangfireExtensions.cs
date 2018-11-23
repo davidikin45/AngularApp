@@ -1,16 +1,8 @@
-﻿using AspNetCore.ApiBase.Hangfire;
-using AspNetCore.ApiBase.Helpers;
-using AspNetCore.ApiBase.MultiTenancy.Hangfire;
-using Hangfire;
+﻿using AspNetCore.ApiBase.MultiTenancy.Hangfire;
 using Hangfire.Annotations;
-using Hangfire.Dashboard;
-using Hangfire.MemoryStorage;
-using Hangfire.SQLite;
-using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
 
 namespace AspNetCore.ApiBase.MultiTenancy
 {

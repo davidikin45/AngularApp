@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <UserSecretsId>3e8563b9-c864-4785-b44f-276441f9fe31</UserSecretsId>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netcoreapp2.1\DatingApp.Api.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netcoreapp2.1\DatingApp.Api.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="ffmpeg\ffmpeg.exe" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="ffmpeg\ffmpeg.exe">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="certificates\" />
+    <Folder Include="Mvc\" />
+    <Folder Include="email_templates\" />
+    <Folder Include="signing_keys\" />
+    <Folder Include="wwwroot\files\social-media\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AspNetCore.ApiBase\AspNetCore.ApiBase.csproj" />
+    <ProjectReference Include="..\DatingApp.Admin.Core\DatingApp.Admin.Core.csproj" />
+    <ProjectReference Include="..\DatingApp.Admin.Data.Identity\DatingApp.Admin.Data.Identity.csproj" />
+    <ProjectReference Include="..\DatingApp.Admin.Data.Tenants\DatingApp.Admin.Data.Tenants.csproj" />
+    <ProjectReference Include="..\DatingApp.Admin.Domain\DatingApp.Admin.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Update="features.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

@@ -44,7 +44,6 @@ using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -267,11 +266,11 @@ namespace AspNetCore.ApiBase
         {
             Logger.LogInformation("Configuring Databases");
 
-            var tenantConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "TenantConnection") ? Configuration.GetConnectionString("TenantConnection") : null;
+            var tenantsConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "TenantsConnection") ? Configuration.GetConnectionString("TenantsConnection") : null;
             var identityConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "IdentityConnection") ? Configuration.GetConnectionString("IdentityConnection") : null;
             var defaultConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "DefaultConnection") ? Configuration.GetConnectionString("DefaultConnection") : null;
 
-            AddDatabases(services, tenantConnectionString, identityConnectionString, defaultConnectionString);
+            AddDatabases(services, tenantsConnectionString, identityConnectionString, defaultConnectionString);
             AddUnitOfWorks(services);
 
             services.AddHangfire(defaultConnectionString);
@@ -1169,9 +1168,19 @@ namespace AspNetCore.ApiBase
 
             if (switchSettings.EnableHangfire)
             {
-                //app.UseHangfire();
+                app.UseWhen(context => context.RequestServices.GetService<ITenantService>() == null || context.RequestServices.GetService<ITenantService>().GetTenant() == null,
+                     appBranch =>
+                     {
+                         appBranch.UseHangfire();
+                     }
+                     );
 
-                app.UseHangfireDashboardMultiTenant();
+                app.UseWhen(context => context.RequestServices.GetService<ITenantService>() != null && context.RequestServices.GetService<ITenantService>().GetTenant() != null,
+                   appBranch =>
+                   {
+                       appBranch.UseHangfireDashboardMultiTenant();
+                   }
+                   );
             }
 
             if (switchSettings.EnableCookieConsent)
@@ -1195,7 +1204,7 @@ namespace AspNetCore.ApiBase
             taskRunner.RunTasksAfterApplicationConfiguration();
         }
 
-        public abstract void AddDatabases(IServiceCollection services, string tenantConnectionString, string identityConnectionString, string defaultConnectionString);
+        public abstract void AddDatabases(IServiceCollection services, string tenantsConnectionString, string identityConnectionString, string defaultConnectionString);
         public abstract void AddUnitOfWorks(IServiceCollection services);
         public abstract void AddHostedServices(IServiceCollection services);
         public abstract void AddHangfireJobServices(IServiceCollection services);
