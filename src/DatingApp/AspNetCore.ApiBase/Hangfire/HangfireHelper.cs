@@ -13,7 +13,7 @@ namespace AspNetCore.ApiBase.Hangfire
 {
     public static class HangfireHelper
     {
-        public static IRecurringJobManager StartHangfireServer(
+        public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(
             string connectionString,
             string serverName,
             IApplicationLifetime applicationLifetime,
@@ -44,7 +44,7 @@ namespace AspNetCore.ApiBase.Hangfire
                 );
         }
 
-        public static IRecurringJobManager StartHangfireServer(
+        public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(
             string connectionString,
             BackgroundJobServerOptions options,
             IApplicationLifetime applicationLifetime,
@@ -81,7 +81,10 @@ namespace AspNetCore.ApiBase.Hangfire
             applicationLifetime.ApplicationStopped.Register(() => server.Dispose());
 
             var recurringJobManager = new RecurringJobManager(storage, backgroundJobFactory);
-            return recurringJobManager;
+
+            var backgroundJobClient = new BackgroundJobClient(storage, backgroundJobFactory, backgroundJobStateChanger);
+
+            return (server, recurringJobManager, backgroundJobClient);
         }
     }
 }

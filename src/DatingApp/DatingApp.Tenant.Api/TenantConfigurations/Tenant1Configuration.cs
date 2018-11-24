@@ -10,11 +10,6 @@ namespace DatingApp.Api.TenantConfigurations
     {
         public string TenantId => "t1";
 
-        public void Configure(IConfiguration configuration)
-        {
-            
-        }
-
         public void ConfigureServices(ConfigurationActionBuilder services, IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
 

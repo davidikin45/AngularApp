@@ -100,28 +100,10 @@ namespace AspNetCore.ApiBase.MultiTenancy
                 .Where(type => typeof(ITenantConfiguration).IsAssignableFrom(type))
                 .Where(type => (type.IsAbstract == false) && (type.IsInterface == false));
 
-            services.AddScoped(typeof(ITenantConfiguration), sp =>
+            foreach (var type in types)
             {
-                var svc = sp.GetRequiredService<ITenantService<TTenant>>();
-                var configuration = sp.GetRequiredService<IConfiguration>();
-
-                var tenantId = svc.GetTenantId();
-                var instance = types
-                    .Select(type => ActivatorUtilities.CreateInstance(sp, type))
-                    .OfType<ITenantConfiguration>()
-                    .SingleOrDefault(x => x.TenantId == tenantId);
-
-                if (instance != null)
-                {
-                    instance.Configure(configuration);
-
-                    return instance;
-                }
-                else
-                {
-                    return DummyTenantServiceProviderConfiguration.Instance;
-                }
-            });
+                services.AddSingleton(typeof(ITenantConfiguration), type);
+            }
 
             return services;
         }

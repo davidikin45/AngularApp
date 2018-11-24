@@ -18,6 +18,7 @@ namespace AspNetCore.ApiBase.MultiTenancy
 
         public void Configure(IConfiguration configuration)
         {
+
         }
 
         public void ConfigureServices(ConfigurationActionBuilder services, IConfiguration configuration, IHostingEnvironment hostingEnvironment)

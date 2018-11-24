@@ -9,9 +9,6 @@ namespace AspNetCore.ApiBase.MultiTenancy
     {
         string TenantId { get; }
         void ConfigureServices(ConfigurationActionBuilder services, IConfiguration configuration, IHostingEnvironment hostingEnvironment);
-
-        void Configure(IConfiguration configuration);
-
         void ConfigureHangfireJobs(IRecurringJobManager recurringJobManager, IConfiguration configuration, IHostingEnvironment hostingEnvironment);
     }
 }

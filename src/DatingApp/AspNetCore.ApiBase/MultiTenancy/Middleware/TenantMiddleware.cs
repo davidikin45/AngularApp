@@ -26,7 +26,6 @@ namespace AspNetCore.ApiBase.MultiTenancy.Middleware
         {
             if (context.Items.ContainsKey("_tenantMiddleware") == false)
             {
-                var tenantConfiguration = context.RequestServices.GetServices<ITenantConfiguration>();
                 var service = context.RequestServices.GetService<ITenantService<TTenant>>();
                 var tenant = service.GetTenant();
                 if(tenant != null)
