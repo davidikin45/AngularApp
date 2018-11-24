@@ -88,7 +88,17 @@ namespace AspNetCore.ApiBase.Hangfire
             return (server, recurringJobManager, backgroundJobClient);
         }
 
-        public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(string connectionString, string serverName = null)
+        public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(string connectionString, string serverName)
+        {
+            var options = new BackgroundJobServerOptions
+            {
+                ServerName = serverName,
+                Queues = new string[] { "default" }
+            };
+            return StartHangfireServer(connectionString, options);
+        }
+
+        public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(string connectionString, BackgroundJobServerOptions options)
         {
             JobStorage storage;
             if (string.IsNullOrWhiteSpace(connectionString))
@@ -104,12 +114,6 @@ namespace AspNetCore.ApiBase.Hangfire
                 storage = new SqlServerStorage(connectionString);
             }
 
-            var options = new BackgroundJobServerOptions
-            {
-                ServerName = serverName,
-                Queues = new string[] { "default" }
-            };
-
             var filterProvider = JobFilterProviders.Providers;
             var activator = JobActivator.Current;
 
@@ -119,8 +123,8 @@ namespace AspNetCore.ApiBase.Hangfire
             IEnumerable<IBackgroundProcess> additionalProcesses = null;
 
             var server = new BackgroundJobServer(options, storage, additionalProcesses,
-                filterProvider,
-                activator,
+                options.FilterProvider ?? filterProvider,
+                options.Activator ?? activator,
                 backgroundJobFactory,
                 performer,
                 backgroundJobStateChanger);
