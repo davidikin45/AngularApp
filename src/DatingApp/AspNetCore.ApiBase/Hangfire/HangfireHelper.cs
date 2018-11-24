@@ -88,6 +88,11 @@ namespace AspNetCore.ApiBase.Hangfire
             return (server, recurringJobManager, backgroundJobClient);
         }
 
+        public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServerInMemory()
+        {
+            return StartHangfireServer(new BackgroundJobServerOptions(), "");
+        }
+
         public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServerInMemory(string serverName)
         {
             return StartHangfireServer(serverName, "");
