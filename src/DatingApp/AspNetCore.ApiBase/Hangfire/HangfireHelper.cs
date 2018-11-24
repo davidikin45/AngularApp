@@ -15,8 +15,8 @@ namespace AspNetCore.ApiBase.Hangfire
     public static class HangfireHelper
     {
         public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(
-            string connectionString,
             string serverName,
+            string connectionString,
             IApplicationLifetime applicationLifetime,
             IJobFilterProvider jobFilters,
             JobActivator jobActivator,
@@ -33,8 +33,8 @@ namespace AspNetCore.ApiBase.Hangfire
             };
 
             return StartHangfireServer(
+                  options,
                  connectionString,
-                 options,
                  applicationLifetime,
                  jobFilters,
                  jobActivator,
@@ -46,8 +46,8 @@ namespace AspNetCore.ApiBase.Hangfire
         }
 
         public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(
-            string connectionString,
             BackgroundJobServerOptions options,
+            string connectionString,
             IApplicationLifetime applicationLifetime,
             IJobFilterProvider jobFilters,
             JobActivator jobActivator,
@@ -88,17 +88,22 @@ namespace AspNetCore.ApiBase.Hangfire
             return (server, recurringJobManager, backgroundJobClient);
         }
 
-        public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(string connectionString, string serverName)
+        public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServerInMemory(string serverName)
+        {
+            return StartHangfireServer(serverName, "");
+        }
+
+        public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(string serverName, string connectionString)
         {
             var options = new BackgroundJobServerOptions
             {
                 ServerName = serverName,
                 Queues = new string[] { "default" }
             };
-            return StartHangfireServer(connectionString, options);
+            return StartHangfireServer(options, connectionString);
         }
 
-        public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(string connectionString, BackgroundJobServerOptions options)
+        public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(BackgroundJobServerOptions options, string connectionString)
         {
             JobStorage storage;
             if (string.IsNullOrWhiteSpace(connectionString))

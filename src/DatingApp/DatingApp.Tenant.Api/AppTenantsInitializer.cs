@@ -74,7 +74,7 @@ namespace DatingApp.Tenant.Api
                 var connectionString = tenant.GetConnectionString("HangfireConnection") ?? (_configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "HangfireConnection") ? _configuration.GetConnectionString("HangfireConnection") : null);
                 if(connectionString != null)
                 {
-                    var serverDetails = HangfireMultiTenantHelper.StartHangfireServer(connectionString, tenant.Id, _applicationLifetime, _jobFilters, _multiTenantContainer, _backgroundJobFactory, _backgroundJobPerformer, _backgroundJobStateChanger, _additionalProcesses);
+                    var serverDetails = HangfireMultiTenantHelper.StartHangfireServer(tenant.Id, connectionString, _applicationLifetime, _jobFilters, _multiTenantContainer, _backgroundJobFactory, _backgroundJobPerformer, _backgroundJobStateChanger, _additionalProcesses);
 
                     if (tenantInitializer != null)
                     {
