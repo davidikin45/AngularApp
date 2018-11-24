@@ -34,7 +34,9 @@ namespace AspNetCore.ApiBase.MultiTenancy.DependencyInjection
             Func<MultitenantContainer> multitenantContainerAccessor = () => multiTenantContainer;
             Action<MultitenantContainer> multitenantContainerSetter = (mtc) => { multiTenantContainer = mtc; };
             builder.ConfigureServices(services => services.AddAutofacMultitenant<TContext, TTenant>(multitenantContainerSetter, assembly));
+            builder.ConfigureServices(services => services.AddSingleton((sp) => multiTenantContainer));
             return builder.UseAutofacMultitenantRequestServices(multitenantContainerAccessor);
+
         }
 
         private class AutofacMultiTenantServiceProviderFactory<TContext, TTenant> : IServiceProviderFactory<ContainerBuilder>

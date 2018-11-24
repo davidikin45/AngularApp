@@ -30,14 +30,12 @@ namespace DatingApp.Tenant.Api
 
         }
 
-        public override void AddDatabases(IServiceCollection services, string tenantsConnectionString, string identityConnectionString, string defaultConnectionString)
+        public override void AddDatabases(IServiceCollection services, string tenantsConnectionString, string sharedIdentityConnectionString, string sharedHangfireConnectionString, string sharedDefaultConnectionString)
         {
-            //services.AddDbContext<IdentityContext>(defaultConnectionString);
-
             services.AddDbContextMultiTenancy<AppTenantsContext, AppTenant>(tenantsConnectionString, Configuration);
 
-            services.AddDbContextTenant<IdentityContext>(identityConnectionString).AllowDifferentConnectionFilterByTenantAndDifferentSchemaForTenant("IdentityConnection");
-            services.AddDbContextTenant<AppContext>(defaultConnectionString).AllowDifferentConnectionFilterByTenantAndDifferentSchemaForTenant("DefaultConnection");
+            services.AddDbContextTenant<IdentityContext>(sharedIdentityConnectionString).AllowDifferentConnectionFilterByTenantAndDifferentSchemaForTenant("IdentityConnection");
+            services.AddDbContextTenant<AppContext>(sharedDefaultConnectionString).AllowDifferentConnectionFilterByTenantAndDifferentSchemaForTenant("DefaultConnection");
         }
 
         public override void AddUnitOfWorks(IServiceCollection services)

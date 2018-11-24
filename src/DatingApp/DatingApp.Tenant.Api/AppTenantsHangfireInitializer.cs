@@ -1,6 +1,8 @@
 ﻿using AspNetCore.ApiBase.Hangfire;
 using AspNetCore.ApiBase.MultiTenancy;
+using AspNetCore.ApiBase.MultiTenancy.Hangfire;
 using AspNetCore.ApiBase.Tasks;
+using Autofac.Multitenant;
 using DatingApp.Data.Tenants;
 using Hangfire;
 using Hangfire.Client;
@@ -25,7 +27,7 @@ namespace DatingApp.Tenant.Api
 
         private readonly IApplicationLifetime _applicationLifetime;
         private readonly IJobFilterProvider _jobFilters;
-        private readonly JobActivator _jobActivator;
+        private readonly MultitenantContainer _multiTenantContainer;
         private readonly IBackgroundJobFactory _backgroundJobFactory;
         private readonly IBackgroundJobPerformer _backgroundJobPerformer;
         private readonly IBackgroundJobStateChanger _backgroundJobStateChanger;
@@ -37,7 +39,7 @@ namespace DatingApp.Tenant.Api
             IHostingEnvironment environment,
             IApplicationLifetime applicationLifetime,
             IJobFilterProvider jobFilters,
-            JobActivator jobActivator,
+            MultitenantContainer multiTenantContainer,
             IBackgroundJobFactory backgroundJobFactory,
             IBackgroundJobPerformer backgroundJobPerformer,
             IBackgroundJobStateChanger backgroundJobStateChanger,
@@ -48,7 +50,7 @@ namespace DatingApp.Tenant.Api
             _environment = environment;
             _applicationLifetime = applicationLifetime;
             _jobFilters = jobFilters;
-            _jobActivator = jobActivator;
+            _multiTenantContainer = multiTenantContainer;
             _backgroundJobFactory = backgroundJobFactory;
             _backgroundJobPerformer = backgroundJobPerformer;
             _backgroundJobStateChanger = backgroundJobStateChanger;
@@ -64,17 +66,20 @@ namespace DatingApp.Tenant.Api
 
             foreach (var tenant in await _context.Tenants.ToListAsync())
             {
-                var connectionString = tenant.GetConnectionString("DefaultConnection");
-                var recurringJobManager = HangfireHelper.StartHangfireServer(connectionString, tenant.Id, _applicationLifetime, _jobFilters, _jobActivator, _backgroundJobFactory, _backgroundJobPerformer, _backgroundJobStateChanger, _additionalProcesses);
-
-                var instance = types
-                 .Select(type => Activator.CreateInstance(type))
-                 .OfType<ITenantConfiguration>()
-                 .SingleOrDefault(x => x.TenantId == tenant.Id);
-
-                if(instance != null)
+                var connectionString = tenant.GetConnectionString("HangfireConnection") ?? (_configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "HangfireConnection") ? _configuration.GetConnectionString("HangfireConnection") : null);
+                if(connectionString != null)
                 {
-                    instance.ConfigureHangfireJobs(recurringJobManager, _configuration, _environment);
+                    var recurringJobManager = HangfireMultiTenantHelper.StartHangfireServer(connectionString, tenant.Id, _applicationLifetime, _jobFilters, _multiTenantContainer, _backgroundJobFactory, _backgroundJobPerformer, _backgroundJobStateChanger, _additionalProcesses);
+
+                    var instance = types
+                     .Select(type => Activator.CreateInstance(type))
+                     .OfType<ITenantConfiguration>()
+                     .SingleOrDefault(x => x.TenantId == tenant.Id);
+
+                    if (instance != null)
+                    {
+                        instance.ConfigureHangfireJobs(recurringJobManager, _configuration, _environment);
+                    }
                 }
             }
         }

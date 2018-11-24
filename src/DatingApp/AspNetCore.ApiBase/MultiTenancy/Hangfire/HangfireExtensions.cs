@@ -2,6 +2,7 @@
 using Hangfire.Annotations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using System;
 
 namespace AspNetCore.ApiBase.MultiTenancy

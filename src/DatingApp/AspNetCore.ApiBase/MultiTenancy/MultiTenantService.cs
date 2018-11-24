@@ -3,6 +3,7 @@ using AspNetCore.ApiBase.MultiTenancy.Data.Tenant;
 using AspNetCore.ApiBase.MultiTenancy.Data.Tenants;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy
 {
@@ -19,8 +20,10 @@ namespace AspNetCore.ApiBase.MultiTenancy
             _strategyService = strategyService;
         }
 
+        private readonly TContext _context;
         public MultiTenantService(IHttpContextAccessor accessor, TContext context, ITenantIdentificationService<TContext, TTenant> service)
         {
+            _context = context;
             _tenant = service.GetTenantAsync(accessor.HttpContext).Result;
         }
 
@@ -49,6 +52,21 @@ namespace AspNetCore.ApiBase.MultiTenancy
         public IDbContextTenantStrategy GetTenantStrategy(DbContext context)
         {
             return _strategyService.GetStrategy(context);
+        }
+
+        public async Task<TTenant> GetTenantByIdAsync(object key)
+        {
+            return await _context.FindAsync<TTenant>(key);
+        }
+
+        async Task<AppTenant> ITenantService.GetTenantByIdAsync(object key)
+        {
+            return await _context.FindAsync<TTenant>(key);
+        }
+
+        public async Task SetTenantByIdAsync(object key)
+        {
+            SetTenant(await GetTenantByIdAsync(key));
         }
     }
 }

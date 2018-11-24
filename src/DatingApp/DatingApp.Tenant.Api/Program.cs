@@ -11,6 +11,5 @@ namespace DatingApp.Tenant.Api
         {
             return await RunApp(args);
         }
-
     }
 }

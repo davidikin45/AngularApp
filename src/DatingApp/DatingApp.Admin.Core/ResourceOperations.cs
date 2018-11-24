@@ -4,9 +4,9 @@ namespace DatingApp.Admin.Core
 {
     public class ResourceOperations
     {
-        public class Values
+        public class Tenants
         {
-            public const string Name = "values";
+            public const string Name = "tenants";
 
             public class Operations
             {

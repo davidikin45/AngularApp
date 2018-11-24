@@ -1,9 +1,9 @@
 ﻿using AspNetCore.ApiBase.ApplicationServices;
-using DatingApp.Admin.Domain;
+using AspNetCore.ApiBase.MultiTenancy;
 
 namespace DatingApp.Admin.Core
 {
-    public interface IValueApplicationService : IApplicationServiceEntity<Value, Value, Value, Value>
+    public interface ITenantApplicationService : IApplicationServiceEntity<AppTenant, AppTenant, AppTenant, AppTenant>
     {
 
     }

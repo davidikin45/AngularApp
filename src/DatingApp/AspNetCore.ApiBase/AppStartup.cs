@@ -30,7 +30,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -53,7 +52,6 @@ using Newtonsoft.Json.Serialization;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.IO.Compression;
@@ -269,11 +267,12 @@ namespace AspNetCore.ApiBase
             var tenantsConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "TenantsConnection") ? Configuration.GetConnectionString("TenantsConnection") : null;
             var identityConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "IdentityConnection") ? Configuration.GetConnectionString("IdentityConnection") : null;
             var defaultConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "DefaultConnection") ? Configuration.GetConnectionString("DefaultConnection") : null;
+            var hangfireConnectionString = Configuration.GetSection("ConnectionStrings").GetChildren().Any(x => x.Key == "HangfireConnection") ? Configuration.GetConnectionString("HangfireConnection") : null;
 
-            AddDatabases(services, tenantsConnectionString, identityConnectionString, defaultConnectionString);
+            AddDatabases(services, tenantsConnectionString, identityConnectionString, hangfireConnectionString, defaultConnectionString);
             AddUnitOfWorks(services);
 
-            services.AddHangfire(defaultConnectionString);
+            services.AddHangfire(hangfireConnectionString);
         }
         #endregion
 
@@ -602,7 +601,11 @@ namespace AspNetCore.ApiBase
                 // new API
                 options.Cookie.Name = appSettings.CookieTempDataName;
             })
-            .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+            //By default, ASP.NET Core will resolve the controller parameters from the container but doesn’t actually resolve the controller from the container.
+            //https://andrewlock.net/controller-activation-and-dependency-injection-in-asp-net-core-mvc/
+            //The AddControllersAsServices method does two things - it registers all of the Controllers in your application with the DI container (if they haven't already been registered) and replaces the IControllerActivator registration with the ServiceBasedControllerActivator
+            .AddControllersAsServices();
 
             services.AddSingleton<IConfigureOptions<MvcOptions>, ConfigureMvcOptions>();
 
@@ -1116,46 +1119,8 @@ namespace AspNetCore.ApiBase
                    appBranch.UseContentHandler(env, AppSettings, publicUploadFolders, cacheSettings.UploadFilesDays);
                });
 
-            //Default culture should be set to where the majority of traffic comes from.
-            //If the client sends through "en" and the default culture is "en-AU". Instead of falling back to "en" it will fall back to "en-AU".
-            var defaultLanguage = appSettings.DefaultCulture.Split('-')[0];
-
-            //Support all formats for numbers, dates, etc.
-            var formatCulturesList = new List<string>();
-
-            //Countries
-            foreach (CultureInfo ci in CultureInfo.GetCultures(CultureTypes.SpecificCultures))
-            {
-                if (!formatCulturesList.Contains(ci.Name))
-                {
-                    formatCulturesList.Add(ci.Name);
-                }
-            }
-
-            //Languages
-            foreach (CultureInfo ci in CultureInfo.GetCultures(CultureTypes.NeutralCultures))
-            {
-                if (!formatCulturesList.Contains(ci.TwoLetterISOLanguageName) && ci.TwoLetterISOLanguageName != defaultLanguage)
-                {
-                    formatCulturesList.Add(ci.TwoLetterISOLanguageName);
-                }
-            }
-
-            var supportedFormatCultures = formatCulturesList.Select(x => new CultureInfo(x)).ToArray();
-
-            var supportedUICultures = new CultureInfo[] {
-                new CultureInfo(appSettings.DefaultCulture)
-            };
-
-            app.UseRequestLocalization(new RequestLocalizationOptions
-            {
-                DefaultRequestCulture = new RequestCulture(culture: appSettings.DefaultCulture, uiCulture: appSettings.DefaultCulture),
-                // Formatting numbers, dates, etc.
-                SupportedCultures = supportedFormatCultures,
-                // UI strings that we have localized.
-                SupportedUICultures = supportedUICultures
-            });
-
+            app.UseRequestLocalization(appSettings.DefaultCulture);
+        
             app.UseDefaultFiles();
 
             //versioned files can have large cache expiry time
@@ -1168,14 +1133,14 @@ namespace AspNetCore.ApiBase
 
             if (switchSettings.EnableHangfire)
             {
-                app.UseWhen(context => context.RequestServices.GetService<ITenantService>() == null || context.RequestServices.GetService<ITenantService>().GetTenant() == null,
+                app.UseWhen(context => context.RequestServices.GetService<ITenantService>() == null,
                      appBranch =>
                      {
                          appBranch.UseHangfire();
                      }
                      );
 
-                app.UseWhen(context => context.RequestServices.GetService<ITenantService>() != null && context.RequestServices.GetService<ITenantService>().GetTenant() != null,
+                app.UseWhen(context => context.RequestServices.GetService<ITenantService>() != null,
                    appBranch =>
                    {
                        appBranch.UseHangfireDashboardMultiTenant();
@@ -1204,7 +1169,7 @@ namespace AspNetCore.ApiBase
             taskRunner.RunTasksAfterApplicationConfiguration();
         }
 
-        public abstract void AddDatabases(IServiceCollection services, string tenantsConnectionString, string identityConnectionString, string defaultConnectionString);
+        public abstract void AddDatabases(IServiceCollection services, string tenantsConnectionString, string identityConnectionString, string hangfireConnectionString, string defaultConnectionString);
         public abstract void AddUnitOfWorks(IServiceCollection services);
         public abstract void AddHostedServices(IServiceCollection services);
         public abstract void AddHangfireJobServices(IServiceCollection services);

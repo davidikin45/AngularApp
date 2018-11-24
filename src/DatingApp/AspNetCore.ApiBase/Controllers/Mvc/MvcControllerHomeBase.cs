@@ -1,6 +1,7 @@
 ﻿using AspNetCore.ApiBase.Email;
 using AspNetCore.ApiBase.Settings;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -27,20 +28,15 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
         protected abstract string SiteDescription { get; }
         protected abstract string SiteUrl { get; }
 
-        public IActionResult ChangeCulture(string cultureString)
+        [HttpPost]
+        public IActionResult SetLanguage(string culture)
         {
-            try
-            {
-                Response.Cookies.Delete(CookieRequestCultureProvider.DefaultCookieName);
-            }
-            catch
-            {
+            Response.Cookies.Append(
+                CookieRequestCultureProvider.DefaultCookieName,
+                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)), new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+            );
 
-            }
-
-            Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName, "c=" + cultureString + "|uic=" + cultureString);
-
-            return Redirect(Request.Headers["Referer"].ToString());
+            return LocalRedirect(Request.Headers["Referer"].ToString());
         }
 
         protected string GetSitemapDocument(IEnumerable<SitemapNode> sitemapNodes)

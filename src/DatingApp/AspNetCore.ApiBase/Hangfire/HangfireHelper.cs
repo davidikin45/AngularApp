@@ -25,6 +25,37 @@ namespace AspNetCore.ApiBase.Hangfire
             IBackgroundProcess[] additionalProcesses
             )
         {
+            var options = new BackgroundJobServerOptions
+            {
+                ServerName = serverName,
+                Queues = new string[] { "default" }
+            };
+
+            return StartHangfireServer(
+                 connectionString,
+                 options,
+                 applicationLifetime,
+                 jobFilters,
+                 jobActivator,
+                backgroundJobFactory,
+                backgroundJobPerformer,
+                backgroundJobStateChanger,
+                additionalProcesses
+                );
+        }
+
+        public static IRecurringJobManager StartHangfireServer(
+            string connectionString,
+            BackgroundJobServerOptions options,
+            IApplicationLifetime applicationLifetime,
+            IJobFilterProvider jobFilters,
+            JobActivator jobActivator,
+            IBackgroundJobFactory backgroundJobFactory,
+            IBackgroundJobPerformer backgroundJobPerformer,
+            IBackgroundJobStateChanger backgroundJobStateChanger,
+            IBackgroundProcess[] additionalProcesses
+            )
+        {
             JobStorage storage;
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -39,14 +70,9 @@ namespace AspNetCore.ApiBase.Hangfire
                 storage = new SqlServerStorage(connectionString);
             }
 
-            var options = new BackgroundJobServerOptions
-            {
-                ServerName = serverName
-            };
-
             var server = new BackgroundJobServer(options, storage, additionalProcesses,
-                jobFilters,
-                jobActivator,
+                options.FilterProvider ?? jobFilters,
+                options.Activator ?? jobActivator,
                backgroundJobFactory,
                 backgroundJobPerformer,
                 backgroundJobStateChanger);

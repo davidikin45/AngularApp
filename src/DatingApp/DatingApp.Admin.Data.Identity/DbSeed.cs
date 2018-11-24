@@ -28,10 +28,10 @@ namespace DatingApp.Admin.Data.Identity
                ResourceOperationsCore.Auth.Scopes.ResetPassword
                ),
                new SeedRole(Role.authenticated.ToString(),
-               ResourceOperations.Values.Scopes.Create,
-               ResourceOperations.Values.Scopes.ReadOwner,
-               ResourceOperations.Values.Scopes.UpdateOwner,
-               ResourceOperations.Values.Scopes.DeleteOwner
+               ResourceOperations.Tenants.Scopes.Create,
+               ResourceOperations.Tenants.Scopes.ReadOwner,
+               ResourceOperations.Tenants.Scopes.UpdateOwner,
+               ResourceOperations.Tenants.Scopes.DeleteOwner
                ),
                new SeedRole(Role.administrator.ToString(),
                ResourceOperationsCore.Admin.Scopes.Full

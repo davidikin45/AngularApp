@@ -13,6 +13,7 @@ namespace AspNetCore.ApiBase.Hangfire
 
         public void OnPerforming(PerformingContext context)
         {
+
             logger.InfoFormat("Starting to perform job `{0}`", context.BackgroundJob.Id);
         }
 

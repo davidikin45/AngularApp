@@ -27,7 +27,7 @@ namespace DatingApp.Admin.Api
 
         }
 
-        public override void AddDatabases(IServiceCollection services, string tenantsConnectionString, string identityConnectionString, string defaultConnectionString)
+        public override void AddDatabases(IServiceCollection services, string tenantsConnectionString, string identityConnectionString, string hangfireConnectionString, string defaultConnectionString)
         {
             services.AddDbContext<AppTenantsContext>(tenantsConnectionString);
             services.AddDbContext<IdentityContext>(identityConnectionString);

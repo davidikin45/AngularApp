@@ -1,6 +1,6 @@
 ﻿using AspNetCore.ApiBase.MultiTenancy.Data.Tenant;
 using Microsoft.EntityFrameworkCore;
-using System;
+using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy
 {
@@ -8,6 +8,7 @@ namespace AspNetCore.ApiBase.MultiTenancy
         where TTenant : AppTenant
     {
         new TTenant GetTenant();
+        new Task<TTenant> GetTenantByIdAsync(object key);
         void SetTenant(TTenant tenant);
     }
 
@@ -15,6 +16,8 @@ namespace AspNetCore.ApiBase.MultiTenancy
     {
         IDbContextTenantStrategy GetTenantStrategy(DbContext context);
         AppTenant GetTenant();
+        Task<AppTenant> GetTenantByIdAsync(object key);
+        Task SetTenantByIdAsync(object key);
         string GetTenantId();
         string TenantPropertyName { get; }
     }
