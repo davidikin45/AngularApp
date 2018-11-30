@@ -31,8 +31,7 @@ namespace AspNetCore.ApiBase.Data.Converters
                 foreach (var property in entityType.GetProperties())
                 {
                     var attributes = property.PropertyInfo?.GetCustomAttributes(typeof(JsonAttribute), false);
-                    var localizedString = property.ClrType == typeof(LocalizedString);
-                    if ((attributes != null && attributes.Any()) || localizedString)
+                    if ((attributes != null && attributes.Any()))
                     {
                         var modelType = property.PropertyInfo.PropertyType;
                         var converterType = typeof(JsonValueConverter<>).MakeGenericType(modelType);
@@ -45,7 +44,7 @@ namespace AspNetCore.ApiBase.Data.Converters
             }
         }
 
-        public static void AddLocalizedStringValues(this ModelBuilder modelBuilder)
+        public static void AddMultiLangaugeStringValues(this ModelBuilder modelBuilder)
         {
             if (modelBuilder == null)
                 throw new ArgumentNullException(nameof(modelBuilder));
@@ -54,8 +53,8 @@ namespace AspNetCore.ApiBase.Data.Converters
             {
                 foreach (var property in entityType.GetProperties())
                 {
-                    var localizedString = property.ClrType == typeof(LocalizedString);
-                    if (localizedString)
+                    var multiLanguage = property.ClrType == typeof(MultiLangaugeString);
+                    if (multiLanguage)
                     {
                         var modelType = property.PropertyInfo.PropertyType;
                         var converterType = typeof(JsonValueConverter<>).MakeGenericType(modelType);
@@ -69,10 +68,10 @@ namespace AspNetCore.ApiBase.Data.Converters
         }
     }
 
-    public class LocalizedString : Dictionary<string, string>
+    public class MultiLangaugeString : Dictionary<string, string>
     {
         private readonly string _defaultLanguage;
-        public LocalizedString(string defaultLanguage = "en")
+        public MultiLangaugeString(string defaultLanguage = "en")
         {
             _defaultLanguage = defaultLanguage;
             this.Add(_defaultLanguage, null);

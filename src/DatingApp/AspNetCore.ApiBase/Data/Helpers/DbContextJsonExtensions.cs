@@ -41,7 +41,7 @@ namespace AspNetCore.ApiBase.Data.Helpers
             _entityType = entityTypes.First(t => t.ClrType == typeof(TEntity));
         }
 
-        public JsonQueryable<TEntity> Like(Expression<Func<TEntity, LocalizedString>> propertyLambda, string value)
+        public JsonQueryable<TEntity> Like(Expression<Func<TEntity, MultiLangaugeString>> propertyLambda, string value)
         {
             var jsonKey = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
             return Like(propertyLambda, jsonKey, value);
@@ -107,6 +107,12 @@ namespace AspNetCore.ApiBase.Data.Helpers
             return this;
         }
 
+        public JsonQueryable<TEntity> ArrayContains<TProperty>(Expression<Func<TEntity, TProperty>> propertyLambda, string value)
+        where TProperty : class
+        {
+            return ArrayContains(propertyLambda, string.Empty, value);
+        }
+
         public JsonQueryable<TEntity> ArrayContains<TProperty>(Expression<Func<TEntity, TProperty>> propertyLambda, string jsonKey, string value)
         where TProperty : class
         {
@@ -118,6 +124,48 @@ namespace AspNetCore.ApiBase.Data.Helpers
             }
 
             _orConditions.Add((col, "ArrayContains", jsonKey, value));
+
+            return this;
+        }
+
+        public JsonQueryable<TEntity> ArrayItemStartsWith<TProperty>(Expression<Func<TEntity, TProperty>> propertyLambda, string value)
+        where TProperty : class
+        {
+            return ArrayItemStartsWith(propertyLambda, string.Empty, value);
+        }
+
+        public JsonQueryable<TEntity> ArrayItemStartsWith<TProperty>(Expression<Func<TEntity, TProperty>> propertyLambda, string jsonKey, string value)
+        where TProperty : class
+        {
+            var propertyInfo = EntityPropertyExtensions.GetPropertyInfo(propertyLambda);
+            var col = _entityType.GetColumnName(propertyInfo);
+            if (!string.IsNullOrEmpty(jsonKey))
+            {
+                jsonKey = $".{jsonKey}";
+            }
+
+            _orConditions.Add((col, "ArrayItemStartsWith", jsonKey, value));
+
+            return this;
+        }
+
+        public JsonQueryable<TEntity> ArrayItemEndsWith<TProperty>(Expression<Func<TEntity, TProperty>> propertyLambda, string value)
+        where TProperty : class
+        {
+            return ArrayItemEndsWith(propertyLambda, string.Empty, value);
+        }
+
+        public JsonQueryable<TEntity> ArrayItemEndsWith<TProperty>(Expression<Func<TEntity, TProperty>> propertyLambda, string jsonKey, string value)
+        where TProperty : class
+        {
+            var propertyInfo = EntityPropertyExtensions.GetPropertyInfo(propertyLambda);
+            var col = _entityType.GetColumnName(propertyInfo);
+            if (!string.IsNullOrEmpty(jsonKey))
+            {
+                jsonKey = $".{jsonKey}";
+            }
+
+            _orConditions.Add((col, "ArrayItemEndsWith", jsonKey, value));
 
             return this;
         }
@@ -161,7 +209,13 @@ namespace AspNetCore.ApiBase.Data.Helpers
                         sb.AppendLine($"OR (JSON_VALUE({condition.column},'${condition.key}') != '{{{parameters.Count()}}}')");
                         break;
                     case "ArrayContains":
-                        sb.AppendLine($"OR ('{parameters.Count()}' IN(SELECT value FROM OPENJSON({condition.column},'${condition.key}')))");
+                        sb.AppendLine($"OR ('{parameters.Count()}' IN (SELECT value FROM OPENJSON({condition.column},'${condition.key}')))");
+                        break;
+                    case "ArrayItemStartsWith":
+                        sb.AppendLine($"OR ((SELECT count(value) FROM OPENJSON({condition.column},'${condition.key}') WHERE value LIKE '{{{parameters.Count()}}}%') > 0)");
+                        break;
+                    case "ArrayItemEndsWith":
+                        sb.AppendLine($"OR ((SELECT count(value) FROM OPENJSON({condition.column},'${condition.key}') WHERE value LIKE '%{{{parameters.Count()}}}') > 0)");
                         break;
                     default:
                         throw new Exception("Unsupported operation");

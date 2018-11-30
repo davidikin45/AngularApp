@@ -19,6 +19,7 @@ namespace AspNetCore.ApiBase.Data
         public DbContextBase(DbContextOptions options)
             : base(options)
         {
+            
         }
 
         public bool LazyLoadingEnabled
@@ -31,6 +32,12 @@ namespace AspNetCore.ApiBase.Data
         {
             get { return ChangeTracker.AutoDetectChangesEnabled; }
             set { ChangeTracker.AutoDetectChangesEnabled = value; }
+        }
+
+        public QueryTrackingBehavior DefaultQueryTrackingBehavior
+        {
+            get { return ChangeTracker.QueryTrackingBehavior; }
+            set { ChangeTracker.QueryTrackingBehavior = value; }
         }
 
         public static readonly ILoggerFactory CommandLoggerFactory
@@ -57,7 +64,7 @@ namespace AspNetCore.ApiBase.Data
             builder.AddSoftDeleteFilter();
 
             builder.AddJsonValues();
-            builder.AddLocalizedStringValues();
+            builder.AddMultiLangaugeStringValues();
 
             BuildQueries(builder);
         }

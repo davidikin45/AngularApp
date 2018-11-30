@@ -4,9 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -35,6 +33,12 @@ namespace AspNetCore.ApiBase.Data.UnitOfWork
         {
             get { return ChangeTracker.AutoDetectChangesEnabled; }
             set { ChangeTracker.AutoDetectChangesEnabled = value; }
+        }
+
+        public QueryTrackingBehavior DefaultQueryTrackingBehavior
+        {
+            get { return ChangeTracker.QueryTrackingBehavior; }
+            set { ChangeTracker.QueryTrackingBehavior = value; }
         }
 
         public static readonly ILoggerFactory CommandLoggerFactory
@@ -66,7 +70,7 @@ namespace AspNetCore.ApiBase.Data.UnitOfWork
             builder.AddSoftDeleteFilter();
 
             builder.AddJsonValues();
-            builder.AddLocalizedStringValues();
+            builder.AddMultiLangaugeStringValues();
 
             //modelBuilder.Entity<IdentityUser>().ToTable("User");
             builder.Entity<TUser>().ToTable("User");
