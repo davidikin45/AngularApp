@@ -1,6 +1,8 @@
-﻿using AspNetCore.ApiBase.Data.Helpers;
+﻿using AspNetCore.ApiBase.Data.Converters;
+using AspNetCore.ApiBase.Data.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading;
@@ -43,6 +45,7 @@ namespace AspNetCore.ApiBase.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.ConfigureWarnings(warnings => warnings.Throw(RelationalEventId.QueryClientEvaluationWarning));
             optionsBuilder.UseLoggerFactory(CommandLoggerFactory).EnableSensitiveDataLogging();
         }
 
@@ -52,6 +55,9 @@ namespace AspNetCore.ApiBase.Data
 
             builder.RemovePluralizingTableNameConvention();
             builder.AddSoftDeleteFilter();
+
+            builder.AddJsonValues();
+            builder.AddLocalizedStringValues();
 
             BuildQueries(builder);
         }

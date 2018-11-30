@@ -1,7 +1,9 @@
-﻿using AspNetCore.ApiBase.Data.Helpers;
+﻿using AspNetCore.ApiBase.Data.Converters;
+using AspNetCore.ApiBase.Data.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using System.Linq;
@@ -47,6 +49,7 @@ namespace AspNetCore.ApiBase.Data.UnitOfWork
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.ConfigureWarnings(warnings => warnings.Throw(RelationalEventId.QueryClientEvaluationWarning));
             optionsBuilder.UseLoggerFactory(CommandLoggerFactory).EnableSensitiveDataLogging();
         }
 
@@ -61,6 +64,9 @@ namespace AspNetCore.ApiBase.Data.UnitOfWork
 
             builder.RemovePluralizingTableNameConvention();
             builder.AddSoftDeleteFilter();
+
+            builder.AddJsonValues();
+            builder.AddLocalizedStringValues();
 
             //modelBuilder.Entity<IdentityUser>().ToTable("User");
             builder.Entity<TUser>().ToTable("User");

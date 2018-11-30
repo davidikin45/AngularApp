@@ -1,4 +1,5 @@
-﻿using AspNetCore.ApiBase.Domain;
+﻿using AspNetCore.ApiBase.Data.Converters;
+using AspNetCore.ApiBase.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +10,11 @@ namespace AspNetCore.ApiBase.MultiTenancy
     {
         public string Name { get; set; }
 
+        [Json]
         public string[] RequestIpAddresses { get; set; }
+        [Json]
         public string[] HostNames { get; set; }
-
+        [Json]
         public Dictionary<string, string> ConnectionStrings { get; set; } = new Dictionary<string, string>();
 
         public string GetConnectionString(string name)

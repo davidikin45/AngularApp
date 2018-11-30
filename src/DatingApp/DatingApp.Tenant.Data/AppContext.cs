@@ -11,7 +11,7 @@ namespace DatingApp.Tenant.Data
 
         public AppContext(DbContextOptions<AppContext> options = null, ITenantService tenantService = null) : base(options, tenantService)
         {
-
+            
         }
 
         public override void BuildQueries(ModelBuilder builder)

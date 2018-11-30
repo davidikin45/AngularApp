@@ -6,6 +6,7 @@ using AspNetCore.ApiBase.Extensions;
 using AspNetCore.ApiBase.Filters;
 using AspNetCore.ApiBase.Hangfire;
 using AspNetCore.ApiBase.Hosting;
+using AspNetCore.ApiBase.Localization;
 using AspNetCore.ApiBase.Middleware;
 using AspNetCore.ApiBase.MultiTenancy;
 using AspNetCore.ApiBase.Reflection;
@@ -130,6 +131,7 @@ namespace AspNetCore.ApiBase
             ConfigureEmailServices(services);
             ConfigureCachingServices(services);
             ConfigureResponseCompressionServices(services);
+            ConfigureLocalizationServices(services);
             ConfigureMvcServices(services);
             ConfigureSignalRServices(services);
             ConfigureApiServices(services);
@@ -557,6 +559,27 @@ namespace AspNetCore.ApiBase
         }
         #endregion
 
+        #region Localization
+        public virtual void ConfigureLocalizationServices(IServiceCollection services)
+        {
+            Logger.LogInformation("Configuring Localization");
+
+            //https://github.com/RickStrahl/Westwind.Globalization
+
+            services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+            //CultureInfo.CurrentUICulture.TwoLetterISOLanguageName
+            //Globalization(G11N): The process of making an app support different languages and regions.
+            //Localization(L10N): The process of customizing an app for a given language and region.
+            //Internationalization(I18N): Describes both globalization and localization.
+            //Culture: It's a language and, optionally, a region.
+            //Neutral culture: A culture that has a specified language, but not a region. (for example "en", "es")
+            //                    Specific culture: A culture that has a specified language and region. (for example "en-US", "en-GB", "es-CL")
+            //                Parent culture: The neutral culture that contains a specific culture. (for example, "en" is the parent culture of "en-US" and "en-GB")
+            //            Locale: A locale is the same as a culture.
+        }
+        #endregion
+
         #region Mvc
         public virtual void ConfigureMvcServices(IServiceCollection services)
         {
@@ -602,6 +625,8 @@ namespace AspNetCore.ApiBase
                 options.Cookie.Name = appSettings.CookieTempDataName;
             })
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+            .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
+            .AddDataAnnotationsLocalization()
             //By default, ASP.NET Core will resolve the controller parameters from the container but doesn’t actually resolve the controller from the container.
             //https://andrewlock.net/controller-activation-and-dependency-injection-in-asp-net-core-mvc/
             //The AddControllersAsServices method does two things - it registers all of the Controllers in your application with the DI container (if they haven't already been registered) and replaces the IControllerActivator registration with the ServiceBasedControllerActivator
@@ -1119,7 +1144,7 @@ namespace AspNetCore.ApiBase
                    appBranch.UseContentHandler(env, AppSettings, publicUploadFolders, cacheSettings.UploadFilesDays);
                });
 
-            app.UseRequestLocalization(appSettings.DefaultCulture);
+            app.UseRequestLocalizationCustom(appSettings.DefaultCulture);
         
             app.UseDefaultFiles();
 

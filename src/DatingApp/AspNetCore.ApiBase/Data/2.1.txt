@@ -102,7 +102,15 @@ modelBuilder.Query<UnitQueryType>().ToQuery(
 	);
 );
 
+dbContext.Query<UnitQueryType>().ToList();
+dbContext.UnitsInService.ToList();
+
 -- private parameterless constructors
 private Class();
 
-
+//https://docs.microsoft.com/en-us/ef/core/querying/raw-sql
+context.Properties
+    .FromSql($"SELECT * FROM dbo.Properties where JSON_VALUE(name,'$.en') LIKE '%{user}%'")
+	.Where(b => b.Rating > 3)
+    .OrderByDescending(b => b.Rating)
+    .ToList();

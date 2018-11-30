@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace AspNetCore.ApiBase.Data.Converters
 {
-    public static class EncryptedConverterModelBuilder
+    public static class EncryptedConverterExtensions
     {
         public static void AddEncryptedValues(this ModelBuilder modelBuilder)
         {
@@ -15,7 +15,7 @@ namespace AspNetCore.ApiBase.Data.Converters
                 foreach (var property in entityType.GetProperties())
                 {
                     var attributes = property.PropertyInfo.GetCustomAttributes(typeof(EncryptedAttribute), false);
-                    if (attributes.Any())
+                    if (attributes != null && attributes.Any())
                     {
                         property.SetValueConverter(new EncryptedConverter());
                     }

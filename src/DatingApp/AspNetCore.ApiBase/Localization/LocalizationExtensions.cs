@@ -1,17 +1,14 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 
-namespace AspNetCore.ApiBase.Internationalisation
+namespace AspNetCore.ApiBase.Localization
 {
     public static class LocalizationExtensions
     {
-        public static IApplicationBuilder AddRequestLocalization(this IApplicationBuilder app, string defaultCulture, params string[] supportedUICultures)
+        public static IApplicationBuilder UseRequestLocalizationCustom(this IApplicationBuilder app, string defaultCulture, params string[] supportedUICultures)
         {
             //https://andrewlock.net/adding-localisation-to-an-asp-net-core-application/
             //Default culture should be set to where the majority of traffic comes from.
