@@ -1,6 +1,8 @@
 ﻿using AspnetCore.ApiBase.Validation.Errors;
 using AspNetCore.ApiBase.Data.Helpers;
 using AspNetCore.ApiBase.Data.Repository;
+using AspNetCore.ApiBase.Domain;
+using AspNetCore.ApiBase.Extensions;
 using AspNetCore.ApiBase.Validation;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -130,46 +132,94 @@ namespace AspNetCore.ApiBase.Data.UnitOfWork
 
         public virtual async Task<Result<int>> SaveAsync(CancellationToken cancellationToken)
         {
-            if (validateOnSave)
+            try
             {
-                var validationResult = GetValidationErrors();
-                if (!validationResult.IsSuccess)
+                if (validateOnSave)
                 {
-                    return Result.DatabaseErrors<int>(validationResult.ObjectValidationErrors);
+                    var validationResult = GetValidationErrors();
+                    if (!validationResult.IsSuccess)
+                    {
+                        return Result.DatabaseErrors<int>(validationResult.ObjectValidationErrors);
+                    }
+                }
+
+                bool commitChanges = !commitingChanges;
+                commitingChanges = true;
+
+                ExceptionDispatchInfo lastError = null;
+
+                var changes = 0;
+
+                if (commitChanges && lastError == null)
+                {
+                    foreach (var context in contexts)
+                    {
+                        try
+                        {
+                            changes += await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                        }
+                        catch (Exception e)
+                        {
+                            lastError = ExceptionDispatchInfo.Capture(e);
+                        }
+                    }
+                }
+
+                if (commitChanges)
+                {
+                    commitingChanges = false;
+                }
+
+                if (lastError != null)
+                    lastError.Throw(); // Re-throw while maintaining the exception's original stack track
+
+                return Result.Ok(changes);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return HandleEFCoreUpdateAndDeleteConcurrency(ex);
+            }
+        }
+        #endregion
+
+        #region Concurrency
+        protected Result<int> HandleEFCoreUpdateAndDeleteConcurrency(DbUpdateConcurrencyException ex)
+        {
+            var errors = new List<ValidationResult>();
+
+            var entry = ex.Entries.Single();
+            var clientValues = entry.Entity;
+            var databaseEntry = entry.GetDatabaseValues();
+            if (databaseEntry == null)
+            {
+                return Result.ConcurrencyConflict<int>("Unable to save changes. Object was deleted by another user.");
+            }
+
+            var databaseValues = databaseEntry.ToObject();
+
+            foreach (var prop in databaseValues.GetProperties())
+            {
+                var v1 = clientValues.GetPropValue(prop.Name);
+                var v2 = databaseValues.GetPropValue(prop.Name);
+
+                if (!(v1 == null && v2 == null))
+                {
+                    if (((v1 == null && v2 != null) || (v2 == null && v1 != null) || !v1.Equals(v2)))
+                    {
+                        var v2String = v2 == null ? "" : v2.ToString();
+
+                        errors.Add(new ValidationResult("Current value: " + v2String, new string[] { prop.Name }));
+                    }
                 }
             }
 
-            bool commitChanges = !commitingChanges;
-            commitingChanges = true;
+            errors.Add(new ValidationResult("The record you attempted to edit or delete "
+                + "was modified by another user after you got the original value. The "
+                + "operation was canceled and the current values in the database "
+                + "have been returned. If you still want to perform this opeartion on the record, save "
+                + "again."));
 
-            ExceptionDispatchInfo lastError = null;
-
-            var changes = 0;
-
-            if (commitChanges && lastError == null)
-            {
-                foreach (var context in contexts)
-                {
-                    try
-                    {
-                        changes += await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                    }
-                    catch (Exception e)
-                    {
-                        lastError = ExceptionDispatchInfo.Capture(e);
-                    }
-                }
-            }
-
-            if (commitChanges)
-            {
-                commitingChanges = false;
-            }
-
-            if (lastError != null)
-                lastError.Throw(); // Re-throw while maintaining the exception's original stack track
-
-            return Result.Ok(changes);
+            return Result.ConcurrencyConflict<int>(errors, ((IEntityConcurrencyAware)databaseValues).RowVersion);
         }
         #endregion
     }

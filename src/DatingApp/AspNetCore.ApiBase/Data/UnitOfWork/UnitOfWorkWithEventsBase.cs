@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.Data.UnitOfWork
 {
+    //https://github.com/aspnet/EntityFrameworkCore/issues/9237
     public abstract class UnitOfWorkWithEventsBase : UnitOfWorkBase
     {
         protected List<(DbContext dbContext, DbContextDomainEventsEFCoreAdapter domainEvents)> contextsWithDomainEvents = new List<(DbContext dbContext, DbContextDomainEventsEFCoreAdapter domainEvents)>();
@@ -103,59 +104,66 @@ namespace AspNetCore.ApiBase.Data.UnitOfWork
 
         public override async Task<Result<int>> SaveAsync(CancellationToken cancellationToken)
         {
-            if (validateOnSave)
+            try
             {
-                var validationResult = GetValidationErrors();
-                if (!validationResult.IsSuccess)
+                if (validateOnSave)
                 {
-                    return Result.DatabaseErrors<int>(validationResult.ObjectValidationErrors);
+                    var validationResult = GetValidationErrors();
+                    if (!validationResult.IsSuccess)
+                    {
+                        return Result.DatabaseErrors<int>(validationResult.ObjectValidationErrors);
+                    }
                 }
-            }
 
-            bool commitChanges = !commitingChanges;
-            commitingChanges = true;
+                bool commitChanges = !commitingChanges;
+                commitingChanges = true;
 
-            ExceptionDispatchInfo lastError = null;
-            foreach (var context in contextsWithDomainEvents)
-            {
-                try
-                {
-                    await context.domainEvents.FirePreCommitEventsAsync().ConfigureAwait(false);
-                }
-                catch (Exception e)
-                {
-                    lastError = ExceptionDispatchInfo.Capture(e);
-                }
-            }
-
-            var changes = 0;
-
-            if (commitChanges && lastError == null)
-            {
+                ExceptionDispatchInfo lastError = null;
                 foreach (var context in contextsWithDomainEvents)
                 {
                     try
                     {
                         await context.domainEvents.FirePreCommitEventsAsync().ConfigureAwait(false);
-                        changes += await context.dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                        await context.domainEvents.FirePostCommitEventsAsync().ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
                         lastError = ExceptionDispatchInfo.Capture(e);
                     }
                 }
-            }
 
-            if (commitChanges)
+                var changes = 0;
+
+                if (commitChanges && lastError == null)
+                {
+                    foreach (var context in contextsWithDomainEvents)
+                    {
+                        try
+                        {
+                            await context.domainEvents.FirePreCommitEventsAsync().ConfigureAwait(false);
+                            changes += await context.dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                            await context.domainEvents.FirePostCommitEventsAsync().ConfigureAwait(false);
+                        }
+                        catch (Exception e)
+                        {
+                            lastError = ExceptionDispatchInfo.Capture(e);
+                        }
+                    }
+                }
+
+                if (commitChanges)
+                {
+                    commitingChanges = false;
+                }
+
+                if (lastError != null)
+                    lastError.Throw(); // Re-throw while maintaining the exception's original stack track
+
+                return Result.Ok(changes);
+            }
+            catch (DbUpdateConcurrencyException ex)
             {
-                commitingChanges = false;
+                return HandleEFCoreUpdateAndDeleteConcurrency(ex);
             }
-
-            if (lastError != null)
-                lastError.Throw(); // Re-throw while maintaining the exception's original stack track
-
-            return Result.Ok(changes);
         }
         #endregion
     }

@@ -719,6 +719,7 @@ namespace AspNetCore.ApiBase
         {
             services.Configure<RouteOptions>(options =>
             {
+                options.ConstraintMap.Add("promo", typeof(PromoConstraint));
                 options.ConstraintMap.Add("tokenCheck", typeof(TokenConstraint));
                 options.ConstraintMap.Add("versionCheck", typeof(RouteVersionConstraint));
             });

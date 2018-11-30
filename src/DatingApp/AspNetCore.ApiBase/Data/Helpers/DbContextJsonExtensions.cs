@@ -29,7 +29,7 @@ namespace AspNetCore.ApiBase.Data.Helpers
     {
         private readonly IEntityType _entityType;
         private readonly DbSet<TEntity> _dbSet;
-        private readonly List<(string column, string operation, string key, string param)> _orConditions = new List<(string column, string operation, string key, string param)>();
+        private readonly List<(string column, string operation, string key, string param)> _Conditions = new List<(string column, string operation, string key, string param)>();
 
         public JsonQueryable(DbSet<TEntity> dbSet)
         {
@@ -39,6 +39,20 @@ namespace AspNetCore.ApiBase.Data.Helpers
             var model = dbContext.Model;
             var entityTypes = model.GetEntityTypes();
             _entityType = entityTypes.First(t => t.ClrType == typeof(TEntity));
+        }
+
+        public JsonQueryable<TEntity> Or()
+        {
+            _Conditions.Add(("", "Or", "", ""));
+
+            return this;
+        }
+
+        public JsonQueryable<TEntity> And()
+        {
+            _Conditions.Add(("", "And", "", ""));
+
+            return this;
         }
 
         public JsonQueryable<TEntity> Like(Expression<Func<TEntity, MultiLangaugeString>> propertyLambda, string value)
@@ -54,7 +68,7 @@ namespace AspNetCore.ApiBase.Data.Helpers
             var col = _entityType.GetColumnName(propertyInfo);
             jsonKey = $".{jsonKey}";
 
-            _orConditions.Add((col, "Like", jsonKey, value));
+            _Conditions.Add((col, "Like", jsonKey, value));
 
             return this;
         }
@@ -66,7 +80,7 @@ namespace AspNetCore.ApiBase.Data.Helpers
             var col = _entityType.GetColumnName(propertyInfo);
             jsonKey = $".{jsonKey}";
 
-            _orConditions.Add((col, "StartsWith", jsonKey, value));
+            _Conditions.Add((col, "StartsWith", jsonKey, value));
 
             return this;
         }
@@ -78,7 +92,7 @@ namespace AspNetCore.ApiBase.Data.Helpers
             var col = _entityType.GetColumnName(propertyInfo);
             jsonKey = $".{jsonKey}";
 
-            _orConditions.Add((col, "EndsWith", jsonKey, value));
+            _Conditions.Add((col, "EndsWith", jsonKey, value));
 
             return this;
         }
@@ -90,7 +104,7 @@ namespace AspNetCore.ApiBase.Data.Helpers
         var col = _entityType.GetColumnName(propertyInfo);
         jsonKey = $".{jsonKey}";
 
-            _orConditions.Add((col, "=", jsonKey, value));
+            _Conditions.Add((col, "=", jsonKey, value));
 
             return this;
         }
@@ -102,7 +116,7 @@ namespace AspNetCore.ApiBase.Data.Helpers
             var col = _entityType.GetColumnName(propertyInfo);
             jsonKey = $".{jsonKey}";
 
-            _orConditions.Add((col, "!=", jsonKey, value));
+            _Conditions.Add((col, "!=", jsonKey, value));
 
             return this;
         }
@@ -123,7 +137,7 @@ namespace AspNetCore.ApiBase.Data.Helpers
                 jsonKey = $".{jsonKey}";
             }
 
-            _orConditions.Add((col, "ArrayContains", jsonKey, value));
+            _Conditions.Add((col, "ArrayContains", jsonKey, value));
 
             return this;
         }
@@ -144,7 +158,7 @@ namespace AspNetCore.ApiBase.Data.Helpers
                 jsonKey = $".{jsonKey}";
             }
 
-            _orConditions.Add((col, "ArrayItemStartsWith", jsonKey, value));
+            _Conditions.Add((col, "ArrayItemStartsWith", jsonKey, value));
 
             return this;
         }
@@ -165,7 +179,7 @@ namespace AspNetCore.ApiBase.Data.Helpers
                 jsonKey = $".{jsonKey}";
             }
 
-            _orConditions.Add((col, "ArrayItemEndsWith", jsonKey, value));
+            _Conditions.Add((col, "ArrayItemEndsWith", jsonKey, value));
 
             return this;
         }
@@ -187,40 +201,58 @@ namespace AspNetCore.ApiBase.Data.Helpers
             var parameters = new List<object>();
 
             var sb = new StringBuilder();
-            sb.AppendLine($"SELECT * FROM {tableName} WHERE 1=1");
+            sb.AppendLine($"SELECT * FROM {tableName}");
 
-            foreach (var condition in _orConditions)
+            if(_Conditions.Count > 0)
             {
+                sb.AppendLine($"WHERE");
+            }
+
+            foreach (var condition in _Conditions)
+            {
+                bool addParameter = true;
                 switch (condition.operation)
                 {
+                    case "And":
+                        sb.AppendLine($"AND");
+                        addParameter = false;
+                        break;
+                    case "Or":
+                        sb.AppendLine($"OR");
+                        addParameter = false;
+                        break;
                     case "Like":
-                        sb.AppendLine($"OR (JSON_VALUE({condition.column},'${condition.key}') LIKE '%{{{parameters.Count()}}}%')");
+                        sb.AppendLine($"(JSON_VALUE({condition.column},'${condition.key}') LIKE '%{{{parameters.Count()}}}%')");
                         break;
                     case "StartsWith":
-                        sb.AppendLine($"OR (JSON_VALUE({condition.column},'${condition.key}') LIKE '{{{parameters.Count()}}}%')");
+                        sb.AppendLine($"(JSON_VALUE({condition.column},'${condition.key}') LIKE '{{{parameters.Count()}}}%')");
                         break;
                     case "EndsWith":
-                        sb.AppendLine($"OR (JSON_VALUE({condition.column},'${condition.key}') LIKE '%{{{parameters.Count()}}}')");
+                        sb.AppendLine($"(JSON_VALUE({condition.column},'${condition.key}') LIKE '%{{{parameters.Count()}}}')");
                         break;
                     case "=":
-                        sb.AppendLine($"OR (JSON_VALUE({condition.column},'${condition.key}') = '{{{parameters.Count()}}}')");
+                        sb.AppendLine($"(JSON_VALUE({condition.column},'${condition.key}') = '{{{parameters.Count()}}}')");
                         break;
                     case "!=":
-                        sb.AppendLine($"OR (JSON_VALUE({condition.column},'${condition.key}') != '{{{parameters.Count()}}}')");
+                        sb.AppendLine($"(JSON_VALUE({condition.column},'${condition.key}') != '{{{parameters.Count()}}}')");
                         break;
                     case "ArrayContains":
-                        sb.AppendLine($"OR ('{parameters.Count()}' IN (SELECT value FROM OPENJSON({condition.column},'${condition.key}')))");
+                        sb.AppendLine($"('{parameters.Count()}' IN (SELECT value FROM OPENJSON({condition.column},'${condition.key}')))");
                         break;
                     case "ArrayItemStartsWith":
-                        sb.AppendLine($"OR ((SELECT count(value) FROM OPENJSON({condition.column},'${condition.key}') WHERE value LIKE '{{{parameters.Count()}}}%') > 0)");
+                        sb.AppendLine($"((SELECT count(value) FROM OPENJSON({condition.column},'${condition.key}') WHERE value LIKE '{{{parameters.Count()}}}%') > 0)");
                         break;
                     case "ArrayItemEndsWith":
-                        sb.AppendLine($"OR ((SELECT count(value) FROM OPENJSON({condition.column},'${condition.key}') WHERE value LIKE '%{{{parameters.Count()}}}') > 0)");
+                        sb.AppendLine($"((SELECT count(value) FROM OPENJSON({condition.column},'${condition.key}') WHERE value LIKE '%{{{parameters.Count()}}}') > 0)");
                         break;
                     default:
                         throw new Exception("Unsupported operation");
                 }
-                parameters.Add(condition.param);
+
+                if(addParameter)
+                {
+                    parameters.Add(condition.param);
+                }
             }
 
             var finalQuery = sb.ToString();

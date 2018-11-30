@@ -4,13 +4,13 @@ namespace AspNetCore.ApiBase.Validation
 {
     public static class ResultExtensions
     {
-        //public static Result<T> ToResult<T>(this Maybe<T> maybe, string errorMessage) where T : class
-        //{
-        //    if (maybe.HasNoValue)
-        //        return Result.Fail<T>(errorMessage);
+        public static Result<T> ToResult<T>(this Maybe<T> maybe) where T : class
+        {
+            if (maybe.HasNoValue)
+                return Result.Fail<T>(ErrorType.ObjectDoesNotExist);
 
-        //    return Result.Ok(maybe.Value);
-        //}
+            return Result.Ok(maybe.Value);
+        }
 
         public static Result OnSuccess(this Result result, Action action)
         {
