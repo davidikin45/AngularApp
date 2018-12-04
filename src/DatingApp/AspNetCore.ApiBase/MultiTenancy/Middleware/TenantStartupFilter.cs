@@ -5,13 +5,12 @@ using System;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Middleware
 {
-    public class TenantStartupFilter<TContext, TTenant> : IStartupFilter
-        where TContext : DbContextTenantsBase<TTenant>
+    public class TenantStartupFilter<TTenant> : IStartupFilter
         where TTenant: AppTenant
     {
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
         {
-            return builder => next(builder.UseMiddleware<TenantMiddleware<TContext, TTenant>>());
+            return builder => next(builder.UseMiddleware<TenantMiddleware<TTenant>>());
         }
     }
 }

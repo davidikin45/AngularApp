@@ -7,23 +7,22 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy
 {
-    public class MultiTenantService<TContext, TTenant> : ITenantService<TTenant> 
-        where TContext : DbContextTenantsBase<TTenant>
+    public class MultiTenantService<TTenant> : ITenantService<TTenant>
         where TTenant : AppTenant
     {
         private TTenant _tenant;
 
         private readonly ITenantDbContextStrategyService _strategyService;
-        public MultiTenantService(IHttpContextAccessor accessor, TContext context, ITenantIdentificationService<TContext,TTenant> service, ITenantDbContextStrategyService strategyService)
-            :this(accessor, context, service)
+        public MultiTenantService(IHttpContextAccessor accessor, ITenantsStore<TTenant> store, ITenantIdentificationService<TTenant> service, ITenantDbContextStrategyService strategyService)
+            :this(accessor, store, service)
         {
             _strategyService = strategyService;
         }
 
-        private readonly TContext _context;
-        public MultiTenantService(IHttpContextAccessor accessor, TContext context, ITenantIdentificationService<TContext, TTenant> service)
+        private readonly ITenantsStore<TTenant> _store;
+        public MultiTenantService(IHttpContextAccessor accessor, ITenantsStore<TTenant> store, ITenantIdentificationService<TTenant> service)
         {
-            _context = context;
+            _store = store;
             _tenant = service.GetTenantAsync(accessor.HttpContext).Result;
         }
 
@@ -56,12 +55,12 @@ namespace AspNetCore.ApiBase.MultiTenancy
 
         public async Task<TTenant> GetTenantByIdAsync(object key)
         {
-            return await _context.FindAsync<TTenant>(key);
+            return await _store.GetTenantByIdAsync(key);
         }
 
         async Task<AppTenant> ITenantService.GetTenantByIdAsync(object key)
         {
-            return await _context.FindAsync<TTenant>(key);
+            return await _store.GetTenantByIdAsync(key);
         }
 
         public async Task SetTenantByIdAsync(object key)

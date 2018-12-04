@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +10,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Middleware
 {
-    public class TenantMiddleware<TContext, TTenant>
-        where TContext : DbContextTenantsBase<TTenant>
+    public class TenantMiddleware<TTenant>
         where TTenant : AppTenant
     {
         private readonly RequestDelegate _next;

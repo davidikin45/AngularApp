@@ -92,17 +92,17 @@ namespace AspNetCore.ApiBase.Data.UnitOfWork
         #endregion
 
         #region Save Changes
-        public override Result<int> Save()
+        public override Result<int> Complete()
         {
-            return SaveAsync(CancellationToken.None).Result;
+            return CompleteAsync(CancellationToken.None).Result;
         }
 
-        public override Task<Result<int>> SaveAsync()
+        public override Task<Result<int>> CompleteAsync()
         {
-            return SaveAsync(CancellationToken.None);
+            return CompleteAsync(CancellationToken.None);
         }
 
-        public override async Task<Result<int>> SaveAsync(CancellationToken cancellationToken)
+        public override async Task<Result<int>> CompleteAsync(CancellationToken cancellationToken)
         {
             try
             {

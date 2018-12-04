@@ -26,6 +26,30 @@ namespace AspNetCore.ApiBase.Data.UnitOfWork
         protected readonly Dictionary<Type, DbContext> contextsByEntityType = new Dictionary<Type, DbContext>();
         protected readonly Dictionary<Type, object> repositories = new Dictionary<Type, object>();
 
+        public bool AutoDetectChangesEnabled
+        {
+            get
+            {
+                return contexts.All(c => c.ChangeTracker.AutoDetectChangesEnabled);
+            }
+            set
+            {
+                contexts.ForEach(c => c.ChangeTracker.AutoDetectChangesEnabled = value);
+            }
+        }
+
+        public QueryTrackingBehavior QueryTrackingBehavior
+        {
+            get
+            {
+                return contexts.All(c => c.ChangeTracker.QueryTrackingBehavior == QueryTrackingBehavior.NoTracking) ? QueryTrackingBehavior.NoTracking : QueryTrackingBehavior.TrackAll;
+            }
+            set
+            {
+                contexts.ForEach(c => c.ChangeTracker.QueryTrackingBehavior = value);
+            }
+        }
+
         public UnitOfWorkBase(bool validateOnSave, IValidationService validationService, params DbContext[] contexts)
             : this(contexts)
         {
@@ -120,17 +144,17 @@ namespace AspNetCore.ApiBase.Data.UnitOfWork
         #endregion
 
         #region Save Changes
-        public virtual Result<int> Save()
+        public virtual Result<int> Complete()
         {
-            return SaveAsync(CancellationToken.None).Result;
+            return CompleteAsync(CancellationToken.None).Result;
         }
 
-        public virtual Task<Result<int>> SaveAsync()
+        public virtual Task<Result<int>> CompleteAsync()
         {
-            return SaveAsync(CancellationToken.None);
+            return CompleteAsync(CancellationToken.None);
         }
 
-        public virtual async Task<Result<int>> SaveAsync(CancellationToken cancellationToken)
+        public virtual async Task<Result<int>> CompleteAsync(CancellationToken cancellationToken)
         {
             try
             {

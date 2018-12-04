@@ -1,6 +1,7 @@
 ﻿using AspNetCore.ApiBase.Domain;
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DatingApp.Tenant.Domain
 {
@@ -17,6 +18,9 @@ namespace DatingApp.Tenant.Domain
 
             }
         }
+
+        private readonly List<Role> _list = new List<Role>();
+        public virtual IReadOnlyList<Role> List => _list.AsReadOnly();
 
         public string Name { get; set; }
 

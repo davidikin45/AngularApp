@@ -68,7 +68,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
             Repository.Add(bo, createdBy);
 
-            var result = UnitOfWork.Save();
+            var result = UnitOfWork.Complete();
 
             if (result.IsFailure)
             {
@@ -105,7 +105,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
             Repository.Add(bo, createdBy);
 
-            var result = await UnitOfWork.SaveAsync(cancellationToken).ConfigureAwait(false);
+            var result = await UnitOfWork.CompleteAsync(cancellationToken).ConfigureAwait(false);
 
             if (result.IsFailure)
             {
@@ -248,7 +248,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
             Repository.Update(persistedBO, updatedBy);
 
-            var result = UnitOfWork.Save();
+            var result = UnitOfWork.Complete();
 
             if (result.IsFailure)
             {
@@ -295,7 +295,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
             Repository.Update(persistedBO, updatedBy);
 
-            var result = UnitOfWork.Save();
+            var result = UnitOfWork.Complete();
 
             if (result.IsFailure)
             {
@@ -342,7 +342,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
             Repository.Update(persistedBO, updatedBy);
 
-            var result = await UnitOfWork.SaveAsync(cancellationToken).ConfigureAwait(false);
+            var result = await UnitOfWork.CompleteAsync(cancellationToken).ConfigureAwait(false);
 
             if (result.IsFailure)
             {
@@ -389,7 +389,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
             Repository.Update(persistedBO, updatedBy);
 
-            var result = await UnitOfWork.SaveAsync(cancellationToken).ConfigureAwait(false);
+            var result = await UnitOfWork.CompleteAsync(cancellationToken).ConfigureAwait(false);
 
             if (result.IsFailure)
             {
@@ -685,7 +685,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
             Repository.Delete(bo, deletedBy);
 
-            var result = UnitOfWork.Save();
+            var result = UnitOfWork.Complete();
 
             if (result.IsFailure)
             {
@@ -722,7 +722,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
             Repository.Delete(bo, deletedBy);
 
-            var result = await UnitOfWork.SaveAsync(cancellationToken).ConfigureAwait(false);
+            var result = await UnitOfWork.CompleteAsync(cancellationToken).ConfigureAwait(false);
 
             if (result.IsFailure)
             {
@@ -823,7 +823,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
                 }
             }
 
-            var result = UnitOfWork.Save();
+            var result = UnitOfWork.Complete();
 
             if (result.IsFailure)
             {
@@ -865,7 +865,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
                 }
             }
 
-            var result = await UnitOfWork.SaveAsync(cancellationToken);
+            var result = await UnitOfWork.CompleteAsync(cancellationToken);
 
             if (result.IsFailure)
             {

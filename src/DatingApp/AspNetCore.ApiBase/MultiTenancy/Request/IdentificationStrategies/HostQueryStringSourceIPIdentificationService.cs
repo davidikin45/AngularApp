@@ -5,26 +5,25 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
 {
-    public class TenantHostQueryStringRequestIpIdentificationService<TContext, TTenant> : ITenantIdentificationService<TContext,TTenant>
-        where TContext : DbContextTenantsBase<TTenant>
-        where TTenant : AppTenant
+    public class TenantHostQueryStringRequestIpIdentificationService<TTenant> : ITenantIdentificationService<TTenant>
+     where TTenant : AppTenant
     {
-        private readonly ILogger<ITenantIdentificationService<TContext, TTenant>> _logger;
+        private readonly ILogger<ITenantIdentificationService<TTenant>> _logger;
         private readonly IHttpContextAccessor _contextAccessor;
-        private readonly TContext _context;
+        private readonly ITenantsStore<TTenant> _store;
 
-        public TenantHostQueryStringRequestIpIdentificationService(TContext context, IHttpContextAccessor contextAccessor, ILogger<ITenantIdentificationService<TContext, TTenant>> logger)
+        public TenantHostQueryStringRequestIpIdentificationService(ITenantsStore<TTenant> store, IHttpContextAccessor contextAccessor, ILogger<ITenantIdentificationService<TTenant>> logger)
         {
-            _context = context;
+            _store = store;
             _contextAccessor = contextAccessor;
             _logger = logger;
         }
 
         public async Task<TTenant> GetTenantAsync(HttpContext httpContext)
         {
-            var hostIdentificationService = new HostIdentificationService<TContext,TTenant>(_context, _contextAccessor, _logger);
-            var queryStringIdentificationService = new QueryStringIdentificationService<TContext,TTenant>(_context, _contextAccessor, _logger);
-            var requestIpIdentificationService = new SourceIPIdentificationService<TContext,TTenant>(_context, _contextAccessor, _logger);
+            var hostIdentificationService = new HostIdentificationService<TTenant>(_store, _contextAccessor, _logger);
+            var queryStringIdentificationService = new QueryStringIdentificationService<TTenant>(_store, _contextAccessor, _logger);
+            var requestIpIdentificationService = new SourceIPIdentificationService<TTenant>(_store, _contextAccessor, _logger);
 
             //destination
             var tenant = await hostIdentificationService.GetTenantAsync(httpContext);

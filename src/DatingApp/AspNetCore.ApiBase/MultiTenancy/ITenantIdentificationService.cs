@@ -5,8 +5,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy
 {
-    public interface ITenantIdentificationService<TContext, TTenant> : ITenantIdentificationStrategy
-        where TContext : DbContextTenantsBase<TTenant>
+    public interface ITenantIdentificationService<TTenant> : ITenantIdentificationStrategy
         where TTenant : AppTenant
 
     {

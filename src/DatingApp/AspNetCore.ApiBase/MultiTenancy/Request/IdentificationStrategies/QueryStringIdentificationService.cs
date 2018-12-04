@@ -5,17 +5,16 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
 {
-    public class QueryStringIdentificationService<TContext, TTenant> : ITenantIdentificationService<TContext, TTenant>
-   where TContext : DbContextTenantsBase<TTenant>
-   where TTenant : AppTenant
+    public class QueryStringIdentificationService<TTenant> : ITenantIdentificationService<TTenant>
+    where TTenant : AppTenant
     {
-        private readonly ILogger<ITenantIdentificationService<TContext, TTenant>> _logger;
+        private readonly ILogger<ITenantIdentificationService<TTenant>> _logger;
         private readonly IHttpContextAccessor _contextAccessor;
-        private readonly TContext _context;
+        private readonly ITenantsStore<TTenant> _store;
 
-        public QueryStringIdentificationService(TContext context, IHttpContextAccessor contextAccessor, ILogger<ITenantIdentificationService<TContext, TTenant>> logger)
+        public QueryStringIdentificationService(ITenantsStore<TTenant> store, IHttpContextAccessor contextAccessor, ILogger<ITenantIdentificationService<TTenant>> logger)
         {
-            _context = context;
+            _store = store;
             _contextAccessor = contextAccessor;
             _logger = logger;
         }
@@ -33,7 +32,7 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
             var tenantId = httpContext.Request.Query["TenantId"].ToString();
             if (!string.IsNullOrWhiteSpace(tenantId))
             {
-                var tenant = await _context.Tenants.FindAsync(tenantId);
+                var tenant = await _store.GetTenantByIdAsync(tenantId);
                 if (tenant != null)
                 {
                     if (tenant.IpAddressAllowed(ip))

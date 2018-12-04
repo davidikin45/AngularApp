@@ -33,5 +33,25 @@ namespace AspNetCore.ApiBase.Data.Helpers
                 }
             }
         }
+
+        public static void AddBackingFields(this ModelBuilder modelBuilder)
+        {
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties())
+                {
+                    var attributes = property.PropertyInfo.GetCustomAttributes(typeof(HasFieldAttribute), false);
+                    if (attributes != null && attributes.Any())
+                    {
+                        property.SetPropertyAccessMode(PropertyAccessMode.Field);
+                    }
+                }
+            }
+        }
     }
+
+
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+    sealed class HasFieldAttribute : Attribute
+    { }
 }

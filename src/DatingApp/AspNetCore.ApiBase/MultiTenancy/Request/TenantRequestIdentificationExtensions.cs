@@ -10,39 +10,34 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request
 {
     public static class TenantRequestIdentificationExtensions
     {
-        public static IServiceCollection DynamicTenant<TContext,TTenant>(this TenantRequestIdentification<TContext, TTenant> identification, Func<HttpContext, TTenant> currentTenant, Func<IEnumerable<TTenant>> allTenants)
-            where TContext : DbContextTenantsBase<TTenant>
+        public static IServiceCollection DynamicTenant<TTenant>(this TenantRequestIdentification<TTenant> identification, Func<HttpContext, TTenant> currentTenant, Func<IEnumerable<TTenant>> allTenants)
             where TTenant : AppTenant
         {
-            return identification._services.AddScoped<ITenantIdentificationService<TContext,TTenant>>(sp => new DynamicTenantIdentificationService<TContext,TTenant>(sp.GetRequiredService<IHttpContextAccessor>(), sp.GetRequiredService<ILogger<ITenantIdentificationService<TContext, TTenant>>>(), currentTenant, allTenants));
+            return identification._services.AddScoped<ITenantIdentificationService<TTenant>>(sp => new DynamicTenantIdentificationService<TTenant>(sp.GetRequiredService<IHttpContextAccessor>(), sp.GetRequiredService<ILogger<ITenantIdentificationService<TTenant>>>(), currentTenant, allTenants));
         }
 
-        public static IServiceCollection TenantForHostQueryStringSourceIP<TContext,TTenant>(this TenantRequestIdentification<TContext, TTenant> identification)
-            where TContext : DbContextTenantsBase<TTenant>
+        public static IServiceCollection TenantForHostQueryStringSourceIP<TTenant>(this TenantRequestIdentification<TTenant> identification)
             where TTenant : AppTenant
         {
-            return identification._services.AddScoped<ITenantIdentificationService<TContext, TTenant>, TenantHostQueryStringRequestIpIdentificationService<TContext, TTenant>>();
+            return identification._services.AddScoped<ITenantIdentificationService<TTenant>, TenantHostQueryStringRequestIpIdentificationService<TTenant>>();
         }
 
-        public static IServiceCollection TenantForHost<TContext,TTenant>(this TenantRequestIdentification<TContext, TTenant> identification)
-            where TContext : DbContextTenantsBase<TTenant>
+        public static IServiceCollection TenantForHost<TTenant>(this TenantRequestIdentification<TTenant> identification)
             where TTenant : AppTenant
         {
-            return identification._services.AddScoped<ITenantIdentificationService<TContext, TTenant>, HostIdentificationService<TContext, TTenant>>();
+            return identification._services.AddScoped<ITenantIdentificationService<TTenant>, HostIdentificationService<TTenant>>();
         }
 
-        public static IServiceCollection TenantForQueryString<TContext,TTenant>(this TenantRequestIdentification<TContext, TTenant> identification)
-            where TContext : DbContextTenantsBase<TTenant>
+        public static IServiceCollection TenantForQueryString<TTenant>(this TenantRequestIdentification<TTenant> identification)
             where TTenant : AppTenant
         {
-            return identification._services.AddScoped<ITenantIdentificationService<TContext, TTenant>, QueryStringIdentificationService<TContext, TTenant>>();
+            return identification._services.AddScoped<ITenantIdentificationService<TTenant>, QueryStringIdentificationService<TTenant>>();
         }
 
-        public static IServiceCollection TenantForSourceIP<TContext,TTenant>(this TenantRequestIdentification<TContext, TTenant> identification)
-            where TContext : DbContextTenantsBase<TTenant>
+        public static IServiceCollection TenantForSourceIP<TTenant>(this TenantRequestIdentification<TTenant> identification)
             where TTenant : AppTenant
         {
-            return identification._services.AddScoped<ITenantIdentificationService<TContext, TTenant>, SourceIPIdentificationService<TContext, TTenant>>();
+            return identification._services.AddScoped<ITenantIdentificationService<TTenant>, SourceIPIdentificationService<TTenant>>();
         }
     }
 }

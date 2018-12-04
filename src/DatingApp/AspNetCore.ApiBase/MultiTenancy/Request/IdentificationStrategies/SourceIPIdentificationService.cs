@@ -1,6 +1,5 @@
 ﻿using AspNetCore.ApiBase.MultiTenancy.Data.Tenants;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -8,17 +7,16 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
 {
-    public class SourceIPIdentificationService<TContext,TTenant> : ITenantIdentificationService<TContext,TTenant>
-   where TContext : DbContextTenantsBase<TTenant>
+    public class SourceIPIdentificationService<TTenant> : ITenantIdentificationService<TTenant>
    where TTenant : AppTenant
     {
-        private readonly ILogger<ITenantIdentificationService<TContext, TTenant>> _logger;
+        private readonly ILogger<ITenantIdentificationService<TTenant>> _logger;
         private readonly IHttpContextAccessor _contextAccessor;
-        private readonly TContext _context;
+        private readonly ITenantsStore<TTenant> _store;
 
-        public SourceIPIdentificationService(TContext context, IHttpContextAccessor contextAccessor, ILogger<ITenantIdentificationService<TContext, TTenant>> logger)
+        public SourceIPIdentificationService(ITenantsStore<TTenant> store, IHttpContextAccessor contextAccessor, ILogger<ITenantIdentificationService<TTenant>> logger)
         {
-            _context = context;
+            _store = store;
             _contextAccessor = contextAccessor;
             _logger = logger;
         }
@@ -39,7 +37,7 @@ namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
              || t.RequestIpAddresses.Where(i => i.StartsWith("*")).Any(i => ip.EndsWith(i.Replace("*", "")))
              );
 
-            var tenants = await _context.Tenants.ToListAsync();
+            var tenants = await _store.GetAllTenantsAsync();
 
             var filteredTenants = tenants.Where(whereClause).ToList();
 

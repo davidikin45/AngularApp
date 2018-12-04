@@ -3,8 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Request
 {
-    public class TenantRequestIdentification<TContext, TTenant>
-      where TContext : DbContextTenantsBase<TTenant>
+    public class TenantRequestIdentification<TTenant>
       where TTenant : AppTenant
     {
         internal readonly IServiceCollection _services;

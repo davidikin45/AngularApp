@@ -7,17 +7,16 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.MultiTenancy.Request.IdentificationStrategies
 {
-    public sealed class DynamicTenantIdentificationService<TContext,TTenant> : ITenantIdentificationService<TContext,TTenant>
-        where TContext : DbContextTenantsBase<TTenant>
+    public sealed class DynamicTenantIdentificationService<TTenant> : ITenantIdentificationService<TTenant>
         where TTenant : AppTenant
     {
         private readonly Func<HttpContext, TTenant> _currentTenant;
         private readonly Func<IEnumerable<TTenant>> _allTenants;
 
-        private readonly ILogger<ITenantIdentificationService<TContext, TTenant>> _logger;
+        private readonly ILogger<ITenantIdentificationService<TTenant>> _logger;
         private readonly IHttpContextAccessor _contextAccessor;
 
-        public DynamicTenantIdentificationService(IHttpContextAccessor contextAccessor, ILogger<ITenantIdentificationService<TContext, TTenant>> logger, Func<HttpContext, TTenant> currentTenant, Func<IEnumerable<TTenant>> allTenants)
+        public DynamicTenantIdentificationService(IHttpContextAccessor contextAccessor, ILogger<ITenantIdentificationService<TTenant>> logger, Func<HttpContext, TTenant> currentTenant, Func<IEnumerable<TTenant>> allTenants)
         {
             if (currentTenant == null)
             {

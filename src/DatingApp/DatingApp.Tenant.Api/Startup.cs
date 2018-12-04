@@ -32,7 +32,8 @@ namespace DatingApp.Tenant.Api
 
         public override void AddDatabases(IServiceCollection services, string tenantsConnectionString, string sharedIdentityConnectionString, string sharedHangfireConnectionString, string sharedDefaultConnectionString)
         {
-            services.AddDbContextMultiTenancy<AppTenantsContext, AppTenant>(tenantsConnectionString, Configuration);
+            services.AddMultiTenancyDbContextStore<AppTenantsContext, AppTenant>(tenantsConnectionString);
+            services.AddMultiTenancy<AppTenant>(Configuration);
 
             services.AddDbContextTenant<IdentityContext>(sharedIdentityConnectionString).AllowDifferentConnectionFilterByTenantAndDifferentSchemaForTenant("IdentityConnection");
             services.AddDbContextTenant<AppContext>(sharedDefaultConnectionString).AllowDifferentConnectionFilterByTenantAndDifferentSchemaForTenant("DefaultConnection");

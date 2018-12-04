@@ -71,6 +71,7 @@ namespace AspNetCore.ApiBase.Data.UnitOfWork
 
             builder.AddJsonValues();
             builder.AddMultiLangaugeStringValues();
+            builder.AddBackingFields();
 
             //modelBuilder.Entity<IdentityUser>().ToTable("User");
             builder.Entity<TUser>().ToTable("User");

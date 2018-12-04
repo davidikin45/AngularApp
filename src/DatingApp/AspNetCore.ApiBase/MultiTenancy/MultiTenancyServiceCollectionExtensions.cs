@@ -18,26 +18,42 @@ namespace AspNetCore.ApiBase.MultiTenancy
 {
     public static class MultiTenancyServiceCollectionExtensions
     {
-        public static IServiceCollection AddDbContextMultiTenancyInMemory<TContext, TTentant>(this IServiceCollection services, IConfiguration configuration, ServiceLifetime contextLifetime = ServiceLifetime.Singleton)
-           where TContext : DbContextTenantsBase<TTentant>
-           where TTentant : AppTenant
+        public static IServiceCollection AddMultiTenancy<TTenant>(this IServiceCollection services, IConfiguration configuration)
+            where TTenant : AppTenant
         {
-            return services.AddDbContextMultiTenancy<TContext, TTentant>("", configuration);
+            services.AddTenantService<TTenant>()
+                    .AddTenantStrategyService<TTenant>()
+                    .AddTenantMiddleware<TTenant>()
+                    .AddTenantLocations<TTenant>()
+                    .AddTenantRequestIdentification<TTenant>().TenantForHostQueryStringSourceIP()
+                    .AddTenantConfiguration<TTenant>(Assembly.GetCallingAssembly())
+                    .AddTenantSettings<TTenant>(configuration);
+
+            return services;
         }
 
-        public static IServiceCollection AddDbContextMultiTenancy<TContext, TTentant>(this IServiceCollection services, string connectionString, IConfiguration configuration, ServiceLifetime contextLifetime = ServiceLifetime.Singleton)
-            where TContext : DbContextTenantsBase<TTentant>
-            where TTentant : AppTenant
+        public static IServiceCollection AddMultiTenancyDbContextStoreInMemory<TTenantStore, TTenant>(this IServiceCollection services, ServiceLifetime contextLifetime = ServiceLifetime.Singleton)
+          where TTenantStore : DbContext, ITenantsStore<TTenant>
+          where TTenant : AppTenant
         {
-            services.AddDbContext<TContext>(connectionString, ServiceLifetime.Scoped)
-                    .AddTenantService<TContext, TTentant>()
-                    .AddTenantStrategyService<TContext, TTentant>()
-                    .AddTenantMiddleware<TContext, TTentant>()
-                    .AddTenantLocations<TTentant>()
-                    .AddTenantRequestIdentification<TContext, TTentant>().TenantForHostQueryStringSourceIP()
-                    .AddTenantConfiguration<TTentant>(Assembly.GetCallingAssembly())
-                    .AddTenantSettings<TTentant>(configuration);
+            return services.AddMultiTenancyDbContextStore<TTenantStore, TTenant>("", contextLifetime);
+        }
 
+        public static IServiceCollection AddMultiTenancyDbContextStore<TTenantStore, TTenant>(this IServiceCollection services, string connectionString, ServiceLifetime contextLifetime = ServiceLifetime.Singleton)
+           where TTenantStore : DbContext, ITenantsStore<TTenant>
+            where TTenant : AppTenant
+        {
+            services.AddDbContext<TTenantStore>(connectionString, contextLifetime);
+            services.Add(new ServiceDescriptor(typeof(ITenantsStore<TTenant>), sp => sp.GetRequiredService<TTenantStore>(), contextLifetime));
+            return services;
+        }
+
+        public static IServiceCollection AddMultiTenancyStore<TTenantStore, TTenant>(this IServiceCollection services, ServiceLifetime contextLifetime = ServiceLifetime.Singleton)
+           where TTenantStore : class, ITenantsStore<TTenant>
+            where TTenant : AppTenant
+        {
+            services.Add(new ServiceDescriptor(typeof(TTenantStore), typeof(TTenantStore), contextLifetime));
+            services.Add(new ServiceDescriptor(typeof(ITenantsStore<TTenant>), sp => sp.GetRequiredService<TTenantStore>(), contextLifetime));
             return services;
         }
 
@@ -48,30 +64,27 @@ namespace AspNetCore.ApiBase.MultiTenancy
             return services.AddTransient(sp => sp.GetService<IOptions<TenantSettings<TTenant>>>().Value);
         }
 
-        public static IServiceCollection AddTenantService<TContext, TTenant>(this IServiceCollection services)
-            where TContext : DbContextTenantsBase<TTenant>
+        public static IServiceCollection AddTenantService<TTenant>(this IServiceCollection services)
             where TTenant : AppTenant
         {
             return services
                 .AddHttpContextAccessor()
-                .AddScoped<MultiTenantService<TContext, TTenant>>()
-                .AddScoped<ITenantService>(x => x.GetRequiredService<MultiTenantService<TContext, TTenant>>())
-                .AddScoped<ITenantService<TTenant>>(x => x.GetRequiredService<MultiTenantService<TContext, TTenant>>())
+                .AddScoped<MultiTenantService<TTenant>>()
+                .AddScoped<ITenantService>(x => x.GetRequiredService<MultiTenantService<TTenant>>())
+                .AddScoped<ITenantService<TTenant>>(x => x.GetRequiredService<MultiTenantService<TTenant>>())
                 .AddScoped(sp => sp.GetService<ITenantService<TTenant>>().GetTenant());
         }
 
-        public static IServiceCollection AddTenantStrategyService<TContext, TTenant>(this IServiceCollection services)
-            where TContext : DbContextTenantsBase<TTenant>
+        public static IServiceCollection AddTenantStrategyService<TTenant>(this IServiceCollection services)
             where TTenant : AppTenant
         {
             return services.AddSingleton<ITenantDbContextStrategyService, MultiTenantDbContextStrategyService>();
         }
 
-        public static TenantRequestIdentification<TContext,TTenant> AddTenantRequestIdentification<TContext, TTenant>(this IServiceCollection services)
-             where TContext : DbContextTenantsBase<TTenant>
+        public static TenantRequestIdentification<TTenant> AddTenantRequestIdentification<TTenant>(this IServiceCollection services)
             where TTenant : AppTenant
         {
-            return new TenantRequestIdentification<TContext, TTenant>(services);
+            return new TenantRequestIdentification<TTenant>(services);
         }
 
         public static TenantDbContextIdentification<TContext> AddTenantDbContextIdentification<TContext>(this IServiceCollection services)
@@ -115,11 +128,10 @@ namespace AspNetCore.ApiBase.MultiTenancy
             return services.AddTenantConfiguration<TTenant>(target);
         }
 
-        public static IServiceCollection AddTenantMiddleware<TContext, TTentant>(this IServiceCollection services)
-           where TContext : DbContextTenantsBase<TTentant>
-           where TTentant : AppTenant
+        public static IServiceCollection AddTenantMiddleware<TTenant>(this IServiceCollection services)
+           where TTenant : AppTenant
         {
-            return services.AddSingleton<IStartupFilter, TenantStartupFilter<TContext, TTentant>>();
+            return services.AddSingleton<IStartupFilter, TenantStartupFilter<TTenant>>();
         }
     }
 }

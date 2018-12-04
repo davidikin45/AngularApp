@@ -23,7 +23,10 @@ namespace AspNetCore.ApiBase.Extensions
         public static IServiceCollection AddDbContext<TContext>(this IServiceCollection services, string connectionString, ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
         {
             return services.AddDbContext<TContext>(options =>
-                    options.SetConnectionString<TContext>(connectionString), contextLifetime);
+                    {
+                        options.SetConnectionString<TContext>(connectionString);
+                        options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                    }, contextLifetime);
         }
 
         public static DbContextOptionsBuilder SetConnectionString<TContext>(this DbContextOptionsBuilder options, string connectionString, string migrationsAssembly = "")
@@ -94,16 +97,19 @@ namespace AspNetCore.ApiBase.Extensions
         }
 
         public static void AddUnitOfWork<TUnitOfWorkImplementation>(this IServiceCollection services)
-    where TUnitOfWorkImplementation : UnitOfWorkBase
+        where TUnitOfWorkImplementation : UnitOfWorkBase
         {
             services.AddScoped<TUnitOfWorkImplementation>();
+            services.AddScoped<IUnitOfWork>(sp => sp.GetService<TUnitOfWorkImplementation>());
         }
 
         public static void AddUnitOfWork<TUnitOfWork, TUnitOfWorkImplementation>(this IServiceCollection services)
             where TUnitOfWork : class
             where TUnitOfWorkImplementation : UnitOfWorkBase, TUnitOfWork
         {
-            services.AddScoped<TUnitOfWork, TUnitOfWorkImplementation>();
+            services.AddScoped<TUnitOfWorkImplementation>();
+            services.AddScoped<IUnitOfWork>(sp => sp.GetService<TUnitOfWorkImplementation>());
+            services.AddScoped<TUnitOfWork>(sp => sp.GetService<TUnitOfWorkImplementation>());
         }
     }
 }
