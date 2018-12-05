@@ -44,17 +44,27 @@ namespace AspNetCore.ApiBase.Extensions
             {
                 if(!string.IsNullOrWhiteSpace(migrationsAssembly))
                 {
-                    return options.UseSqlite(connectionString, sqlOptions => sqlOptions.MigrationsAssembly(migrationsAssembly));
+                    return options.UseSqlite(connectionString, sqlOptions => {
+                        sqlOptions.MigrationsAssembly(migrationsAssembly);
+                        sqlOptions.UseNetTopologySuite();
+                    });
                 }
-                return options.UseSqlite(connectionString);
+                return options.UseSqlite(connectionString, sqlOptions => {
+                    sqlOptions.UseNetTopologySuite();
+                });
             }
             else
             {
                 if (!string.IsNullOrWhiteSpace(migrationsAssembly))
                 {
-                    return options.UseSqlite(connectionString, sqlOptions => sqlOptions.MigrationsAssembly(migrationsAssembly));
+                    return options.UseSqlServer(connectionString, sqlOptions => {
+                        sqlOptions.MigrationsAssembly(migrationsAssembly);
+                        sqlOptions.UseNetTopologySuite();
+                        });
                 }
-                return options.UseSqlServer(connectionString);
+                return options.UseSqlServer(connectionString, sqlOptions => {
+                    sqlOptions.UseNetTopologySuite();
+                });
             }
         }
 
@@ -68,19 +78,25 @@ namespace AspNetCore.ApiBase.Extensions
         public static IServiceCollection AddDbContextSqlServer<TContext>(this IServiceCollection services, string connectionString, ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
         {
             return services.AddDbContext<TContext>(options =>
-                    options.UseSqlServer(connectionString), contextLifetime);
+                    options.UseSqlServer(connectionString, sqlOptions => {
+                        sqlOptions.UseNetTopologySuite();
+                    }), contextLifetime);
         }
 
         public static IServiceCollection AddDbContextSqlite<TContext>(this IServiceCollection services, string connectionString, ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
         {
             return services.AddDbContext<TContext>(options =>
-                    options.UseSqlite(connectionString), contextLifetime);
+                    options.UseSqlite(connectionString, sqlOptions => {
+                        sqlOptions.UseNetTopologySuite();
+                    }), contextLifetime);
         }
 
         public static IServiceCollection AddDbContextPoolSqlServer<TContext>(this IServiceCollection services, string connectionString, ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
         {
             return services.AddDbContextPool<TContext>(options =>
-                    options.UseSqlServer(connectionString));
+                    options.UseSqlServer(connectionString, sqlOptions => {
+                        sqlOptions.UseNetTopologySuite();
+                    }));
         }
 
         public static IServiceCollection AddDbContextSqlServerWithRetries<TContext>(this IServiceCollection services, string connectionString, int retries = 10, ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
@@ -93,6 +109,7 @@ namespace AspNetCore.ApiBase.Extensions
                         maxRetryCount: retries,
                         maxRetryDelay: TimeSpan.FromSeconds(30),
                         errorNumbersToAdd: null);
+                        sqlOptions.UseNetTopologySuite();
                     }), contextLifetime);
         }
 

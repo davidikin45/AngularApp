@@ -627,7 +627,7 @@ namespace AspNetCore.ApiBase
                 // new API
                 options.Cookie.Name = appSettings.CookieTempDataName;
             })
-            .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
             .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
             .AddDataAnnotationsLocalization()
             //By default, ASP.NET Core will resolve the controller parameters from the container but doesn’t actually resolve the controller from the container.
@@ -779,7 +779,6 @@ namespace AspNetCore.ApiBase
         }
         #endregion
 
-
         #region SignalR
         public virtual void ConfigureSignalRServices(IServiceCollection services)
         {
@@ -837,6 +836,8 @@ namespace AspNetCore.ApiBase
             });
             services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
             services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+
+            services.AddHealthChecks();
 
             string xmlDocumentationFileName = AssemblyName + ".xml";
             var xmlDocumentationPath = Path.Combine(BinPath, xmlDocumentationFileName);
@@ -904,6 +905,8 @@ namespace AspNetCore.ApiBase
                     Directory.CreateDirectory(path);
                 }
             }
+
+            app.UseHealthChecks("/hc");
 
             if (!env.IsProduction())
             {
