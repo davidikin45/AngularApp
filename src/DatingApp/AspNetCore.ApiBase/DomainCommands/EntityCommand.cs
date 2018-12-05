@@ -1,19 +1,12 @@
-﻿using AspNetCore.ApiBase.DomainEvents;
-using Newtonsoft.Json.Linq;
-
-namespace AspNetCore.ApiBase.DomainCommands
+﻿namespace AspNetCore.ApiBase.DomainCommands
 {
-    public class EntityCommand<T> : IDomainCommand where T : class
+    public abstract class EntityCommand<T> : IDomainCommand where T : class
     {
-        public string Action { get; }
-        public JObject Payload { get; }
         public T Entity { get; }
         public string TriggeredBy { get; }
 
-        public EntityCommand(string action, JObject payload, T entity, string triggeredBy)
+        public EntityCommand(T entity, string triggeredBy)
         {
-            Action = action;
-            Payload = payload;
             Entity = entity;
             TriggeredBy = triggeredBy;
         }

@@ -77,14 +77,6 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         Task<TDeleteDto> GetDeleteDtoByIdAsync(object id, CancellationToken cancellationToken);
 
-        Task<IEnumerable<TDeleteDto>> GetDeleteDtosByIdsAsync(CancellationToken cancellationToken, IEnumerable<object> ids);
-
-        Result TriggerAction(object id, ActionDto action, string triggeredBy);
-
-        Task<Result> TriggerActionAsync(object id, ActionDto action, string triggeredBy, CancellationToken cancellationToken = default(CancellationToken));
-
-        List<Result> TriggerActions(BulkDto<ActionDto>[] actions, string triggeredBy);
-
-        Task<List<Result>> TriggerActionsAsync(BulkDto<ActionDto>[] actions, string triggeredBy, CancellationToken cancellationToken = default(CancellationToken));
+        Task<IEnumerable<TDeleteDto>> GetDeleteDtosByIdsAsync(CancellationToken cancellationToken, IEnumerable<object> ids);        
     }
 }

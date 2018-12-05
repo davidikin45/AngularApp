@@ -31,14 +31,14 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         private readonly IHubContext<ApiNotificationHub<TReadDto>> HubContext;
 
-        public ApplicationServiceEntityBase(TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IDomainCommandsService actionEventsService, IHubContext<ApiNotificationHub<TReadDto>> hubContext)
-          : this(unitOfWork, mapper, authorizationService, userService, validationService, actionEventsService)
+        public ApplicationServiceEntityBase(TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IHubContext<ApiNotificationHub<TReadDto>> hubContext)
+          : this(unitOfWork, mapper, authorizationService, userService, validationService)
         {
             HubContext = hubContext;
         }
 
-        public ApplicationServiceEntityBase(TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IDomainCommandsService actionEventsService)
-           : base(unitOfWork, mapper, authorizationService, userService, validationService, actionEventsService)
+        public ApplicationServiceEntityBase(TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService)
+           : base(unitOfWork, mapper, authorizationService, userService, validationService)
         {
 
         }
@@ -801,134 +801,6 @@ namespace AspNetCore.ApiBase.ApplicationServices
             var type = RelationshipHelper.GetCollectionExpressionCreateType(collectionExpression, typeof(TUpdateDto));
             return Activator.CreateInstance(type);
         }
-        #endregion
-
-        #region TriggerActions
-        public virtual Result TriggerAction(object id, ActionDto action, string triggeredBy)
-        {
-            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
-
-            var entity = Repository.GetById(id);
-
-            AuthorizeResourceOperationAsync(entity, ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
-
-            if (entity is IEntityAggregateRoot)
-            {
-                IDomainCommand actionEvent = ActionEventsService.CreateEntityActionEvent(action.Action, action.Payload, entity, triggeredBy);
-                if (actionEvent != null)
-                {
-                    ((IEntityAggregateRoot)entity).AddDomainCommand(actionEvent);
-
-                    var validationResult = Repository.Update(entity, triggeredBy);
-                }
-            }
-
-            var result = UnitOfWork.Complete();
-
-            if (result.IsFailure)
-            {
-                switch (result.ErrorType)
-                {
-                    case ErrorType.ObjectValidationFailed:
-                        return result;
-                    case ErrorType.DatabaseValidationFailed:
-                        return result;
-                    case ErrorType.ObjectDoesNotExist:
-                        return result;
-                    case ErrorType.ConcurrencyConflict:
-                        return result;
-                    default:
-                        throw new ArgumentException();
-                }
-            }
-
-            return Result.Ok();
-        }
-
-        public async virtual Task<Result> TriggerActionAsync(object id, ActionDto action, string triggeredBy, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
-
-            var entity = await Repository.GetByIdAsync(cancellationToken, id);
-
-            await AuthorizeResourceOperationAsync(entity, ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
-
-            if (entity is IEntityAggregateRoot)
-            {
-                IDomainCommand actionEvent = ActionEventsService.CreateEntityActionEvent(action.Action, action.Payload, entity, triggeredBy);
-
-                if (actionEvent != null)
-                {
-                    ((IEntityAggregateRoot)entity).AddDomainCommand(actionEvent);
-
-                    var validationResult =Repository.Update(entity, triggeredBy);
-                }
-            }
-
-            var result = await UnitOfWork.CompleteAsync(cancellationToken);
-
-            if (result.IsFailure)
-            {
-                switch (result.ErrorType)
-                {
-                    case ErrorType.ObjectValidationFailed:
-                        return result;
-                    case ErrorType.DatabaseValidationFailed:
-                        return result;
-                    case ErrorType.ObjectDoesNotExist:
-                        return result;
-                    case ErrorType.ConcurrencyConflict:
-                        return result;
-                    default:
-                        throw new ArgumentException();
-                }
-            }
-
-            return Result.Ok();
-        }
-        #endregion
-
-        #region Bulk Trigger Actions
-        public virtual List<Result> TriggerActions(BulkDto<ActionDto>[] actions, string triggeredBy)
-        {
-            AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner).Wait();
-
-            var results = new List<Result>();
-            foreach (var action in actions)
-            {
-                try
-                {
-                    var result = TriggerAction(action.Id, action.Value, triggeredBy);
-                    results.Add(result);
-                }
-                catch
-                {
-                    results.Add(Result.Fail(ErrorType.UnknownError));
-                }
-            }
-            return results;
-        }
-
-        public async virtual Task<List<Result>> TriggerActionsAsync(BulkDto<ActionDto>[] actions, string triggeredBy, CancellationToken cancellationToken)
-        {
-            await AuthorizeResourceOperationAsync(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner);
-
-            var results = new List<Result>();
-            foreach (var action in actions)
-            {
-                try
-                {
-                    var result = await TriggerActionAsync(action.Id, action.Value, triggeredBy, cancellationToken);
-                    results.Add(result);
-                }
-                catch
-                {
-                    results.Add(Result.Fail(ErrorType.UnknownError));
-                }
-            }
-            return results;
-        }
-
         #endregion
     }
 }

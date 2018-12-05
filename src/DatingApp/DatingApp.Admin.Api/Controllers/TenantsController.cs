@@ -18,8 +18,8 @@ namespace DatingApp.Admin.Api.Controllers
     public class TenantsController : ApiControllerEntityAuthorizeBase<AppTenant, AppTenant, AppTenant, AppTenant, ITenantApplicationService>
     {
         public TenantsController(ITenantApplicationService applicationService, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService,
-            AppSettings appSettings, IDomainCommandsService actionEventsService )
-            :base( applicationService, mapper, emailService, urlHelper, typeHelperService, appSettings, actionEventsService)
+            AppSettings appSettings)
+            :base( applicationService, mapper, emailService, urlHelper, typeHelperService, appSettings)
         {
 
         }

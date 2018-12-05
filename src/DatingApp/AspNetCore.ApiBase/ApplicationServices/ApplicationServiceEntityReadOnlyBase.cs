@@ -21,13 +21,11 @@ namespace AspNetCore.ApiBase.ApplicationServices
     {
         protected virtual TUnitOfWork UnitOfWork { get; }
         protected virtual IGenericRepository<TEntity> Repository => UnitOfWork.Repository<TEntity>();
-        protected virtual IDomainCommandsService ActionEventsService { get; }
 
-        public ApplicationServiceEntityReadOnlyBase(TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IDomainCommandsService actionEventsService)
+        public ApplicationServiceEntityReadOnlyBase(TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService)
            : base(mapper, authorizationService, userService, validationService)
         {
             UnitOfWork = unitOfWork;
-            ActionEventsService = actionEventsService;
         }
 
         public virtual void AddIncludes(List<Expression<Func<TEntity, Object>>> includes)

@@ -27,8 +27,8 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
         where TDelete : class
         where IEntityService : IApplicationServiceEntity<TCreate, TRead, TUpdate, TDelete>
     {
-        public MvcControllerEntityBase(Boolean admin, IEntityService service, IMapper mapper, IEmailService emailService, AppSettings appSettings, IDomainCommandsService actionEventsService)
-        : base(admin, service, mapper, emailService, appSettings, actionEventsService)
+        public MvcControllerEntityBase(Boolean admin, IEntityService service, IMapper mapper, IEmailService emailService, AppSettings appSettings)
+        : base(admin, service, mapper, emailService, appSettings)
         {
         }
 

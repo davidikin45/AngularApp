@@ -34,8 +34,8 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
         where TDeleteDto : class
         where IEntityService : IApplicationServiceEntity<TCreateDto, TReadDto, TUpdateDto, TDeleteDto>
     {
-        public MvcControllerEntityAuthorizeBase(Boolean admin, IEntityService service, IMapper mapper, IEmailService emailService, AppSettings appSettings, IDomainCommandsService actionEventsService)
-        : base(admin, service, mapper, emailService, appSettings, actionEventsService)
+        public MvcControllerEntityAuthorizeBase(Boolean admin, IEntityService service, IMapper mapper, IEmailService emailService, AppSettings appSettings)
+        : base(admin, service, mapper, emailService, appSettings)
         {
         }
 
@@ -214,50 +214,6 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
             var instance = Service.GetCreateDefaultCollectionItemDto(collection);
 
             return PartialView("_CreateCollectionItem", instance);
-        }
-        #endregion
-
-        #region Trigger Actions
-        [Authorize(Policy = ApiScopes.Update)]
-        [HttpPost]
-        [Route("{id}/trigger-action")]
-        public virtual async Task<ActionResult> TriggerAction(string id, string action, IFormCollection collection)
-        {
-            if (string.IsNullOrWhiteSpace(action) || !ActionEventsService.IsValidAction<TUpdateDto>(action))
-            {
-                return HandleReadException();
-            }
-
-            dynamic args = null;
-            if (collection != null)
-            {
-                args = collection.ToJObject();
-            }
-
-            var cts = TaskHelper.CreateNewCancellationTokenSource();
-
-            try
-            {
-                var eventDto = new ActionDto()
-                {
-                    Action = action,
-                    Payload = args
-                };
-
-                var result = await Service.TriggerActionAsync(id, eventDto, Username, cts.Token);
-                if (result.IsFailure)
-                {
-                    return HandleReadException();
-                }
-                else
-                {
-                    return RedirectToControllerDefault().WithSuccess(this, Messages.ActionSuccessful);
-                }
-            }
-            catch
-            {
-                return HandleReadException();
-            }
         }
         #endregion
 

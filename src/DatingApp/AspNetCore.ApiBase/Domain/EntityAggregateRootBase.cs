@@ -1,4 +1,5 @@
-﻿using AspNetCore.ApiBase.DomainEvents;
+﻿using AspNetCore.ApiBase.DomainCommands;
+using AspNetCore.ApiBase.DomainEvents;
 using System;
 using System.Collections.Generic;
 

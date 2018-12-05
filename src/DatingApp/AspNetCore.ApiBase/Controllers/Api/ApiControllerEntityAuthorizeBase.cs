@@ -40,8 +40,8 @@ namespace AspNetCore.ApiBase.Controllers.Api
          where TDeleteDto : class
         where IEntityService : IApplicationServiceEntity<TCreateDto, TReadDto, TUpdateDto, TDeleteDto>
     {
-        public ApiControllerEntityAuthorizeBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSetings, IDomainCommandsService actionEventsService)
-        : base(service, mapper, emailService, urlHelper, typeHelperService, appSetings, actionEventsService)
+        public ApiControllerEntityAuthorizeBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSetings)
+        : base(service, mapper, emailService, urlHelper, typeHelperService, appSetings)
         {
 
         }
@@ -452,74 +452,6 @@ namespace AspNetCore.ApiBase.Controllers.Api
             var response = Service.GetCreateDefaultCollectionItemDto(collection);
 
             return Ok(response);
-        }
-        #endregion
-
-        #region Trigger Actions
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
-        [Route("{id}/trigger-action")]
-        [HttpPost]
-        [ProducesResponseType(typeof(WebApiMessage), 200)]
-        public virtual async Task<IActionResult> TriggerAction(string id, [FromBody] ActionDto action)
-        {
-            if (action == null)
-            {
-                return ApiErrorMessage(Messages.RequestInvalid);
-            }
-
-            if (string.IsNullOrWhiteSpace(action.Action) || !ActionEventsService.IsValidAction<TUpdateDto>(action.Action))
-            {
-                return ApiErrorMessage(Messages.ActionInvalid);
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return ValidationErrors(ModelState);
-            }
-
-            var cts = TaskHelper.CreateNewCancellationTokenSource();
-
-            var result = await Service.TriggerActionAsync(id, action, UserId, cts.Token);
-            if (result.IsFailure)
-            {
-                return ValidationErrors(result);
-            }
-
-            return NoContent();
-        }
-        #endregion
-
-        #region Bulk Trigger Action
-        /// <summary>
-        /// Triggers the actions.
-        /// </summary>
-        /// <param name="actions">The actions.</param>
-        /// <returns></returns>
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
-        [HttpPost]
-        [Route("bulk/trigger-actions")]
-        public virtual async Task<IActionResult> TriggerActions([FromBody] BulkDto<ActionDto>[] actions)
-        {
-            if (actions == null || actions.Any(a => a.Id is null || string.IsNullOrWhiteSpace(a.Id.ToString())))
-            {
-                return ApiErrorMessage(Messages.RequestInvalid);
-            }
-
-            foreach (var action in actions)
-            {
-                if (action == null || string.IsNullOrWhiteSpace(action.Value.Action) || !ActionEventsService.IsValidAction<TUpdateDto>(action.Value.Action))
-                {
-                    return ApiErrorMessage(Messages.ActionsInvalid);
-                }
-            }
-
-            var cts = TaskHelper.CreateNewCancellationTokenSource();
-
-            var results = await Service.TriggerActionsAsync(actions, UserId, cts.Token);
-
-            return BulkTriggerActionResponse(results);
         }
         #endregion
     }
