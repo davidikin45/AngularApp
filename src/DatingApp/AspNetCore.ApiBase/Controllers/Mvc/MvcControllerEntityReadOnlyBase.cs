@@ -25,7 +25,7 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
         where IEntityService : IApplicationServiceEntityReadOnly<TDto>
     {
 
-        public MvcControllerEntityReadOnlyBase(Boolean admin, IEntityService service, IMapper mapper, IEmailService emailService, AppSettings appSettings, IActionEventsService actionEventsService)
+        public MvcControllerEntityReadOnlyBase(Boolean admin, IEntityService service, IMapper mapper, IEmailService emailService, AppSettings appSettings, IDomainCommandsService actionEventsService)
         : base(admin, service, mapper, emailService, appSettings, actionEventsService)
         {
 

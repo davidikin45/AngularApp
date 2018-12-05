@@ -2,39 +2,6 @@
 
 namespace AspNetCore.ApiBase.DomainEvents
 {
-    public class EntityActionEvent<T> : IDomainActionEvent
-  where T : class
-    {
-        public string Action { get; }
-        public dynamic Args { get; }
-        public T Entity { get; }
-        public string TriggeredBy { get; }
-
-        public EntityActionEvent(string action, dynamic args, T entity, string triggeredBy)
-        {
-            Action = action;
-            Args = args;
-            Entity = entity;
-            TriggeredBy = triggeredBy;
-        }
-
-        public override bool Equals(object obj)
-        {
-            var other = obj as EntityInsertedEvent<T>;
-
-            if (ReferenceEquals(other, null))
-                return false;
-
-            if (ReferenceEquals(this, other))
-                return true;
-
-            if (GetType() != obj.GetType())
-                return false;
-
-            return other.Entity.Equals(Entity);
-        }
-    }
-
     public class EntityInsertedEvent<T> : IDomainEvent
         where T : class
     {

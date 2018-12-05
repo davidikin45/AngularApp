@@ -50,9 +50,9 @@ namespace AspNetCore.ApiBase.Controllers.Api
     {
         public IEntityService Service { get; private set; }
         public ITypeHelperService TypeHelperService { get; private set; }
-        public IActionEventsService ActionEventsService { get; private set; }
+        public IDomainCommandsService ActionEventsService { get; private set; }
 
-        public ApiControllerEntityReadOnlyAuthorizeBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSettings, IActionEventsService actionEventsService)
+        public ApiControllerEntityReadOnlyAuthorizeBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSettings, IDomainCommandsService actionEventsService)
         : base(mapper, emailService, urlHelper, appSettings)
         {
             Service = service;

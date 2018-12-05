@@ -13,8 +13,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase
 {
-    public abstract class ProgramMultiTenantBase<TStartup, TContext, TTenant>
-        where TContext : DbContextTenantsBase<TTenant>
+    public abstract class ProgramMultiTenantBase<TStartup, TTenant>
         where TTenant : AppTenant
         where TStartup : class
     {
@@ -65,7 +64,7 @@ namespace AspNetCore.ApiBase
                     options.AddServerHeader = false;
                 }
                 )
-                .UseAutofacMultiTenant<TContext,TTenant>(typeof(TStartup).Assembly)
+                .UseAutofacMultiTenant<TTenant>(typeof(TStartup).Assembly)
                 .UseConfiguration(Configuration) ////IWebHostBuilder configuration is added to the app's configuration, but the converse isn't true—ConfigureAppConfiguration doesn't affect the IWebHostBuilder configuration
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {

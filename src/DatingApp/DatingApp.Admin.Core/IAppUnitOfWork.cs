@@ -4,5 +4,6 @@ namespace DatingApp.Admin.Core
 {
     public interface IAppUnitOfWork : IUnitOfWork
     {
+
     }
 }

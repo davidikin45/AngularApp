@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -39,6 +40,20 @@ namespace AspNetCore.ApiBase.Extensions
             }
 
             return expando;
+        }
+
+        public static JObject ToJObject(this IFormCollection collection)
+        {
+            var dictionary = new Dictionary<string, object>();
+
+            foreach (var item in collection.Keys.ToDictionary(key => key, value => collection[value]))
+            {
+                dictionary.Add(item.Key, item.Value);
+            }
+
+            JObject obj = JObject.FromObject(dictionary);
+
+            return obj;
         }
     }
 }

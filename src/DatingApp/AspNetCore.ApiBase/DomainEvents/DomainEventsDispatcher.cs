@@ -17,29 +17,25 @@ namespace AspNetCore.ApiBase.DomainEvents
         public static bool HandlePostCommitEventsInProcess = false;
         public static bool DispatchPostCommitEventsInParellel = true;
 
-        IServiceProvider _serviceProvider;
-        public DomainEventsDispatcher(IServiceProvider serviceProvider = null)
+        private readonly IServiceProvider _serviceProvider;
+        public DomainEventsDispatcher(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
-
 
         private List<dynamic> GetEventHandlerInstancesForPreCommit(IServiceProvider services, IDomainEvent domainEvent)
         {
             List<dynamic> instances = new List<dynamic>();
 
-            if (_serviceProvider != null)
-            {
-                var eventHandlerInterfaceType = typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType());
-                var types = typeof(IEnumerable<>).MakeGenericType(eventHandlerInterfaceType);
-                dynamic handlers = services.GetService(types);
+            var eventHandlerInterfaceType = typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType());
+            var types = typeof(IEnumerable<>).MakeGenericType(eventHandlerInterfaceType);
+            dynamic handlers = services.GetService(types);
 
-                foreach (var handler in handlers)
+            foreach (var handler in handlers)
+            {
+                if (handler.HandlePreCommitCondition((dynamic)domainEvent))
                 {
-                    if (handler.HandlePreCommitCondition((dynamic)domainEvent))
-                    {
-                        instances.Add(handler);
-                    }
+                    instances.Add(handler);
                 }
             }
 
@@ -50,18 +46,15 @@ namespace AspNetCore.ApiBase.DomainEvents
         {
             List<dynamic> instances = new List<dynamic>();
 
-            if (_serviceProvider != null)
-            {
-                var eventHandlerInterfaceType = typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType());
-                var types = typeof(IEnumerable<>).MakeGenericType(eventHandlerInterfaceType);
-                dynamic handlers = services.GetService(types);
+            var eventHandlerInterfaceType = typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType());
+            var types = typeof(IEnumerable<>).MakeGenericType(eventHandlerInterfaceType);
+            dynamic handlers = services.GetService(types);
 
-                foreach (var handler in handlers)
+            foreach (var handler in handlers)
+            {
+                if (handler.HandlePostCommitCondition((dynamic)domainEvent))
                 {
-                    if (handler.HandlePostCommitCondition((dynamic)domainEvent))
-                    {
-                        instances.Add(handler);
-                    }
+                    instances.Add(handler);
                 }
             }
 

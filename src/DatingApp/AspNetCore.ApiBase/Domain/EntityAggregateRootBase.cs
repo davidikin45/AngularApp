@@ -21,7 +21,7 @@ namespace AspNetCore.ApiBase.Domain
             _domainEvents.Clear();
         }
 
-        public void AddActionEvent(IDomainActionEvent actionEvent)
+        public void AddDomainCommand(IDomainCommand actionEvent)
         {
             _domainEvents.Add(actionEvent);
         }

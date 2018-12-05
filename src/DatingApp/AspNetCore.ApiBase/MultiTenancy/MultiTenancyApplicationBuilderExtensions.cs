@@ -6,11 +6,10 @@ namespace AspNetCore.ApiBase.MultiTenancy
 {
     public static class MultiTenancyApplicationBuilderExtensions
     {
-        public static IApplicationBuilder UseTenants<TContext, TTenant>(this IApplicationBuilder builder)
-        where TContext : DbContextTenantsBase<TTenant>
+        public static IApplicationBuilder UseTenants<TTenant>(this IApplicationBuilder builder)
         where TTenant : AppTenant
         {
-            return builder.UseMiddleware<TenantMiddleware<TContext, TTenant>>();
+            return builder.UseMiddleware<TenantMiddleware<TTenant>>();
         }
     }
 }

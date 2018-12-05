@@ -17,7 +17,7 @@ namespace DatingApp.Tenant.Api.Controllers
     public class ValuesController : ApiControllerEntityAuthorizeBase<Value, Value, Value, Value, IValueApplicationService>
     {
         public ValuesController(IValueApplicationService applicationService, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService,
-            AppSettings appSettings, IActionEventsService actionEventsService )
+            AppSettings appSettings, IDomainCommandsService actionEventsService )
             :base( applicationService, mapper, emailService, urlHelper, typeHelperService, appSettings, actionEventsService)
         {
 

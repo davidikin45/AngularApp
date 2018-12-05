@@ -13,7 +13,7 @@ namespace DatingApp.ApplicationServices
     [Resource(ResourceOperations.Values.Name)]
     public class ValueApplicationService : ApplicationServiceEntityBase<Value, Value, Value, Value, Value, IAppUnitOfWork>, IValueApplicationService
     {
-        public ValueApplicationService(IMapper mapper, IAppUnitOfWork unitOfWork, IAuthorizationService auth, IUserService userService, IValidationService validationService, IActionEventsService actionEventsService)
+        public ValueApplicationService(IMapper mapper, IAppUnitOfWork unitOfWork, IAuthorizationService auth, IUserService userService, IValidationService validationService, IDomainCommandsService actionEventsService)
             :base(unitOfWork, mapper, auth, userService, validationService, actionEventsService)
         {
 

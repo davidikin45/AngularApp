@@ -1,5 +1,6 @@
 ﻿using AspNetCore.ApiBase.ActionResults;
 using AspNetCore.ApiBase.Authorization;
+using AspNetCore.ApiBase.Cqrs;
 using AspNetCore.ApiBase.DependencyInjection.Modules;
 using AspNetCore.ApiBase.Email;
 using AspNetCore.ApiBase.Extensions;
@@ -117,6 +118,7 @@ namespace AspNetCore.ApiBase
         // Add services to the collection. Don't build or return
         // any IServiceProvider or the ConfigureContainer method
         // won't get called.
+        //https://stackoverflow.com/questions/40844151/when-are-net-core-dependency-injected-instances-disposed
         public virtual void ConfigureServices(IServiceCollection services)
         {
             ConfigureSettingsServices(services);
@@ -133,6 +135,7 @@ namespace AspNetCore.ApiBase
             ConfigureResponseCompressionServices(services);
             ConfigureLocalizationServices(services);
             ConfigureMvcServices(services);
+            ConfigureCqrsServices(services);
             ConfigureSignalRServices(services);
             ConfigureApiServices(services);
             ConfigureHttpClients(services);
@@ -629,7 +632,7 @@ namespace AspNetCore.ApiBase
             .AddDataAnnotationsLocalization()
             //By default, ASP.NET Core will resolve the controller parameters from the container but doesn’t actually resolve the controller from the container.
             //https://andrewlock.net/controller-activation-and-dependency-injection-in-asp-net-core-mvc/
-            //The AddControllersAsServices method does two things - it registers all of the Controllers in your application with the DI container (if they haven't already been registered) and replaces the IControllerActivator registration with the ServiceBasedControllerActivator
+            //The AddControllersAsServices method does two things - it registers all of the Controllers in your application with the DI container as Transient (if they haven't already been registered) and replaces the IControllerActivator registration with the ServiceBasedControllerActivator
             .AddControllersAsServices();
 
             services.AddSingleton<IConfigureOptions<MvcOptions>, ConfigureMvcOptions>();
@@ -766,6 +769,16 @@ namespace AspNetCore.ApiBase
             });
         }
         #endregion
+
+        #region Cqrs
+        public virtual void ConfigureCqrsServices(IServiceCollection services)
+        {
+            Logger.LogInformation("Configuring Cqrs");
+
+            services.AddCqrs(ApplicationParts);
+        }
+        #endregion
+
 
         #region SignalR
         public virtual void ConfigureSignalRServices(IServiceCollection services)

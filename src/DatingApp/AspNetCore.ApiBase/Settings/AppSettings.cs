@@ -55,5 +55,6 @@
         public string FFMpeg_WorkingPath { get; set; }
         public string SwaggerUIUsername { get; set; }
         public string SwaggerUIPassword { get; set; }
+        public int NumberOfDatabaseRetries { get; set; }
     }
 }

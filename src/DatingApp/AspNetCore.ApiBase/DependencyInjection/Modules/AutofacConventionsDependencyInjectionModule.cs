@@ -30,19 +30,24 @@ namespace LeacockSite.DependencyInjection.Autofac.Modules
                     {
                         if (!type.IsAbstract)
                         {
+                            var interfaceType = type.GetInterface("I" + type.Name);
                             if (type.IsGenericType)
                             {
-                                builder.RegisterGeneric(type).As(type.GetInterface("I" + type.Name));
+                                builder.RegisterGeneric(type).As(interfaceType).IfNotRegistered(interfaceType);
                             }
                             else
                             {
                                 if (type.Name.Contains("Singleton"))
                                 {
-                                    builder.RegisterType(type).As(type.GetInterface("I" + type.Name)).SingleInstance();
+                                    builder.RegisterType(type).As(interfaceType).SingleInstance().IfNotRegistered(interfaceType);
+                                }
+                                else if (type.Name.Contains("Scoped"))
+                                {
+                                    builder.RegisterType(type).As(interfaceType).InstancePerLifetimeScope().IfNotRegistered(interfaceType);
                                 }
                                 else
                                 {
-                                    builder.RegisterType(type).As(type.GetInterface("I" + type.Name));
+                                    builder.RegisterType(type).As(interfaceType).IfNotRegistered(interfaceType);
                                 }
                             }
                         }

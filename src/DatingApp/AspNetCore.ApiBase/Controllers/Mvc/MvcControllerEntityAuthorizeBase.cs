@@ -34,7 +34,7 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
         where TDeleteDto : class
         where IEntityService : IApplicationServiceEntity<TCreateDto, TReadDto, TUpdateDto, TDeleteDto>
     {
-        public MvcControllerEntityAuthorizeBase(Boolean admin, IEntityService service, IMapper mapper, IEmailService emailService, AppSettings appSettings, IActionEventsService actionEventsService)
+        public MvcControllerEntityAuthorizeBase(Boolean admin, IEntityService service, IMapper mapper, IEmailService emailService, AppSettings appSettings, IDomainCommandsService actionEventsService)
         : base(admin, service, mapper, emailService, appSettings, actionEventsService)
         {
         }
@@ -231,7 +231,7 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
             dynamic args = null;
             if (collection != null)
             {
-                args = collection.ToExpandoObject();
+                args = collection.ToJObject();
             }
 
             var cts = TaskHelper.CreateNewCancellationTokenSource();
@@ -241,7 +241,7 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
                 var eventDto = new ActionDto()
                 {
                     Action = action,
-                    Args = args
+                    Payload = args
                 };
 
                 var result = await Service.TriggerActionAsync(id, eventDto, Username, cts.Token);

@@ -239,11 +239,6 @@ namespace AspNetCore.ApiBase.Controllers.Api
             return ApiNotFoundErrorMessage(Messages.NotFound);
         }
 
-        protected IActionResult Error(string errorMessage)
-        {
-            return BadRequest(errorMessage);
-        }
-
         protected IActionResult ApiNotFoundErrorMessage(string message)
         {
             return ApiErrorMessage(Messages.NotFound, message, 404);

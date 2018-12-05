@@ -10,4 +10,10 @@
     <ProjectReference Include="..\DatingApp.Tenant.Domain\DatingApp.Tenant.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Values\Commands\" />
+    <Folder Include="Values\Events\" />
+    <Folder Include="Values\Queries\" />
+  </ItemGroup>
+
 </Project>

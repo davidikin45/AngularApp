@@ -21,9 +21,9 @@ namespace AspNetCore.ApiBase.ApplicationServices
     {
         protected virtual TUnitOfWork UnitOfWork { get; }
         protected virtual IGenericRepository<TEntity> Repository => UnitOfWork.Repository<TEntity>();
-        protected virtual IActionEventsService ActionEventsService { get; }
+        protected virtual IDomainCommandsService ActionEventsService { get; }
 
-        public ApplicationServiceEntityReadOnlyBase(TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IActionEventsService actionEventsService)
+        public ApplicationServiceEntityReadOnlyBase(TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IDomainCommandsService actionEventsService)
            : base(mapper, authorizationService, userService, validationService)
         {
             UnitOfWork = unitOfWork;

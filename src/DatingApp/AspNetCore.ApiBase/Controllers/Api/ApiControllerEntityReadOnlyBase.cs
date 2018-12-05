@@ -28,7 +28,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         where IEntityService : IApplicationServiceEntityReadOnly<TDto>
     {   
 
-        public ApiControllerEntityReadOnlyBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSettings, IActionEventsService actionEventsService)
+        public ApiControllerEntityReadOnlyBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSettings, IDomainCommandsService actionEventsService)
         : base(service, mapper, emailService, urlHelper, typeHelperService, appSettings, actionEventsService)
         {
  

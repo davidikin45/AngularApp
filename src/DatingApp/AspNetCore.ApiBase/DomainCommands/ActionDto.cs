@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Newtonsoft.Json.Linq;
 
 namespace AspNetCore.ApiBase.DomainEvents
 {
     public class ActionDto
     {
         public string Action { get; set; }
-        public dynamic Args { get; set; }
+        public JObject Payload { get; set; }
     }
 }

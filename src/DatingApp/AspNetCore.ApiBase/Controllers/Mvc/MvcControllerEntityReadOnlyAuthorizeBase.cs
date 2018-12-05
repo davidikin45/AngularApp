@@ -34,9 +34,9 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
         public IEntityService Service { get; private set; }
         public Boolean Admin { get; set; }
 
-        public IActionEventsService ActionEventsService { get; private set; }
+        public IDomainCommandsService ActionEventsService { get; private set; }
 
-        public MvcControllerEntityReadOnlyAuthorizeBase(Boolean admin, IEntityService service, IMapper mapper, IEmailService emailService, AppSettings appSettings, IActionEventsService actionEventsService)
+        public MvcControllerEntityReadOnlyAuthorizeBase(Boolean admin, IEntityService service, IMapper mapper, IEmailService emailService, AppSettings appSettings, IDomainCommandsService actionEventsService)
         : base(mapper, emailService, appSettings)
         {
             Admin = admin;

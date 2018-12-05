@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DatingApp.Tenant.Api
 {
-    public class Program : ProgramMultiTenantBase<Startup, AppTenantsContext, AppTenant>
+    public class Program : ProgramMultiTenantBase<Startup, AppTenant>
     {
         public async static Task<int> Main(string[] args)
         {

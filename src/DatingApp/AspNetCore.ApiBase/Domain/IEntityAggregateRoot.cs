@@ -5,7 +5,7 @@ namespace AspNetCore.ApiBase.Domain
 {
     public interface IEntityAggregateRoot
     {
-        void AddActionEvent(IDomainActionEvent actionEvent);
+        void AddDomainCommand(IDomainCommand actionEvent);
         IReadOnlyList<IDomainEvent> DomainEvents { get; }
         void ClearEvents();
     }

@@ -14,27 +14,24 @@ namespace AspNetCore.ApiBase.MultiTenancy.DependencyInjection
 {
     public static class AutofacMultiTenancyExtensions
     {
-        public static IServiceCollection AddAutofacMultitenant<TContext, TTenant>(this IServiceCollection services, Action<MultitenantContainer> mtcSetter)
-          where TContext : DbContextTenantsBase<TTenant>
+        public static IServiceCollection AddAutofacMultitenant<TTenant>(this IServiceCollection services, Action<MultitenantContainer> mtcSetter)
           where TTenant : AppTenant
         {
-            return services.AddSingleton<IServiceProviderFactory<ContainerBuilder>>(new AutofacMultiTenantServiceProviderFactory<TContext, TTenant>(mtcSetter));
+            return services.AddSingleton<IServiceProviderFactory<ContainerBuilder>>(new AutofacMultiTenantServiceProviderFactory<TTenant>(mtcSetter));
         }
 
-        public static IWebHostBuilder UseAutofacMultiTenant<TContext, TTenant>(this IWebHostBuilder builder, Assembly assembly)
-              where TContext : DbContextTenantsBase<TTenant>
+        public static IWebHostBuilder UseAutofacMultiTenant<TTenant>(this IWebHostBuilder builder, Assembly assembly)
             where TTenant : AppTenant
         {
             MultitenantContainer multiTenantContainer = null;
             Func<MultitenantContainer> multitenantContainerAccessor = () => multiTenantContainer;
             Action<MultitenantContainer> multitenantContainerSetter = (mtc) => { multiTenantContainer = mtc; };
-            builder.ConfigureServices(services => services.AddAutofacMultitenant<TContext, TTenant>(multitenantContainerSetter));
+            builder.ConfigureServices(services => services.AddAutofacMultitenant<TTenant>(multitenantContainerSetter));
             builder.ConfigureServices(services => services.AddSingleton((sp) => multiTenantContainer));
             return builder.UseAutofacMultitenantRequestServices(multitenantContainerAccessor);
         }
 
-        private class AutofacMultiTenantServiceProviderFactory<TContext, TTenant> : IServiceProviderFactory<ContainerBuilder>
-              where TContext : DbContextTenantsBase<TTenant>
+        private class AutofacMultiTenantServiceProviderFactory<TTenant> : IServiceProviderFactory<ContainerBuilder>
               where TTenant : AppTenant
         {
             private Action<MultitenantContainer> _mtcSetter;
@@ -57,7 +54,7 @@ namespace AspNetCore.ApiBase.MultiTenancy.DependencyInjection
             {
                 var container = builder.Build();
 
-                var tenantIdentificationStrategy = container.Resolve<ITenantIdentificationService<TContext, TTenant>>();
+                var tenantIdentificationStrategy = container.Resolve<ITenantIdentificationService<TTenant>>();
                 var mtc = new MultitenantContainer(tenantIdentificationStrategy, container);
 
                 var configuration = container.Resolve<IConfiguration>();

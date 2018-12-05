@@ -182,6 +182,17 @@ namespace AspNetCore.ApiBase.Validation
 
             return Ok();
         }
+
+        public static Result Combine(IEnumerable<Result> results)
+        {
+            foreach (Result result in results)
+            {
+                if (result.IsFailure)
+                    return result;
+            }
+
+            return Ok();
+        }
     }
 
 

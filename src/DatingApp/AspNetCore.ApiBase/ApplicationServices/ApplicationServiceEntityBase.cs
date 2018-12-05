@@ -31,13 +31,13 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         private readonly IHubContext<ApiNotificationHub<TReadDto>> HubContext;
 
-        public ApplicationServiceEntityBase(TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IActionEventsService actionEventsService, IHubContext<ApiNotificationHub<TReadDto>> hubContext)
+        public ApplicationServiceEntityBase(TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IDomainCommandsService actionEventsService, IHubContext<ApiNotificationHub<TReadDto>> hubContext)
           : this(unitOfWork, mapper, authorizationService, userService, validationService, actionEventsService)
         {
             HubContext = hubContext;
         }
 
-        public ApplicationServiceEntityBase(TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IActionEventsService actionEventsService)
+        public ApplicationServiceEntityBase(TUnitOfWork unitOfWork, IMapper mapper, IAuthorizationService authorizationService, IUserService userService, IValidationService validationService, IDomainCommandsService actionEventsService)
            : base(unitOfWork, mapper, authorizationService, userService, validationService, actionEventsService)
         {
 
@@ -814,10 +814,10 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
             if (entity is IEntityAggregateRoot)
             {
-                IDomainActionEvent actionEvent = ActionEventsService.CreateEntityActionEvent(action.Action, null, entity, triggeredBy);
+                IDomainCommand actionEvent = ActionEventsService.CreateEntityActionEvent(action.Action, action.Payload, entity, triggeredBy);
                 if (actionEvent != null)
                 {
-                    ((IEntityAggregateRoot)entity).AddActionEvent(actionEvent);
+                    ((IEntityAggregateRoot)entity).AddDomainCommand(actionEvent);
 
                     var validationResult = Repository.Update(entity, triggeredBy);
                 }
@@ -855,11 +855,11 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
             if (entity is IEntityAggregateRoot)
             {
-                IDomainActionEvent actionEvent = ActionEventsService.CreateEntityActionEvent(action.Action, null, entity, triggeredBy);
+                IDomainCommand actionEvent = ActionEventsService.CreateEntityActionEvent(action.Action, action.Payload, entity, triggeredBy);
 
                 if (actionEvent != null)
                 {
-                    ((IEntityAggregateRoot)entity).AddActionEvent(actionEvent);
+                    ((IEntityAggregateRoot)entity).AddDomainCommand(actionEvent);
 
                     var validationResult =Repository.Update(entity, triggeredBy);
                 }

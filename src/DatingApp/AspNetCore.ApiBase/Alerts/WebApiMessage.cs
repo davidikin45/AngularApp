@@ -20,6 +20,7 @@ namespace AspNetCore.ApiBase.Alerts
             this.Message = message;
             this.Errors = errors;
             this.Id = id;
+            TimeGenerated = DateTime.UtcNow;
         }
 
         public static WebApiMessage CreateWebApiMessage(string message, IList<string> errors)
@@ -29,13 +30,14 @@ namespace AspNetCore.ApiBase.Alerts
 
         private WebApiMessage()
         {
-
+            TimeGenerated = DateTime.UtcNow;
         }
 
         private WebApiMessage(string message, string[] errors)
         {
             this.Message = message;
             this.Errors = errors;
+            TimeGenerated = DateTime.UtcNow;
         }
 
         public static WebApiMessage CreateWebApiMessage(string message, IList<string> errors, ModelStateDictionary modelState)
@@ -79,6 +81,9 @@ namespace AspNetCore.ApiBase.Alerts
 
             }
         }
+
+        [DataMember]
+        public DateTime TimeGenerated { get; }
 
         [DataMember]
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
