@@ -1,11 +1,7 @@
 ﻿using AspNetCore.ApiBase.ElasticSearch;
-using AspNetCore.ApiBase.Settings;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Exceptions;
-using Serilog.Sinks.Elasticsearch;
-using System;
-using System.Linq;
 using System.Reflection;
 
 namespace AspnetCore.ApiBase

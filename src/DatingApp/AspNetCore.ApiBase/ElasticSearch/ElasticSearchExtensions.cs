@@ -6,6 +6,7 @@ using Nest;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -75,44 +76,112 @@ namespace AspNetCore.ApiBase.ElasticSearch
             return index;
         }
 
-        public static Task<IIndexResponse> IndexAsync<TDocument>(this IElasticClient client, TDocument document, CancellationToken cancellationToken = default(CancellationToken), string indexSuffix = null)
+        public static Task<IIndexResponse> IndexAsync<TDocument>(
+            this IElasticClient client, 
+            TDocument document, 
+            CancellationToken cancellationToken = default(CancellationToken), 
+            string indexSuffix = null)
             where TDocument : class
         {
            var index = GetIndex<TDocument>(indexSuffix);
-           return client.IndexAsync(document, s => s.Index(index), cancellationToken);
+           return client.IndexAsync(
+               document, 
+               s => s.Index(index), 
+               cancellationToken);
         }
 
-        public static Task<IUpdateResponse<TDocument>> UpsertAsync<TDocument>(this IElasticClient client, TDocument document, CancellationToken cancellationToken = default(CancellationToken), string indexSuffix = null)
+        public static Task<IUpdateResponse<TDocument>> UpsertAsync<TDocument>(
+            this IElasticClient client, 
+            TDocument document, 
+            CancellationToken cancellationToken = default(CancellationToken), 
+            string indexSuffix = null)
            where TDocument : class
         {
             var index = GetIndex<TDocument>(indexSuffix);
-            return client.UpdateAsync<TDocument>(document, u => u.Index(index).Doc(document).DocAsUpsert(true), cancellationToken);
+            return client.UpdateAsync<TDocument>(
+                document, 
+                u => u.Index(index).Doc(document).DocAsUpsert(true), 
+                cancellationToken);
         }
 
-        public static Task<ISearchResponse<TDocument>> SearchAsync<TDocument>(this IElasticClient client, Func<SearchDescriptor<TDocument>, SearchDescriptor<TDocument>> selector, CancellationToken cancellationToken = default(CancellationToken), string indexSuffix = null)
+        public static Task<ISearchResponse<TDocument>> SearchAsync<TDocument>(
+            this IElasticClient client, 
+            Func<SearchDescriptor<TDocument>, SearchDescriptor<TDocument>> selector, 
+            CancellationToken cancellationToken = default(CancellationToken), 
+            string indexSuffix = null)
            where TDocument : class
         {
             var index = GetIndex<TDocument>(indexSuffix);
-            return client.SearchAsync<TDocument>(s => selector(s.Index(index)), cancellationToken);
+            return client.SearchAsync<TDocument>(
+                s => selector(s.Index(index)), 
+                cancellationToken);
         }
 
-        public static Task<IDeleteByQueryResponse> DeleteByQueryAsync<TDocument>(this IElasticClient client, Func<DeleteByQueryDescriptor<TDocument>, DeleteByQueryDescriptor<TDocument>> selector, CancellationToken cancellationToken = default(CancellationToken), string indexSuffix = null)
+        public static Task<IDeleteByQueryResponse> DeleteByQueryAsync<TDocument>(
+            this IElasticClient client, 
+            Func<DeleteByQueryDescriptor<TDocument>, DeleteByQueryDescriptor<TDocument>> selector, 
+            CancellationToken cancellationToken = default(CancellationToken), 
+            string indexSuffix = null)
            where TDocument : class
         {
             var index = GetIndex<TDocument>(indexSuffix);
-            return client.DeleteByQueryAsync<TDocument>(s => selector(s.Index(index)), cancellationToken);
+            return client.DeleteByQueryAsync<TDocument>(
+                s => selector(s.Index(index)), 
+                cancellationToken);
         }
 
-        public static Task<IDeleteIndexResponse> DeleteIndexAsync<TDocument>(this IElasticClient client, CancellationToken cancellationToken = default(CancellationToken), string indexSuffix = null)
+        public static Task<IDeleteIndexResponse> DeleteIndexAsync<TDocument>(
+            this IElasticClient client, CancellationToken cancellationToken = default(CancellationToken), 
+            string indexSuffix = null)
             where TDocument : class
         {
             var index = GetIndex<TDocument>(indexSuffix);
-            return client.DeleteIndexAsync(index, null, cancellationToken);
+            return client.DeleteIndexAsync(
+                index, 
+                null, 
+                cancellationToken);
         }
 
-        public static Task<IDeleteIndexResponse> DeleteIndexAsync(this IElasticClient client, string index, CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<IDeleteIndexResponse> DeleteIndexAsync(
+            this IElasticClient client, 
+            string index, 
+            CancellationToken cancellationToken = default(CancellationToken))
         {
-            return client.DeleteIndexAsync(Indices.Index(index), null, cancellationToken);
+            return client.DeleteIndexAsync(
+                Indices.Index(index), 
+                null, 
+                cancellationToken
+                );
+        }
+
+        //https://rimdev.io/bulk-import-documents-into-elasticsearch-using-nest/
+        public static void BulkAll<TDocument>(
+            this IElasticClient client, 
+            IEnumerable<TDocument> documents, 
+            CancellationToken cancellationToken = default(CancellationToken), 
+            string indexSuffix = null)
+             where TDocument : class
+        {
+            var index = GetIndex<TDocument>(indexSuffix);
+            var waitHandle = new CountdownEvent(1);
+
+            var bulkAll = client.BulkAll(documents, b => b
+                .Index(index)
+                .BackOffRetries(2)
+                .BackOffTime("30s")
+                .RefreshOnCompleted(true)
+                .MaxDegreeOfParallelism(4)
+                .Size(1000),
+                cancellationToken
+            );
+
+            bulkAll.Subscribe(new BulkAllObserver(
+                onNext: (b) => { Console.Write("."); },
+                onError: (e) => { throw e; },
+                onCompleted: () => waitHandle.Signal()
+            ));
+
+            waitHandle.Wait();
         }
     }
 }
