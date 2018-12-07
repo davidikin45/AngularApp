@@ -2,6 +2,7 @@
 using AspNetCore.ApiBase.Authorization;
 using AspNetCore.ApiBase.Cqrs;
 using AspNetCore.ApiBase.DependencyInjection.Modules;
+using AspNetCore.ApiBase.ElasticSearch;
 using AspNetCore.ApiBase.Email;
 using AspNetCore.ApiBase.Extensions;
 using AspNetCore.ApiBase.Filters;
@@ -197,6 +198,9 @@ namespace AspNetCore.ApiBase
                 ManipluateEmailTemplateSettings(options);
             });
             services.AddTransient(sp => sp.GetService<IOptions<EmailTemplates>>().Value);
+
+            services.Configure<ElasticSettings>(Configuration.GetSection("ElasticSettings"));
+            services.AddTransient(sp => sp.GetService<IOptions<ElasticSettings>>().Value);
 
             services.Configure<SwitchSettings>(Configuration.GetSection("SwitchSettings"));
             services.AddTransient(sp => sp.GetService<IOptions<SwitchSettings>>().Value);
@@ -842,6 +846,19 @@ namespace AspNetCore.ApiBase
             string xmlDocumentationFileName = AssemblyName + ".xml";
             var xmlDocumentationPath = Path.Combine(BinPath, xmlDocumentationFileName);
             services.AddSwagger(appSettings.AssemblyPrefix + " API", "", "", "", "v1", xmlDocumentationPath);
+        }
+        #endregion
+
+        #region Elastic
+        public virtual void ConfigureElasticServices(IServiceCollection services)
+        {
+            Logger.LogInformation("Configuring ElasticSearch");
+
+            var elasticSettings = GetSettings<ElasticSettings>("ElasticSettings");
+            if(!string.IsNullOrWhiteSpace(elasticSettings.Uri))
+            {
+                services.AddElasticSearch(elasticSettings.Uri, elasticSettings.DefaultIndex, elasticSettings.DefaultTypeName);
+            }
         }
         #endregion
 

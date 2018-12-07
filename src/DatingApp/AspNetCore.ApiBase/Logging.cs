@@ -1,5 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using AspNetCore.ApiBase.ElasticSearch;
+using AspNetCore.ApiBase.Settings;
+using Microsoft.Extensions.Configuration;
 using Serilog;
+using Serilog.Exceptions;
+using Serilog.Sinks.Elasticsearch;
+using System;
+using System.Linq;
+using System.Reflection;
 
 namespace AspnetCore.ApiBase
 {
@@ -15,12 +22,20 @@ namespace AspnetCore.ApiBase
 
     public class Logging
     {
-        public static void Init(IConfiguration configuration)
+        //https://www.humankode.com/asp-net-core/logging-with-elasticsearch-kibana-asp-net-core-and-docker
+        public static void Init(IConfiguration configuration, string elasticUri = null)
         {
-            Log.Logger = new LoggerConfiguration()
+            var name = Assembly.GetExecutingAssembly().GetName();
+            var loggerConfiguration = new LoggerConfiguration()
              .ReadFrom.Configuration(configuration)
              .Enrich.FromLogContext()
-             .CreateLogger();
+             .Enrich.WithExceptionDetails() //Include exception.data
+             .Enrich.WithMachineName()
+             .Enrich.WithProperty("Assembly", $"{name.Name}")
+             .Enrich.WithProperty("Version", $"{name.Version}")
+             .AddElasticSearchLogging(configuration);
+
+            Log.Logger = loggerConfiguration.CreateLogger();
         }
     }
 }
