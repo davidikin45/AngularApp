@@ -8,7 +8,7 @@ namespace AspNetCore.ApiBase.Localization
 {
     public static class LocalizationExtensions
     {
-        public static IApplicationBuilder UseRequestLocalizationCustom(this IApplicationBuilder app, string defaultCulture, params string[] supportedUICultures)
+        public static IApplicationBuilder UseRequestLocalizationCustom(this IApplicationBuilder app, string defaultCulture, bool allowNeutralCultures, params string[] supportedUICultures)
         {
             //https://andrewlock.net/adding-localisation-to-an-asp-net-core-application/
             //Default culture should be set to where the majority of traffic comes from.
@@ -18,7 +18,7 @@ namespace AspNetCore.ApiBase.Localization
             //Support all formats for numbers, dates, etc.
             var formatCulturesList = new List<string>();
 
-            //Countries
+            //Countries = en-US
             foreach (CultureInfo ci in CultureInfo.GetCultures(CultureTypes.SpecificCultures))
             {
                 if (!formatCulturesList.Contains(ci.Name))
@@ -27,12 +27,15 @@ namespace AspNetCore.ApiBase.Localization
                 }
             }
 
-            //Languages
-            foreach (CultureInfo ci in CultureInfo.GetCultures(CultureTypes.NeutralCultures))
+            if(allowNeutralCultures)
             {
-                if (!formatCulturesList.Contains(ci.TwoLetterISOLanguageName) && ci.TwoLetterISOLanguageName != defaultLanguage)
+                //Languages = en
+                foreach (CultureInfo ci in CultureInfo.GetCultures(CultureTypes.NeutralCultures))
                 {
-                    formatCulturesList.Add(ci.TwoLetterISOLanguageName);
+                    if (!formatCulturesList.Contains(ci.TwoLetterISOLanguageName) && ci.TwoLetterISOLanguageName != defaultLanguage)
+                    {
+                        formatCulturesList.Add(ci.TwoLetterISOLanguageName);
+                    }
                 }
             }
 
