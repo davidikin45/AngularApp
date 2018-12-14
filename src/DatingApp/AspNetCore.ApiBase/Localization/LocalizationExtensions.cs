@@ -8,7 +8,7 @@ namespace AspNetCore.ApiBase.Localization
 {
     public static class LocalizationExtensions
     {
-        public static IApplicationBuilder UseRequestLocalizationCustom(this IApplicationBuilder app, string defaultCulture, bool allowNeutralCultures, params string[] supportedUICultures)
+        public static IApplicationBuilder UseRequestLocalizationCustom(this IApplicationBuilder app, string defaultCulture, bool allowSpecificCultures, bool allowNeutralCultures, params string[] supportedUICultures)
         {
             //https://andrewlock.net/adding-localisation-to-an-asp-net-core-application/
             //Default culture should be set to where the majority of traffic comes from.
@@ -19,11 +19,14 @@ namespace AspNetCore.ApiBase.Localization
             var formatCulturesList = new List<string>();
 
             //Countries = en-US
-            foreach (CultureInfo ci in CultureInfo.GetCultures(CultureTypes.SpecificCultures))
+            if(allowSpecificCultures)
             {
-                if (!formatCulturesList.Contains(ci.Name))
+                foreach (CultureInfo ci in CultureInfo.GetCultures(CultureTypes.SpecificCultures))
                 {
-                    formatCulturesList.Add(ci.Name);
+                    if (!formatCulturesList.Contains(ci.Name))
+                    {
+                        formatCulturesList.Add(ci.Name);
+                    }
                 }
             }
 

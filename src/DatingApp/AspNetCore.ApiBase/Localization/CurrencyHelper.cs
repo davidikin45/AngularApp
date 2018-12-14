@@ -14,7 +14,7 @@ namespace AspNetCore.ApiBase.Localization
             {
                 Value = c.ISOCurrencySymbol,
                 Text = $"{c.ISOCurrencySymbol} – {c.CurrencySymbol}",
-                Selected = c.ISOCurrencySymbol == new RegionInfo(CultureInfo.CurrentCulture.LCID).ISOCurrencySymbol
+                //Selected = c.ISOCurrencySymbol == new RegionInfo(CultureInfo.CurrentCulture.LCID).ISOCurrencySymbol
             })
              .OrderBy(s => s.Text);
         }
@@ -78,7 +78,8 @@ namespace AspNetCore.ApiBase.Localization
             else
             {
                 numberFormat = CultureInfo.CurrentCulture.NumberFormat;
-                ISOCurrencySymbol = new RegionInfo(CultureInfo.CurrentCulture.LCID).ISOCurrencySymbol;
+                var specificCulture = CultureInfo.CreateSpecificCulture(CultureInfo.CurrentCulture.Name);
+                ISOCurrencySymbol = new RegionInfo(specificCulture.LCID).ISOCurrencySymbol;
             }
 
             var numberFormatInfo = (NumberFormatInfo)numberFormat.Clone();

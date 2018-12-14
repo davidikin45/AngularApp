@@ -1178,7 +1178,7 @@ namespace AspNetCore.ApiBase
                    appBranch.UseContentHandler(env, AppSettings, publicUploadFolders, cacheSettings.UploadFilesDays);
                });
 
-            app.UseRequestLocalizationCustom(appSettings.DefaultCulture, false);
+            app.UseRequestLocalizationCustom(appSettings.DefaultCulture, false, true);
         
             app.UseDefaultFiles();
 

@@ -37,6 +37,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatingApp.Tenant.Data.Ident
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatingApp.Tenant.Domain", "DatingApp.Tenant.Domain\DatingApp.Tenant.Domain.csproj", "{9A1284EB-2358-406A-9092-5419A69408B8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.ApiBase.Tests", "AspNetCore.ApiBase.Tests\AspNetCore.ApiBase.Tests.csproj", "{34D3A8AC-7F64-4673-983B-BE2A7F308302}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,10 @@ Global
 		{9A1284EB-2358-406A-9092-5419A69408B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A1284EB-2358-406A-9092-5419A69408B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A1284EB-2358-406A-9092-5419A69408B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34D3A8AC-7F64-4673-983B-BE2A7F308302}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34D3A8AC-7F64-4673-983B-BE2A7F308302}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34D3A8AC-7F64-4673-983B-BE2A7F308302}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34D3A8AC-7F64-4673-983B-BE2A7F308302}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
