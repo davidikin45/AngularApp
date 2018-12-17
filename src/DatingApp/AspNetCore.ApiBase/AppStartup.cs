@@ -665,9 +665,9 @@ namespace AspNetCore.ApiBase
                 "CookieConsent",
             };
 
-            //Replacements
             // Views/{1} = {1}/Views
             // Shared = Shared/Views
+
 
             //Non Area
             //https://stackoverflow.com/questions/36747293/how-to-specify-the-view-location-in-asp-net-core-mvc-when-using-custom-locations
@@ -712,6 +712,7 @@ namespace AspNetCore.ApiBase
                     o.AreaViewLocationFormats.Add("/" + appSettings.MvcImplementationFolder + "Shared/Views/" + sharedViewFolder + "{0}" + RazorViewEngine.ViewExtension);
                 }
             });
+
 
             //services.AddCustomModelMetadataProvider();
             //services.AddCustomObjectValidator();
@@ -1009,7 +1010,10 @@ namespace AspNetCore.ApiBase
                     }
                );
 
-               app.UseBrowserLink();
+                app.UseDatabaseErrorPage();
+
+                app.UseBrowserLink();
+
             }
             else
             {
