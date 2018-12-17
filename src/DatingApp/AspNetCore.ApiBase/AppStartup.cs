@@ -653,7 +653,65 @@ namespace AspNetCore.ApiBase
                 return new UrlHelper(actionContext);
             });
 
-            services.AddViewLocationExpander(appSettings.MvcImplementationFolder);
+            //services.AddViewLocationExpander(appSettings.MvcImplementationFolder);
+
+            var sharedViewFolders = new string[] {
+                "Bundles",
+                "Sidebar",
+                "CRUD",
+                "Navigation",
+                "Footer",
+                "Alerts",
+                "CookieConsent",
+            };
+
+            //Replacements
+            // Views/{1} = {1}/Views
+            // Shared = Shared/Views
+
+            //Non Area
+            //https://stackoverflow.com/questions/36747293/how-to-specify-the-view-location-in-asp-net-core-mvc-when-using-custom-locations
+            services.Configure<RazorViewEngineOptions>(o =>
+            {
+                // {2} is area, {1} is controller,{0} is the action    
+                //o.ViewLocationFormats.Clear();
+                o.ViewLocationFormats.Add("/" + appSettings.MvcImplementationFolder + "{1}/Views/{0}" + RazorViewEngine.ViewExtension);
+                o.ViewLocationFormats.Add("/" + appSettings.MvcImplementationFolder + "Shared/Views/{0}" + RazorViewEngine.ViewExtension);
+
+                foreach (var sharedViewFolder in sharedViewFolders)
+                {
+                    o.ViewLocationFormats.Add("/" + appSettings.MvcImplementationFolder + "Shared/Views/"+ sharedViewFolder + "/{0}" + RazorViewEngine.ViewExtension);
+                }
+            });
+
+            //Areas
+            //https://stackoverflow.com/questions/36747293/how-to-specify-the-view-location-in-asp-net-core-mvc-when-using-custom-locations
+            services.Configure<RazorViewEngineOptions>(o =>
+            {
+                // {2} is area, {1} is controller,{0} is the action    
+                //o.AreaViewLocationFormats.Clear();
+                o.AreaViewLocationFormats.Add("/Areas/{2}/" + appSettings.MvcImplementationFolder + "{1}/Views/{0}" + RazorViewEngine.ViewExtension);
+                o.AreaViewLocationFormats.Add("/Areas/{2}/" + appSettings.MvcImplementationFolder + "Shared/Views/{0}" + RazorViewEngine.ViewExtension);
+
+                foreach (var sharedViewFolder in sharedViewFolders)
+                {
+                    o.AreaViewLocationFormats.Add("/Areas/{2}/" + appSettings.MvcImplementationFolder + "Shared/Views/" + sharedViewFolder + "/{0}" + RazorViewEngine.ViewExtension);
+                }
+
+                o.AreaViewLocationFormats.Add("/Areas/Shared/Views/{0}" + RazorViewEngine.ViewExtension);
+
+                foreach (var sharedViewFolder in sharedViewFolders)
+                {
+                    o.AreaViewLocationFormats.Add("/Areas/Shared/Views/" + sharedViewFolder + "/{0}" + RazorViewEngine.ViewExtension);
+                }
+
+                o.AreaViewLocationFormats.Add("/" + appSettings.MvcImplementationFolder + "Shared/Views/{0}" + RazorViewEngine.ViewExtension);
+
+                foreach (var sharedViewFolder in sharedViewFolders)
+                {
+                    o.AreaViewLocationFormats.Add("/" + appSettings.MvcImplementationFolder + "Shared/Views/" + sharedViewFolder + "{0}" + RazorViewEngine.ViewExtension);
+                }
+            });
 
             //services.AddCustomModelMetadataProvider();
             //services.AddCustomObjectValidator();
@@ -1178,7 +1236,7 @@ namespace AspNetCore.ApiBase
                    appBranch.UseContentHandler(env, AppSettings, publicUploadFolders, cacheSettings.UploadFilesDays);
                });
 
-            app.UseRequestLocalizationCustom(appSettings.DefaultCulture, false, true);
+            app.UseRequestLocalizationCustom(appSettings.DefaultCulture, true, false);
         
             app.UseDefaultFiles();
 

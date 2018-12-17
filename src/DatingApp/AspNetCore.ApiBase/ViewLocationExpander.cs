@@ -8,7 +8,7 @@ namespace AspNetCore.ApiBase
     {
         private readonly string MvcImplementationFolder;
 
-        public ViewLocationExpander(string MvcImplementationFolder = "Mvc/")
+        public ViewLocationExpander(string MvcImplementationFolder = "Controllers/")
         {
             this.MvcImplementationFolder = MvcImplementationFolder;
         }
@@ -32,7 +32,15 @@ namespace AspNetCore.ApiBase
         // /Views/{1}/{0}.cshtml
         // /Shared/{0}.cshtml
         // /Pages/{0}.cshtml
-        //Where {0} is the view and {1} the controller name.
+
+        // /Areas/{2}/Views/{1}/{0}.cshtml
+        // /Areas/{2}/Shared/{0}.cshtml
+        // /Areas/{2}/Pages/{0}.cshtml
+        //Where {0} is the view, {1} the controller name, {2} the area name
+
+        // Replacements
+        // Views/{1} = {1}/Views
+        // Shared = Shared/Views
         public virtual IEnumerable<string> ExpandViewLocations(ViewLocationExpanderContext context, IEnumerable<string> viewLocations)
         {
             return viewLocations.Union(Locations());

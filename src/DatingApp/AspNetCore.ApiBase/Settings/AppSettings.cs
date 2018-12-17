@@ -4,7 +4,7 @@
     {
         public string DefaultCulture { get; set; }
         public string AssemblyPrefix { get; set; }
-        public string MvcImplementationFolder { get; set; }
+        public string MvcImplementationFolder { get; set; } = "Controllers/";
         public string ActiveViewTheme { get; set; }
         public string SignalRUrlPrefix { get; set; }
         public string CookieConsentName { get; set; }

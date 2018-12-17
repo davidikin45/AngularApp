@@ -25,8 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Areas\Admin\Controllers\Shared\Views\" />
+    <Folder Include="Areas\Shared\Views\" />
     <Folder Include="certificates\" />
-    <Folder Include="Mvc\" />
     <Folder Include="email_templates\" />
     <Folder Include="signing_keys\" />
     <Folder Include="wwwroot\files\social-media\" />

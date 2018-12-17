@@ -93,14 +93,14 @@ namespace AspNetCore.ApiBase.MultiTenancy
             return new TenantDbContextIdentification<TContext>(services);
         }
 
-        public static IServiceCollection AddTenantLocations<TTenant>(this IServiceCollection services, string mvcImplementationFolder = "Mvc/")
+        public static IServiceCollection AddTenantLocations<TTenant>(this IServiceCollection services)
              where TTenant : AppTenant
         {
             return services.Configure<RazorViewEngineOptions>(options =>
             {
                 if (!(options.ViewLocationExpanders.FirstOrDefault() is TenantViewLocationExpander<TTenant>))
                 {
-                    options.ViewLocationExpanders.Insert(0, new TenantViewLocationExpander<TTenant>(mvcImplementationFolder));
+                    options.ViewLocationExpanders.Insert(0, new TenantViewLocationExpander<TTenant>());
                 }
             });
         }

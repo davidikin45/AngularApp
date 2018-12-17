@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <Folder Include="certificates\" />
-    <Folder Include="Mvc\" />
     <Folder Include="email_templates\" />
     <Folder Include="signing_keys\" />
     <Folder Include="wwwroot\files\social-media\" />
