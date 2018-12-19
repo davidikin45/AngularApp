@@ -48,19 +48,19 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         Task<TReadDto> CreateAsync(TCreateDto dto);
         Task<List<WebApiMessage>> BulkCreateAsync(TCreateDto[] dtos);
 
-        Task<TUpdateDto> GetByIdForEditAsync(string id);
-        Task<List<TUpdateDto>> BulkGetByIdsForEditAsync(IEnumerable<string> ids);
+        Task<TUpdateDto> GetByIdForEditAsync(object id);
+        Task<List<TUpdateDto>> BulkGetByIdsForEditAsync(IEnumerable<object> ids);
 
-        Task UpdateAsync(string id, TUpdateDto dto);
+        Task UpdateAsync(object id, TUpdateDto dto);
         Task<List<WebApiMessage>> BulkUpdateAsync(BulkDto<TUpdateDto>[] dtos);
 
-        Task UpdatePartialAsync(string id, JsonPatchDocument dtoPatch);
+        Task UpdatePartialAsync(object id, JsonPatchDocument dtoPatch);
         Task<List<WebApiMessage>> BulkUpdatePartialAsync(BulkDto<JsonPatchDocument>[] dtos);
 
-        Task<TDeleteDto> GetByIdForDeleteAsync(string id);
-        Task<List<TDeleteDto>> BulkGetByIdsForDeleteAsync(IEnumerable<string> ids);
+        Task<TDeleteDto> GetByIdForDeleteAsync(object id);
+        Task<List<TDeleteDto>> BulkGetByIdsForDeleteAsync(IEnumerable<object> ids);
 
-        Task DeleteAsync(string id, [FromBody] TDeleteDto dto);
+        Task DeleteAsync(object id, [FromBody] TDeleteDto dto);
         Task<List<WebApiMessage>> BulkDeleteAsync([FromBody] TDeleteDto[] dtos);
 
         Task<CollectionItemTypeDto> NewCollectionItemAsync<CollectionItemTypeDto>(string collection);

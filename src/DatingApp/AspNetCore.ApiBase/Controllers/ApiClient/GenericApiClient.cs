@@ -57,7 +57,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #endregion
 
         #region Get for Edit
-        public async Task<TUpdateDto> GetByIdForEditAsync(string id)
+        public async Task<TUpdateDto> GetByIdForEditAsync(object id)
         {
             var response = await client.Get($"{resource}/edit/{id}");
 
@@ -72,7 +72,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #endregion
 
         #region Bulk Get for Edit
-        public async Task<List<TUpdateDto>> BulkGetByIdsForEditAsync(IEnumerable<string> ids)
+        public async Task<List<TUpdateDto>> BulkGetByIdsForEditAsync(IEnumerable<object> ids)
         {
             var response = await client.Get($"{resource}/bulk/edit/{String.Join(',', ids)}");
 
@@ -83,7 +83,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #endregion
 
         #region Update
-        public async Task UpdateAsync(string id, TUpdateDto dto)
+        public async Task UpdateAsync(object id, TUpdateDto dto)
         {
             var response = await client.Put($"{resource}/{id}", dto, settings);
             await response.EnsureSuccessStatusCodeAsync();
@@ -102,7 +102,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #endregion
 
         #region Partial Update
-        public async Task UpdatePartialAsync(string id, JsonPatchDocument dtoPatch)
+        public async Task UpdatePartialAsync(object id, JsonPatchDocument dtoPatch)
         {
             var response = await client.Patch($"{resource}/{id}", dtoPatch, settings);
 
@@ -122,7 +122,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #endregion
 
         #region Get For Delete
-        public async Task<TDeleteDto> GetByIdForDeleteAsync(string id)
+        public async Task<TDeleteDto> GetByIdForDeleteAsync(object id)
         {
             var response = await client.Get($"{resource}/delete/{id}");
 
@@ -137,7 +137,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #endregion
 
         #region Bulk Get For Delete
-        public async Task<List<TDeleteDto>> BulkGetByIdsForDeleteAsync(IEnumerable<string> ids)
+        public async Task<List<TDeleteDto>> BulkGetByIdsForDeleteAsync(IEnumerable<object> ids)
         {
             var response = await client.Get($"{resource}/bulk/delete/{String.Join(',', ids)}");
 
@@ -148,7 +148,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #endregion
 
         #region Delete
-        public async Task DeleteAsync(string id, [FromBody] TDeleteDto dto)
+        public async Task DeleteAsync(object id, [FromBody] TDeleteDto dto)
         {
             var response = await client.Delete($"{resource}/{id}", dto, settings);
 

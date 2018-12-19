@@ -1,6 +1,5 @@
 ﻿using AspNetCore.ApiBase.Dtos;
 using GrabMobile.ApiClient.HttpClientREST;
-using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -26,7 +25,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         }
 
         #region Search
-        public async Task<WebApiListResponseDto<TReadDto>> SearchAsync(WebApiPagedSearchOrderingRequestDto resourceParameters)
+        public async Task<WebApiListResponseDto<TReadDto>> SearchAsync(WebApiPagedSearchOrderingRequestDto resourceParameters = null)
         {
             var response = await client.GetWithQueryString($"{resource}", resourceParameters);
 
@@ -57,7 +56,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #endregion
 
         #region GetById
-        public async Task<TReadDto> GetByIdAsync(string id, WebApiParamsDto parameters = null)
+        public async Task<TReadDto> GetByIdAsync(object id, WebApiParamsDto parameters = null)
         {
             var response = await client.GetWithQueryString($"{resource}/{id}", parameters);
 
@@ -70,7 +69,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
             return item;
         }
 
-        public async Task<List<TReadDto>> BulkGetByIdsAsync(IEnumerable<string> ids)
+        public async Task<List<TReadDto>> BulkGetByIdsAsync(IEnumerable<object> ids)
         {
             var response = await client.Get($"{resource}/{String.Join(',', ids)}");
 
@@ -79,7 +78,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
             return await response.ContentAsTypeAsync<List<TReadDto>>();
         }
 
-        public async Task<TReadDto> GetByIdFullGraphAsync(string id, WebApiParamsDto parameters = null)
+        public async Task<TReadDto> GetByIdFullGraphAsync(object id, WebApiParamsDto parameters = null)
         {
             var response = await client.GetWithQueryString($"{resource}/full-graph/{id}", parameters);
 
@@ -94,7 +93,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #endregion
 
         #region Child Collection
-        public async Task<WebApiListResponseDto<TChildCollectionItemDto>> GetByIdChildCollectionAsync<TChildCollectionItemDto>(string id, string collection, WebApiPagedSearchOrderingRequestDto resourceParameters)
+        public async Task<WebApiListResponseDto<TChildCollectionItemDto>> GetByIdChildCollectionAsync<TChildCollectionItemDto>(object id, string collection, WebApiPagedSearchOrderingRequestDto resourceParameters)
      where TChildCollectionItemDto : class
         {
             var response = await client.GetWithQueryString($"{resource}/{id}/{collection}", resourceParameters);
@@ -104,7 +103,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
             return await response.ContentAsTypeAsync<WebApiListResponseDto<TChildCollectionItemDto>>();
         }
 
-        public async Task<TChildCollectionItemDto> GetByIdChildCollectionItemAsync<TChildCollectionItemDto>(string id, string collection, string collectionItemId)
+        public async Task<TChildCollectionItemDto> GetByIdChildCollectionItemAsync<TChildCollectionItemDto>(object id, string collection, string collectionItemId)
             where TChildCollectionItemDto : class
         {
             var response = await client.Get($"{resource}/{id}/{collection}/{collectionItemId}");
