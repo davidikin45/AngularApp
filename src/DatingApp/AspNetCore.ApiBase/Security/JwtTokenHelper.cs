@@ -11,7 +11,7 @@ namespace AspNetCore.ApiBase.Security
     public static class JwtTokenHelper
     {
         //Assymetric
-        public static dynamic CreateJwtTokenSigningWithRsaSecurityKey(string userId, string userName, IEnumerable<string> roles, int minuteExpiry, RsaSecurityKey key, string issuer, string audience, params string[] scopes)
+        public static JwtToken CreateJwtTokenSigningWithRsaSecurityKey(string userId, string userName, IEnumerable<string> roles, int minuteExpiry, RsaSecurityKey key, string issuer, string audience, params string[] scopes)
         {
             var claims = new List<Claim>()
                         {
@@ -40,7 +40,7 @@ namespace AspNetCore.ApiBase.Security
         }
 
         //Assymetric
-        public static dynamic CreateJwtTokenSigningWithCertificateSecurityKey(string userId, string userName, IEnumerable<string> roles, int minuteExpiry, X509SecurityKey key, string issuer, string audience, params string[] scopes)
+        public static JwtToken CreateJwtTokenSigningWithCertificateSecurityKey(string userId, string userName, IEnumerable<string> roles, int minuteExpiry, X509SecurityKey key, string issuer, string audience, params string[] scopes)
         {
             var claims = new List<Claim>()
                         {
@@ -69,7 +69,7 @@ namespace AspNetCore.ApiBase.Security
         }
 
         //Symmetric
-        public static dynamic CreateJwtTokenSigningWithKey(string userId, string userName, IEnumerable<string> roles, int minuteExpiry, string hmacKey, string issuer, string audience, params string[] scopes)
+        public static JwtToken CreateJwtTokenSigningWithKey(string userId, string userName, IEnumerable<string> roles, int minuteExpiry, string hmacKey, string issuer, string audience, params string[] scopes)
         {
             var claims = new List<Claim>()
                         {
@@ -99,7 +99,7 @@ namespace AspNetCore.ApiBase.Security
             return CreateJwtToken(minuteExpiry, issuer, audience, claims, creds);
         }
 
-        private static dynamic CreateJwtToken(int minuteExpiry, string issuer, string audience, List<Claim> claims, SigningCredentials creds)
+        private static JwtToken CreateJwtToken(int minuteExpiry, string issuer, string audience, List<Claim> claims, SigningCredentials creds)
         {
             var token = new JwtSecurityToken(
                         issuer,
@@ -108,10 +108,10 @@ namespace AspNetCore.ApiBase.Security
                         expires: DateTime.UtcNow.AddMinutes(minuteExpiry),
                         signingCredentials: creds);
 
-            var results = new
+            var results = new JwtToken
             {
-                token = new JwtSecurityTokenHandler().WriteToken(token),
-                expiration = token.ValidTo
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                Expiration = token.ValidTo
             };
 
             return results;

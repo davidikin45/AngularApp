@@ -1,5 +1,6 @@
 ﻿using AspNetCore.ApiBase.ApplicationServices;
 using AspNetCore.ApiBase.Authorization;
+using AspNetCore.ApiBase.Controllers.ApiClient;
 using AspNetCore.ApiBase.Data.Helpers;
 using AspNetCore.ApiBase.DomainEvents;
 using AspNetCore.ApiBase.Dtos;
@@ -44,7 +45,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
     //[Authorize]
     //[AllowAnonymous]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public abstract class ApiControllerEntityReadOnlyAuthorizeBase<TDto, IEntityService> : ApiControllerBase
+    public abstract class ApiControllerEntityReadOnlyAuthorizeBase<TDto, IEntityService> : ApiControllerBase, IApiControllerEntityReadOnly<TDto>
         where TDto : class
         where IEntityService : IApplicationServiceEntityReadOnly<TDto>
     {
@@ -58,7 +59,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
             TypeHelperService = typeHelperService;
         }
 
-        #region List
+        #region Search
 
         /// <summary>
         /// Gets the paged.
@@ -71,8 +72,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [Route(".{format}")]
         [HttpGet]
         [HttpHead]
-        [ProducesResponseType(typeof(WebApiPagedResponseDto<object>), 200)]
-        public virtual async Task<IActionResult> GetPaged([FromQuery] WebApiPagedSearchOrderingRequestDto resourceParameters)
+        public virtual async Task<ActionResult<WebApiListResponseDto<TDto>>> Search([FromQuery] WebApiPagedSearchOrderingRequestDto resourceParameters)
         {  
             if(User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && c.Value.EndsWith(ResourceOperationsCore.CRUD.Operations.Read)).Count() == 0)
             {
@@ -82,7 +82,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
             return await List(resourceParameters);
         }
 
-        private async Task<IActionResult> List(WebApiPagedSearchOrderingRequestDto resourceParameters)
+        private async Task<ActionResult> List(WebApiPagedSearchOrderingRequestDto resourceParameters)
         {
             if (string.IsNullOrEmpty(resourceParameters.OrderBy))
                 resourceParameters.OrderBy = "Id";
@@ -158,8 +158,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [Route("get-all")]
         [Route("get-all.{format}")]
         [HttpGet]
-        [ProducesResponseType(typeof(List<object>), 200)]
-        public virtual async Task<IActionResult> GetAll()
+        public virtual async Task<ActionResult<List<TDto>>> GetAll()
         {
             var cts = TaskHelper.CreateChildCancellationTokenSource(ClientDisconnectedToken());
 
@@ -179,8 +178,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [Route("get-all-paged")]
         [Route("get-all-paged.{format}")]
         [HttpGet]
-        [ProducesResponseType(typeof(WebApiPagedResponseDto<object>), 200)]
-        public virtual async Task<IActionResult> GetAllPaged()
+        public virtual async Task<ActionResult<List<TDto>>> GetAllPaged()
         {
             var cts = TaskHelper.CreateChildCancellationTokenSource(ClientDisconnectedToken());
 
@@ -208,7 +206,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         }
         #endregion
 
-        #region Details with Composition Properties
+        #region GetById with Composition Properties
         //http://jakeydocs.readthedocs.io/en/latest/mvc/models/formatting.html
         /// <summary>
         /// Gets the specified identifier.
@@ -221,8 +219,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [Route("{id}"), Route("{id}.{format}")]
         //[Route("get/{id}"), Route("get/{id}.{format}")]
         [HttpGet]
-        [ProducesResponseType(typeof(object), 200)]
-        public virtual async Task<IActionResult> Get(string id, [FromQuery] string fields)
+        public virtual async Task<ActionResult<TDto>> GetById(string id, [FromQuery] string fields)
         {
             if (!TypeHelperService.TypeHasProperties<TDto>(fields))
             {
@@ -261,8 +258,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [Route("({ids})"), Route("({ids}).{format}")]
         //[Route("get/({ids})"), Route("get/({ids}).{format}")]
         [HttpGet]
-        [ProducesResponseType(typeof(List<object>), 200)]
-        public virtual async Task<IActionResult> GetCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<string> ids)
+        public virtual async Task<ActionResult<List<TDto>>> BulkGetByIds([ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<string> ids)
         {
             if (ids == null)
             {
@@ -282,15 +278,12 @@ namespace AspNetCore.ApiBase.Controllers.Api
 
             return Success(list);
         }
-        #endregion
 
-        #region Details Full Graph
         [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner)]
         [FormatFilter]
         [Route("full-graph/{id}"), Route("full-graph/{id}.{format}")]
         [HttpGet]
-        [ProducesResponseType(typeof(object), 200)]
-        public virtual async Task<IActionResult> GetFullGraph(string id, [FromQuery] string fields)
+        public virtual async Task<ActionResult<TDto>> GetByIdFullGraph(string id, [FromQuery] string fields)
         {
             if (!TypeHelperService.TypeHasProperties<TDto>(fields))
             {
@@ -320,7 +313,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         }
         #endregion
 
-        #region Collection List and Details
+        #region Child Collection List and Details
         /// <summary>
         /// Gets the paged.
         /// </summary>
@@ -332,8 +325,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         //[Route("{id}/{*collection}.{format}")]
         [HttpGet]
         [HttpHead]
-        [ProducesResponseType(typeof(WebApiPagedResponseDto<object>), 200)]
-        public virtual async Task<IActionResult> GetCollectionProperty(string id, string collection, WebApiPagedSearchOrderingRequestDto resourceParameters)
+        public virtual async Task<IActionResult> GetByIdChildCollection(string id, string collection, WebApiPagedSearchOrderingRequestDto resourceParameters)
         {
             if (string.IsNullOrEmpty(resourceParameters.OrderBy))
                 resourceParameters.OrderBy = "Id";
@@ -403,11 +395,11 @@ namespace AspNetCore.ApiBase.Controllers.Api
                 return collectionPropertyDtoItemAsDictionary;
             });
 
-            var linkedCollectionResource = new
+            var linkedCollectionResource = new WebApiListResponseDto<IDictionary<string, object>>
             {
-                value = shapedDataWithLinks
+                Value = shapedDataWithLinks
                 ,
-                links = links
+                Links = links
             };
 
             return Ok(linkedCollectionResource);
@@ -474,7 +466,7 @@ ResourceUriType type)
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return UrlHelper.Action(nameof(GetPaged),
+                    return UrlHelper.Action(nameof(Search),
                           UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
                       new
                       {
@@ -487,7 +479,7 @@ ResourceUriType type)
                       },
                       UrlHelper.ActionContext.HttpContext.Request.Scheme);
                 case ResourceUriType.NextPage:
-                    return UrlHelper.Action(nameof(GetPaged),
+                    return UrlHelper.Action(nameof(Search),
                           UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
                       new
                       {
@@ -501,7 +493,7 @@ ResourceUriType type)
                       UrlHelper.ActionContext.HttpContext.Request.Scheme);
 
                 default:
-                    return UrlHelper.Action(nameof(GetPaged),
+                    return UrlHelper.Action(nameof(Search),
                     UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
                     new
                     {
@@ -524,7 +516,7 @@ ResourceUriType type)
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return UrlHelper.Action(nameof(GetCollection),
+                    return UrlHelper.Action(nameof(BulkGetByIds),
                           UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
                       new
                       {
@@ -535,7 +527,7 @@ ResourceUriType type)
                       },
                       UrlHelper.ActionContext.HttpContext.Request.Scheme);
                 case ResourceUriType.NextPage:
-                    return UrlHelper.Action(nameof(GetCollection),
+                    return UrlHelper.Action(nameof(BulkGetByIds),
                           UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
                       new
                       {
@@ -547,7 +539,7 @@ ResourceUriType type)
                       UrlHelper.ActionContext.HttpContext.Request.Scheme);
 
                 default:
-                    return UrlHelper.Action(nameof(GetCollection),
+                    return UrlHelper.Action(nameof(BulkGetByIds),
                     UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
                     new
                     {
@@ -576,10 +568,10 @@ ResourceUriType type)
         {
             var links = new List<LinkDto>();
 
-            string action = nameof(Get);
+            string action = nameof(GetById);
             if(fullGraph)
             {
-                action = nameof(GetFullGraph);
+                action = nameof(GetByIdFullGraph);
             }
 
             if (string.IsNullOrWhiteSpace(fields))
@@ -626,14 +618,14 @@ ResourceUriType type)
             if (string.IsNullOrWhiteSpace(fields))
             {
                 links.Add(
-                  new LinkDto(UrlHelper.Action(nameof(GetCollection), UrlHelper.ActionContext.RouteData.Values["controller"].ToString(), new {  id = id, collection = collection }, UrlHelper.ActionContext.HttpContext.Request.Scheme),
+                  new LinkDto(UrlHelper.Action(nameof(BulkGetByIds), UrlHelper.ActionContext.RouteData.Values["controller"].ToString(), new {  id = id, collection = collection }, UrlHelper.ActionContext.HttpContext.Request.Scheme),
                   "self",
                   HttpMethod.Get.Method));
             }
             else
             {
                 links.Add(
-                  new LinkDto(UrlHelper.Action(nameof(GetCollection), UrlHelper.ActionContext.RouteData.Values["controller"].ToString(), new { id = id, collection = collection, fields = fields }, UrlHelper.ActionContext.HttpContext.Request.Scheme),
+                  new LinkDto(UrlHelper.Action(nameof(BulkGetByIds), UrlHelper.ActionContext.RouteData.Values["controller"].ToString(), new { id = id, collection = collection, fields = fields }, UrlHelper.ActionContext.HttpContext.Request.Scheme),
                   "self",
                   HttpMethod.Get.Method));
             }

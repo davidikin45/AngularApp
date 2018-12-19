@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq.Expressions;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace AspNetCore.ApiBase.Controllers.Mvc
 {
@@ -113,6 +116,11 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
         protected string Title
         {
             get { return this.HttpContext.Request.Path; }
+        }
+
+        protected Task<string> GetTokenAsync()
+        {
+           return HttpContext.GetTokenAsync(JwtBearerDefaults.AuthenticationScheme, "access_token");
         }
     }
 }

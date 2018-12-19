@@ -41,7 +41,7 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
             Service = service;
         }
 
-        #region List
+        #region Search
         // GET: Default
         [Route("")]
         public virtual async Task<ActionResult> Index(int page = 1, int pageSize = 10, string orderColumn = "Id", string orderType = "desc", string search = "")
@@ -87,7 +87,7 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
         }
         #endregion
 
-        #region Details
+        #region GetById
         // GET: Default/Details/5
         [Route("details/{id}")]
         public virtual async Task<ActionResult> Details(string id)
@@ -111,7 +111,7 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
         }
         #endregion
 
-        #region Collection List and Details
+        #region Child Collection List and Details
 
         [Route("details/{id}/{*collection}")]
         public virtual async Task<ActionResult> Collection(string id, string collection, int page = 1, int pageSize = 10, string orderColumn = "Id", string orderType = "desc", string search = "")
@@ -224,7 +224,6 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
             return View("Details", data);
         }
         #endregion
-
     }
 }
 

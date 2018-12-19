@@ -14,6 +14,7 @@ using AspNetCore.ApiBase.MultiTenancy;
 using AspNetCore.ApiBase.Reflection;
 using AspNetCore.ApiBase.Routing;
 using AspNetCore.ApiBase.Routing.Constraints;
+using AspNetCore.ApiBase.Security;
 using AspNetCore.ApiBase.Settings;
 using AspNetCore.ApiBase.SignalR;
 using AspNetCore.ApiBase.Swagger;
@@ -369,11 +370,13 @@ namespace AspNetCore.ApiBase
                 {
                     //https://docs.microsoft.com/en-us/aspnet/core/security/authentication/cookie?view=aspnetcore-2.1&tabs=aspnetcore2x
                     //overides "Identity.Application"/IdentityConstants.ApplicationScheme set by AddIdentity
+                    //Use cookie authentication without ASP.NET Core Identity
                     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme; // Challenge scheme is how user should login if they arent already logged in.
                 });
 
                 //authetication scheme seperate to application cookie
+                //Use cookie authentication without ASP.NET Core Identity
                 authenticationBuilder.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, (options) =>
                 {
                     options.Cookie.Name = appSettings.CookieAuthName;
@@ -1249,6 +1252,8 @@ namespace AspNetCore.ApiBase
 
             //non versioned files
             app.UseNonVersionedStaticFiles(cacheSettings.NonVersionedStaticFilesDays);
+
+            app.UseJwtCookieAuthentication();
 
             app.UseAuthentication();
 

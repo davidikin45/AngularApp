@@ -117,7 +117,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
             return Success(webApiMessages);
         }
 
-        protected IActionResult BulkCreateResponse(IEnumerable<Result> results)
+        protected List<WebApiMessage> BulkCreateResponse(IEnumerable<Result> results)
         {
             var webApiMessages = new List<WebApiMessage>();
 
@@ -134,10 +134,10 @@ namespace AspNetCore.ApiBase.Controllers.Api
             }
 
             //For bulk return 200 regardless
-            return Success(webApiMessages);
+            return webApiMessages;
         }
 
-        protected IActionResult BulkUpdateResponse(IEnumerable<Result> results)
+        protected List<WebApiMessage> BulkUpdateResponse(IEnumerable<Result> results)
         {
             var webApiMessages = new List<WebApiMessage>();
 
@@ -154,10 +154,10 @@ namespace AspNetCore.ApiBase.Controllers.Api
             }
 
             //For bulk return 200 regardless
-            return Success(webApiMessages);
+            return webApiMessages;
         }
 
-        protected IActionResult BulkDeleteResponse(IEnumerable<Result> results)
+        protected List<WebApiMessage> BulkDeleteResponse(IEnumerable<Result> results)
         {
             var webApiMessages = new List<WebApiMessage>();
 
@@ -174,10 +174,10 @@ namespace AspNetCore.ApiBase.Controllers.Api
             }
 
             //For bulk return 200 regardless
-            return Success(webApiMessages);
+            return webApiMessages;
         }
 
-        protected IActionResult ValidationErrors(Result failure)
+        protected ActionResult ValidationErrors(Result failure)
         {
             var newModelState = new ModelStateDictionary();
             switch (failure.ErrorType)
@@ -199,22 +199,22 @@ namespace AspNetCore.ApiBase.Controllers.Api
             return ValidationErrors(newModelState);
         }
 
-        protected IActionResult ValidationErrors()
+        protected ActionResult ValidationErrors()
         {
             return ValidationErrors(Messages.RequestInvalid, ModelState);
         }
 
-        protected IActionResult ValidationErrors(ModelStateDictionary modelState)
+        protected ActionResult ValidationErrors(ModelStateDictionary modelState)
         {
             return ValidationErrors(Messages.RequestInvalid, modelState);
         }
 
-        protected virtual IActionResult ValidationErrors(string message, ModelStateDictionary modelState)
+        protected virtual ActionResult ValidationErrors(string message, ModelStateDictionary modelState)
         {
             return new UnprocessableEntityAngularObjectResult(message, modelState);
         }
 
-        protected virtual IActionResult Success<T>(T model)
+        protected virtual ActionResult Success<T>(T model)
         {
             return new OkObjectResult(model);
         }
@@ -224,27 +224,27 @@ namespace AspNetCore.ApiBase.Controllers.Api
             return this.HttpContext.RequestAborted;
         }
 
-        protected IActionResult ApiBadRequest()
+        protected ActionResult ApiBadRequest()
         {
             return ApiErrorMessage(Messages.RequestInvalid);
         }
 
-        protected IActionResult ApiErrorMessage(string message)
+        protected ActionResult ApiErrorMessage(string message)
         {
             return ApiErrorMessage(Messages.RequestInvalid, message);
         }
 
-        protected IActionResult ApiNotFound()
+        protected ActionResult ApiNotFound()
         {
             return ApiNotFoundErrorMessage(Messages.NotFound);
         }
 
-        protected IActionResult ApiNotFoundErrorMessage(string message)
+        protected ActionResult ApiNotFoundErrorMessage(string message)
         {
             return ApiErrorMessage(Messages.NotFound, message, 404);
         }
 
-        protected virtual IActionResult ApiErrorMessage(string message, string errorMessage, int errorStatusCode = 400)
+        protected virtual ActionResult ApiErrorMessage(string message, string errorMessage, int errorStatusCode = 400)
         {
             var errorList = new List<string>();
             errorList.Add(errorMessage);

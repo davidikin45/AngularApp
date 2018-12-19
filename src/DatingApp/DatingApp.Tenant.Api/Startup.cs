@@ -9,15 +9,19 @@ using DatingApp.Api.Jobs;
 using DatingApp.Api.UnitOfWork;
 using DatingApp.Data.Tenant.Identity;
 using DatingApp.Data.Tenants;
+using DatingApp.Tenant.Api.ApiClient;
 using DatingApp.Tenant.Core;
 using DatingApp.Tenant.Data;
 using DatingApp.Tenant.Domain;
 using Hangfire;
 using Hangfire.Common;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using System.Threading.Tasks;
 
 namespace DatingApp.Tenant.Api
@@ -46,7 +50,17 @@ namespace DatingApp.Tenant.Api
 
         public override void ConfigureHttpClients(IServiceCollection services)
         {
+            services.AddHttpClient<AppApiClient>(async cfg =>
+            {
+                var serviceProvider = services.BuildServiceProvider();
+                var httpContextAccessor = serviceProvider.GetService<IHttpContextAccessor>();
+                var accessToken = await httpContextAccessor.HttpContext.GetTokenAsync("access_token");
 
+                if (accessToken != null)
+                    cfg.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+
+                cfg.BaseAddress = new System.Uri("https://api.localhost:44372");
+            });
         }
 
         public override void AddHostedServices(IServiceCollection services)

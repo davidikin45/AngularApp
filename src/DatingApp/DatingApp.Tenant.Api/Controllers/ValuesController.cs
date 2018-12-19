@@ -1,6 +1,5 @@
 ﻿using AspNetCore.ApiBase.Authorization;
 using AspNetCore.ApiBase.Controllers.Api;
-using AspNetCore.ApiBase.DomainEvents;
 using AspNetCore.ApiBase.Email;
 using AspNetCore.ApiBase.Reflection;
 using AspNetCore.ApiBase.Settings;

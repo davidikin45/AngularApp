@@ -1,6 +1,7 @@
 ﻿using AspNetCore.ApiBase.Alerts;
 using AspNetCore.ApiBase.ApplicationServices;
 using AspNetCore.ApiBase.Authorization;
+using AspNetCore.ApiBase.Controllers.ApiClient;
 using AspNetCore.ApiBase.Data.Helpers;
 using AspNetCore.ApiBase.DomainEvents;
 using AspNetCore.ApiBase.Dtos;
@@ -33,7 +34,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
     //If the name of the controller action starts the words "Get", "Post", "Put", "Delete", "Patch", "Options", or "Head", use the corresponding HTTP method.
     //Otherwise, the action supports the POST method.
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public abstract class ApiControllerEntityAuthorizeBase<TCreateDto, TReadDto, TUpdateDto, TDeleteDto, IEntityService> : ApiControllerEntityReadOnlyAuthorizeBase<TReadDto, IEntityService>
+    public abstract class ApiControllerEntityAuthorizeBase<TCreateDto, TReadDto, TUpdateDto, TDeleteDto, IEntityService> : ApiControllerEntityReadOnlyAuthorizeBase<TReadDto, IEntityService>, IApiControllerEntity<TCreateDto, TReadDto, TUpdateDto, TDeleteDto>
          where TCreateDto : class
          where TReadDto : class
          where TUpdateDto : class
@@ -51,8 +52,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Create)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Create)]
         [HttpGet]
-        [ProducesResponseType(typeof(WebApiMessage), 200)]
-        public virtual IActionResult NewDefault()
+        public virtual ActionResult<TCreateDto> NewDefault()
         {
 
             var response = Service.GetCreateDefaultDto();
@@ -78,8 +78,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Create)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Create)]
         [HttpPost]
-        [ProducesResponseType(typeof(WebApiMessage), 200)]
-        public virtual async Task<IActionResult> Create([FromBody] TCreateDto dto)
+        public virtual async Task<ActionResult<TReadDto>> Create([FromBody] TCreateDto dto)
         {
             if (dto == null)
             {
@@ -122,8 +121,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Create)]
         [Route("bulk")]
         [HttpPost]
-        [ProducesResponseType(typeof(WebApiMessage), 200)]
-        public virtual async Task<IActionResult> BulkCreate([FromBody] TCreateDto[] dtos)
+        public virtual async Task<ActionResult<List<WebApiMessage>>> BulkCreate([FromBody] TCreateDto[] dtos)
         {
             var cts = TaskHelper.CreateNewCancellationTokenSource();
 
@@ -146,8 +144,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [Route("edit/{id}"), Route("edit/{id}.{format}")]
         //[Route("get/{id}"), Route("get/{id}.{format}")]
         [HttpGet]
-        [ProducesResponseType(typeof(object), 200)]
-        public virtual async Task<IActionResult> GetForEdit(string id)
+        public virtual async Task<ActionResult<TUpdateDto>> GetByIdForEdit(string id)
         {
             var cts = TaskHelper.CreateChildCancellationTokenSource(ClientDisconnectedToken());
 
@@ -177,8 +174,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [Route("edit/({ids})"), Route("edit/({ids}).{format}")]
         [Route("bulk/edit/({ids})"), Route("bulk/edit/({ids}).{format}")]
         [HttpGet]
-        [ProducesResponseType(typeof(List<object>), 200)]
-        public virtual async Task<IActionResult> GetUpdateCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<string> ids)
+        public virtual async Task<ActionResult<List<TUpdateDto>>> BulkGetByIdsForEditAsync([ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<string> ids)
         {
             if (ids == null)
             {
@@ -212,7 +208,6 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [Route("{id}")]
         [HttpPut]
         //[HttpPost]
-        [ProducesResponseType(typeof(WebApiMessage), 200)]
         public virtual async Task<IActionResult> Update(string id, [FromBody] TUpdateDto dto)
         {
             if (dto.HasProperty("Id"))
@@ -258,8 +253,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [Route("bulk")]
         [HttpPut]
-        [ProducesResponseType(typeof(WebApiMessage), 200)]
-        public virtual async Task<IActionResult> BulkUpdate([FromBody] BulkDto<TUpdateDto>[] dtos)
+        public virtual async Task<ActionResult<List<WebApiMessage>>> BulkUpdate([FromBody] BulkDto<TUpdateDto>[] dtos)
         {
             var cts = TaskHelper.CreateChildCancellationTokenSource(ClientDisconnectedToken());
 
@@ -280,7 +274,6 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [Route("{id}")]
         [HttpPatch]
-        [ProducesResponseType(typeof(WebApiMessage), 200)]
         public virtual async Task<IActionResult> UpdatePartial(string id, [FromBody] JsonPatchDocument dtoPatch)
         {
             if (dtoPatch == null)
@@ -310,8 +303,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [Route("bulk")]
         [HttpPatch]
-        [ProducesResponseType(typeof(WebApiMessage), 200)]
-        public virtual async Task<IActionResult> BulkPartialUpdate([FromBody] BulkDto<JsonPatchDocument>[] dtos)
+        public virtual async Task<ActionResult<List<WebApiMessage>>> BulkUpdatePartial([FromBody] BulkDto<JsonPatchDocument>[] dtos)
         {
             var cts = TaskHelper.CreateChildCancellationTokenSource(ClientDisconnectedToken());
 
@@ -327,8 +319,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [FormatFilter]
         [Route("Delete/{id}"), Route("Delete/{id}.{format}")]
         [HttpGet]
-        [ProducesResponseType(typeof(object), 200)]
-        public virtual async Task<IActionResult> GetForDelete(string id)
+        public virtual async Task<ActionResult<TDeleteDto>> GetByIdForDelete(string id)
         {
             var cts = TaskHelper.CreateChildCancellationTokenSource(ClientDisconnectedToken());
 
@@ -358,8 +349,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [Route("delete/({ids})"), Route("delete/({ids}).{format}")]
         [Route("bulk/delete/({ids})"), Route("bulk/delete/({ids}).{format}")]
         [HttpGet]
-        [ProducesResponseType(typeof(List<object>), 200)]
-        public virtual async Task<IActionResult> GetDeleteCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<string> ids)
+        public virtual async Task<ActionResult<List<TDeleteDto>>> BulkGetByIdsForDeleteAsync([ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<string> ids)
         {
             if (ids == null)
             {
@@ -425,8 +415,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Delete)]
         [Route("bulk")]
         [HttpDelete]
-        [ProducesResponseType(typeof(WebApiMessage), 200)]
-        public virtual async Task<IActionResult> BulkDelete([FromBody] TDeleteDto[] dtos)
+        public virtual async Task<ActionResult<List<WebApiMessage>>> BulkDelete([FromBody] TDeleteDto[] dtos)
         {
             var cts = TaskHelper.CreateNewCancellationTokenSource();
 
@@ -436,7 +425,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         }
         #endregion
 
-        #region Create New Collection Item Instance
+        #region Create New Child Collection Item Instance
         [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Create, ResourceOperationsCore.CRUD.Operations.Update)]
         [Route("new/{*collection}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Create)]
