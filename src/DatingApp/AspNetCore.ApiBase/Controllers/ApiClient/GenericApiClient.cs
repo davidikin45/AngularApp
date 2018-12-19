@@ -27,7 +27,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task<TCreateDto> NewDefaultAsync()
         {
             var response = await client.Get($"{resource}/new");
-            response.EnsureSuccessStatusCode();
+
+            await response.EnsureSuccessStatusCodeAsync();
 
             return await response.ContentAsTypeAsync<TCreateDto>();
         }
@@ -37,7 +38,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task<TReadDto> CreateAsync(TCreateDto dto)
         {
             var response = await client.Post($"{resource}", dto, settings);
-            response.EnsureSuccessStatusCode();
+
+            await response.EnsureSuccessStatusCodeAsync();
 
             return await response.ContentAsTypeAsync<TReadDto>();
         }
@@ -47,7 +49,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task<List<WebApiMessage>> BulkCreateAsync(TCreateDto[] dtos)
         {
             var response = await client.Post($"{resource}/bulk", dtos, settings);
-            response.EnsureSuccessStatusCode();
+
+            await response.EnsureSuccessStatusCodeAsync();
 
             return await response.ContentAsTypeAsync<List<WebApiMessage>>();
         }
@@ -72,7 +75,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task<List<TUpdateDto>> BulkGetByIdsForEditAsync(IEnumerable<string> ids)
         {
             var response = await client.Get($"{resource}/bulk/edit/{String.Join(',', ids)}");
-            response.EnsureSuccessStatusCode();
+
+            await response.EnsureSuccessStatusCodeAsync();
 
             return await response.ContentAsTypeAsync<List<TUpdateDto>>();
         }
@@ -82,7 +86,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task UpdateAsync(string id, TUpdateDto dto)
         {
             var response = await client.Put($"{resource}/{id}", dto, settings);
-            response.EnsureSuccessStatusCode();
+            await response.EnsureSuccessStatusCodeAsync();
         }
         #endregion
 
@@ -90,7 +94,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task<List<WebApiMessage>> BulkUpdateAsync(BulkDto<TUpdateDto>[] dtos)
         {
             var response = await client.Put($"{resource}/bulk", dtos, settings);
-            response.EnsureSuccessStatusCode();
+
+            await response.EnsureSuccessStatusCodeAsync();
 
             return await response.ContentAsTypeAsync<List<WebApiMessage>>();
         }
@@ -100,7 +105,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task UpdatePartialAsync(string id, JsonPatchDocument dtoPatch)
         {
             var response = await client.Patch($"{resource}/{id}", dtoPatch, settings);
-            response.EnsureSuccessStatusCode();
+
+            await response.EnsureSuccessStatusCodeAsync();
         }
         #endregion
 
@@ -108,7 +114,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task<List<WebApiMessage>> BulkUpdatePartialAsync(BulkDto<JsonPatchDocument>[] dtos)
         {
             var response = await client.Patch($"{resource}/bulk", dtos, settings);
-            response.EnsureSuccessStatusCode();
+
+            await response.EnsureSuccessStatusCodeAsync();
 
             return await response.ContentAsTypeAsync<List<WebApiMessage>>();
         }
@@ -133,7 +140,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task<List<TDeleteDto>> BulkGetByIdsForDeleteAsync(IEnumerable<string> ids)
         {
             var response = await client.Get($"{resource}/bulk/delete/{String.Join(',', ids)}");
-            response.EnsureSuccessStatusCode();
+
+            await response.EnsureSuccessStatusCodeAsync();
 
             return await response.ContentAsTypeAsync<List<TDeleteDto>>();
         }
@@ -143,7 +151,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task DeleteAsync(string id, [FromBody] TDeleteDto dto)
         {
             var response = await client.Delete($"{resource}/{id}", dto, settings);
-            response.EnsureSuccessStatusCode();
+
+            await response.EnsureSuccessStatusCodeAsync();
         }
         #endregion
 
@@ -151,7 +160,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task<List<WebApiMessage>> BulkDeleteAsync([FromBody] TDeleteDto[] dtos)
         {
             var response = await client.Delete($"{resource}/bulk", dtos, settings);
-            response.EnsureSuccessStatusCode();
+
+            await response.EnsureSuccessStatusCodeAsync();
 
             return await response.ContentAsTypeAsync<List<WebApiMessage>>();
         }
@@ -161,7 +171,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task<CollectionItemTypeDto> NewCollectionItemAsync<CollectionItemTypeDto>(string collection)
         {
             var response = await client.Get($"{resource}/new/{collection}");
-            response.EnsureSuccessStatusCode();
+
+            await response.EnsureSuccessStatusCodeAsync();
 
             return await response.ContentAsTypeAsync<CollectionItemTypeDto>();
         }

@@ -28,19 +28,9 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #region Search
         public async Task<WebApiListResponseDto<TReadDto>> SearchAsync(WebApiPagedSearchOrderingRequestDto resourceParameters)
         {
-            var requestUri = QueryHelpers.AddQueryString($"{resource}",
-          new Dictionary<string, string>() {
-                    { "fields", resourceParameters.Fields },
-                    { "orderby", resourceParameters.OrderBy },
-                    { "orderby", resourceParameters.OrderType },
-                    { "page", resourceParameters.Page.ToString() },
-                    { "pageSize", resourceParameters.PageSize.ToString() },
-                    { "search", resourceParameters.Search },
-                    { "userId", resourceParameters.UserId },
-              });
+            var response = await client.GetWithQueryString($"{resource}", resourceParameters);
 
-            var response = await client.Get($"{resource}");
-            response.EnsureSuccessStatusCode();
+            await response.EnsureSuccessStatusCodeAsync();
 
             return await response.ContentAsTypeAsync<WebApiListResponseDto<TReadDto>>();
         }
@@ -50,7 +40,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task<List<TReadDto>> GetAllAsync()
         {
             var response = await client.Get($"{resource}/get-all");
-            response.EnsureSuccessStatusCode();
+
+            await response.EnsureSuccessStatusCodeAsync();
 
             return await response.ContentAsTypeAsync<List<TReadDto>>();
         }
@@ -58,7 +49,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task<List<TReadDto>> GetAllPagedAsync()
         {
             var response = await client.Get($"{resource}/get-all-paged");
-            response.EnsureSuccessStatusCode();
+
+            await response.EnsureSuccessStatusCodeAsync();
 
             return await response.ContentAsTypeAsync<List<TReadDto>>();
         }
@@ -86,7 +78,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task<List<TReadDto>> BulkGetByIdsAsync(IEnumerable<string> ids)
         {
             var response = await client.Get($"{resource}/{String.Join(',', ids)}");
-            response.EnsureSuccessStatusCode();
+
+            await response.EnsureSuccessStatusCodeAsync();
 
             return await response.ContentAsTypeAsync<List<TReadDto>>();
         }
@@ -114,19 +107,9 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task<WebApiListResponseDto<TChildCollectionItemDto>> GetByIdChildCollectionAsync<TChildCollectionItemDto>(string id, string collection, WebApiPagedSearchOrderingRequestDto resourceParameters)
      where TChildCollectionItemDto : class
         {
-            var requestUri = QueryHelpers.AddQueryString($"{resource}/{id}/{collection}",
-           new Dictionary<string, string>() {
-                        { "fields", resourceParameters.Fields },
-                        { "orderby", resourceParameters.OrderBy },
-                        { "orderby", resourceParameters.OrderType },
-                        { "page", resourceParameters.Page.ToString() },
-                        { "pageSize", resourceParameters.PageSize.ToString() },
-                        { "search", resourceParameters.Search },
-                        { "userId", resourceParameters.UserId },
-               });
+            var response = await client.GetWithQueryString($"{resource}/{id}/{collection}", resourceParameters);
 
-            var response = await client.Get(requestUri);
-            response.EnsureSuccessStatusCode();
+            await response.EnsureSuccessStatusCodeAsync();
 
             return await response.ContentAsTypeAsync<WebApiListResponseDto<TChildCollectionItemDto>>();
         }

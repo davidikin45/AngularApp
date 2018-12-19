@@ -1,5 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using AspNetCore.ApiBase.HttpClientREST;
+using Microsoft.AspNetCore.WebUtilities;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
@@ -22,6 +23,19 @@ namespace GrabMobile.ApiClient.HttpClientREST
             return await builder.SendAsync(client, cancellationToken);
         }
 
+        public static async Task<HttpResponseMessage> GetWithQueryString(this HttpClient client, string requestUri, object value, CancellationToken cancellationToken = default(CancellationToken))
+           => await GetWithQueryString(client, requestUri, value, "", cancellationToken);
+
+        public static async Task<HttpResponseMessage> GetWithQueryString(this HttpClient client, string requestUri, object value, string bearerToken, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var builder = new HttpRequestBuilder()
+                                .AddMethod(HttpMethod.Get)
+                                .AddRequestUri(QueryHelpers.AddQueryString(requestUri, QueryStringHelper.ToKeyValue(value) ?? new Dictionary<string, string>()))
+                                .AddBearerToken(bearerToken);
+
+            return await builder.SendAsync(client, cancellationToken);
+        }
+
         public static async Task<HttpResponseMessage> Post(this HttpClient client, string requestUri, object value, JsonSerializerSettings serializerSettings, CancellationToken cancellationToken = default(CancellationToken))
             => await Post(client, requestUri, value, serializerSettings, "", cancellationToken);
 
@@ -32,6 +46,21 @@ namespace GrabMobile.ApiClient.HttpClientREST
                                 .AddMethod(HttpMethod.Post)
                                 .AddRequestUri(requestUri)
                                 .AddContent(new JsonContent(value, serializerSettings))
+                                .AddBearerToken(bearerToken);
+
+            return await builder.SendAsync(client, cancellationToken);
+        }
+
+        public static async Task<HttpResponseMessage> PostForm(this HttpClient client, string requestUri, object value, CancellationToken cancellationToken = default(CancellationToken))
+           => await PostForm(client, requestUri, value, "", cancellationToken);
+
+        public static async Task<HttpResponseMessage> PostForm(this HttpClient client,
+            string requestUri, object value, string bearerToken, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var builder = new HttpRequestBuilder()
+                                .AddMethod(HttpMethod.Post)
+                                .AddRequestUri(requestUri)
+                                .AddContent(new FormUrlEncodedContent(QueryStringHelper.ToKeyValue(value) ?? new Dictionary<string, string>()))
                                 .AddBearerToken(bearerToken);
 
             return await builder.SendAsync(client, cancellationToken);
