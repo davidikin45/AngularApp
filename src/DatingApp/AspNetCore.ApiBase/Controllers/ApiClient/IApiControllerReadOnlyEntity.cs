@@ -13,8 +13,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         Task<ActionResult<List<TReadDto>>> GetAll();
         Task<ActionResult<List<TReadDto>>> GetAllPaged();
 
-        Task<ActionResult<TReadDto>> GetById(string id, string fields);
-        Task<ActionResult<TReadDto>> GetByIdFullGraph(string id, string fields);
+        Task<ActionResult<TReadDto>> GetById(string id, WebApiParamsDto parameters);
+        Task<ActionResult<TReadDto>> GetByIdFullGraph(string id, WebApiParamsDto parameters);
 
         Task<ActionResult<List<TReadDto>>> BulkGetByIds(IEnumerable<string> ids);
 
@@ -29,8 +29,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         Task<List<TReadDto>> GetAllAsync();
         Task<List<TReadDto>> GetAllPagedAsync();
 
-        Task<TReadDto> GetByIdAsync(string id, string fields);
-        Task<TReadDto> GetByIdFullGraphAsync(string id, string fields);
+        Task<TReadDto> GetByIdAsync(string id, WebApiParamsDto parameters);
+        Task<TReadDto> GetByIdFullGraphAsync(string id, WebApiParamsDto parameters);
 
         Task<List<TReadDto>> BulkGetByIdsAsync(IEnumerable<string> ids);
 

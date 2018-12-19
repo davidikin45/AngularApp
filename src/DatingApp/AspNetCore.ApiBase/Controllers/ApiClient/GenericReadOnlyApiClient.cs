@@ -57,14 +57,9 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #endregion
 
         #region GetById
-        public async Task<TReadDto> GetByIdAsync(string id, string fields = null)
+        public async Task<TReadDto> GetByIdAsync(string id, WebApiParamsDto parameters = null)
         {
-            var requestUri = QueryHelpers.AddQueryString($"{resource}/{id}",
-            new Dictionary<string, string>() {
-                    { "fields", fields }
-                });
-
-            var response = await client.Get(requestUri);
+            var response = await client.GetWithQueryString($"{resource}/{id}", parameters);
 
             TReadDto item = null;
             if (response.IsSuccessStatusCode)
@@ -84,14 +79,9 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
             return await response.ContentAsTypeAsync<List<TReadDto>>();
         }
 
-        public async Task<TReadDto> GetByIdFullGraphAsync(string id, string fields = null)
+        public async Task<TReadDto> GetByIdFullGraphAsync(string id, WebApiParamsDto parameters = null)
         {
-            var requestUri = QueryHelpers.AddQueryString($"{resource}/full-graph/{id}",
-           new Dictionary<string, string>() {
-                    { "fields", fields }
-               });
-
-            var response = await client.Get(requestUri);
+            var response = await client.GetWithQueryString($"{resource}/full-graph/{id}", parameters);
 
             TReadDto item = null;
             if (response.IsSuccessStatusCode)

@@ -219,9 +219,9 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [Route("{id}"), Route("{id}.{format}")]
         //[Route("get/{id}"), Route("get/{id}.{format}")]
         [HttpGet]
-        public virtual async Task<ActionResult<TDto>> GetById(string id, [FromQuery] string fields)
+        public virtual async Task<ActionResult<TDto>> GetById(string id, [FromQuery] WebApiParamsDto parameters)
         {
-            if (!TypeHelperService.TypeHasProperties<TDto>(fields))
+            if (!TypeHelperService.TypeHasProperties<TDto>(parameters.Fields))
             {
                 return ApiErrorMessage(Messages.FieldsInvalid);
             }
@@ -236,9 +236,9 @@ namespace AspNetCore.ApiBase.Controllers.Api
                 return ApiNotFoundErrorMessage(Messages.NotFound);
             }
 
-            var links = CreateLinks(id, fields);
+            var links = CreateLinks(id, parameters.Fields);
 
-            var linkedResourceToReturn = response.ShapeData(fields)
+            var linkedResourceToReturn = response.ShapeData(parameters.Fields)
                 as IDictionary<string, object>;
 
             linkedResourceToReturn.Add("links", links);
@@ -283,9 +283,9 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [FormatFilter]
         [Route("full-graph/{id}"), Route("full-graph/{id}.{format}")]
         [HttpGet]
-        public virtual async Task<ActionResult<TDto>> GetByIdFullGraph(string id, [FromQuery] string fields)
+        public virtual async Task<ActionResult<TDto>> GetByIdFullGraph(string id, [FromQuery] WebApiParamsDto parameters)
         {
-            if (!TypeHelperService.TypeHasProperties<TDto>(fields))
+            if (!TypeHelperService.TypeHasProperties<TDto>(parameters.Fields))
             {
                 return ApiErrorMessage(Messages.FieldsInvalid);
             }
@@ -300,9 +300,9 @@ namespace AspNetCore.ApiBase.Controllers.Api
                 return ApiNotFoundErrorMessage(Messages.NotFound);
             }
 
-            var links = CreateLinks(id, fields, true);
+            var links = CreateLinks(id, parameters.Fields, true);
 
-            var linkedResourceToReturn = response.ShapeData(fields)
+            var linkedResourceToReturn = response.ShapeData(parameters.Fields)
                 as IDictionary<string, object>;
 
             linkedResourceToReturn.Add("links", links);
