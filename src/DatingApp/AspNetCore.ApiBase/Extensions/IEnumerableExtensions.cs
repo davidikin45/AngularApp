@@ -7,6 +7,15 @@ namespace AspNetCore.ApiBase.Extensions
 {
     public static class IEnumerableExtensions
     {
+        public static IEnumerable<T> ForEach<T>(this IEnumerable<T> collection, Action<T> action)
+        {
+            foreach (T item in collection)
+            {
+                action(item);
+            }
+            return collection;
+        }
+
         public static List<T> MergeLists<T>(
           this IEnumerable<List<T>> source)
         {

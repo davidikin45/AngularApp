@@ -9,6 +9,24 @@ namespace AspNetCore.ApiBase.Extensions
 {
     public static class StringExtensions
     {
+        public static bool IsValidUrl(this string text)
+        {
+            var rx = new Regex(@"http(s)?://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?");
+            return rx.IsMatch(text);
+        }
+
+        public static Boolean IsValidIp(this string ip)
+        {
+            if (!Regex.IsMatch(ip, "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}"))
+                return false; var ips = ip.Split('.');
+            if (ips.Length == 4 || ips.Length == 6)
+            {
+                return Int32.Parse(ips[0]) < 256 && System.Int32.Parse(ips[1]) < 256
+                       & Int32.Parse(ips[2]) < 256 & System.Int32.Parse(ips[3]) < 256;
+            }
+            return false;
+        }
+
         public static string ToUrlSlug(this string s)
         {
             return UrlSlugger.ToUrlSlug(s);
