@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAzure.Storage;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,14 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.AzureStorage
 {
+    public static class VideoStorageExtensions
+    {
+        public static IServiceCollection AddVideoStorage(this IServiceCollection services, string connectionString, string containerName)
+        {
+            return services.AddTransient<IVideoStorage>(sp => new VideoStorage(connectionString, containerName));
+        }
+    }
+
     public class VideoStorage : IVideoStorage
     {
         private readonly string _containerNameVideos;
