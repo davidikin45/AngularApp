@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.AzureStorage
 {
-    public interface IVideoStorage
+    public interface IAzureVideoStorage
     {
         Task<CloudBlockBlob> UploadVideoAsync(byte[] videoByteArray, string blobname,
           string title, string description);

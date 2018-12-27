@@ -9,15 +9,15 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.AzureStorage
 {
-    public static class VideoStorageExtensions
+    public static class AzureVideoStorageExtensions
     {
-        public static IServiceCollection AddVideoStorage(this IServiceCollection services, string connectionString, string containerName)
+        public static IServiceCollection AddAzureVideoStorage(this IServiceCollection services, Func<IServiceProvider, IAzureVideoStorage> implementationFactory)
         {
-            return services.AddTransient<IVideoStorage>(sp => new VideoStorage(connectionString, containerName));
+            return services.AddTransient(implementationFactory);
         }
     }
 
-    public class VideoStorage : IVideoStorage
+    public abstract class AzureVideoStorage : IAzureVideoStorage
     {
         private readonly string _containerNameVideos;
         private readonly string _containerNameVideosArchive;
@@ -25,7 +25,7 @@ namespace AspNetCore.ApiBase.AzureStorage
         private readonly string _metadataKeyTitle = "title";
         private readonly string _metadataKeyDescription = "description";
 
-        public VideoStorage(string connectionString, string containerName)
+        public AzureVideoStorage(string connectionString, string containerName)
         {
             _connectionString = connectionString;
             _containerNameVideos = containerName;
