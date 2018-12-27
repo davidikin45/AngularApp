@@ -543,6 +543,10 @@ namespace AspNetCore.ApiBase
                 options.MaximumBodySize = 64 * 1024 * 1024; //64Mb
             });
 
+
+            services.AddDistributedMemoryCache();
+            services.AddMemoryCache();
+
             //https://stackoverflow.com/questions/46492736/asp-net-core-2-0-http-response-caching-middleware-nothing-cached
             //Client Side Cache Time
             //services.AddHttpCacheHeaders(opt => opt.MaxAge = 600, opt => opt.MustRevalidate = true);
@@ -881,7 +885,7 @@ namespace AspNetCore.ApiBase
             });
 
             //API rate limiting
-            services.AddMemoryCache();
+            //services.AddMemoryCache();
             services.Configure<IpRateLimitOptions>((options) =>
             {
                 options.GeneralRules = new List<RateLimitRule>()
