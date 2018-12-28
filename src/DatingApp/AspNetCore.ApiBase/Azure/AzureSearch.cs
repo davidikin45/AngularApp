@@ -27,5 +27,16 @@ namespace AspNetCore.ApiBase.AzureStorage
         {
             return _searchIndexClient.Documents.SearchAsync(searchText);
         }
+
+        public Task<DocumentSearchResult> SearchAsync(string searchText, string tag, string value)
+        {
+            SearchParameters parameters = new SearchParameters()
+            {
+                Filter = $"{tag} eq '{value}'",
+                QueryType = QueryType.Full
+            };
+
+            return _searchIndexClient.Documents.SearchAsync(searchText, parameters);
+        }
     }
 }
