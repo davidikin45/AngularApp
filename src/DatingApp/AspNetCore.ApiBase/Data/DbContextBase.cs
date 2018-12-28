@@ -1,5 +1,6 @@
 ﻿using AspNetCore.ApiBase.Data.Converters;
 using AspNetCore.ApiBase.Data.Helpers;
+using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -70,6 +71,15 @@ namespace AspNetCore.ApiBase.Data
         }
 
         public abstract void BuildQueries(ModelBuilder builder);
+
+        #region MSI Access Token
+        //https://docs.microsoft.com/en-us/azure/app-service/app-service-web-tutorial-connect-msi
+        public string GetMSIAccessTtoken()
+        {
+            var accessToken = (new AzureServiceTokenProvider()).GetAccessTokenAsync("https://database.windows.net/").Result;
+            return accessToken;
+        }
+        #endregion
 
         #region Seed
         public abstract void Seed();

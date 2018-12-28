@@ -1,4 +1,5 @@
 ﻿using AspnetCore.ApiBase;
+using AspNetCore.ApiBase.Azure;
 using AspNetCore.ApiBase.Hosting;
 using AspNetCore.ApiBase.MultiTenancy;
 using AspNetCore.ApiBase.MultiTenancy.Data.Tenants;
@@ -65,6 +66,7 @@ namespace AspNetCore.ApiBase
                 }
                 )
                 .UseAutofacMultiTenant<TTenant>(typeof(TStartup).Assembly)
+                .UseAzureKeyVault()
                 .UseConfiguration(Configuration) ////IWebHostBuilder configuration is added to the app's configuration, but the converse isn't true—ConfigureAppConfiguration doesn't affect the IWebHostBuilder configuration
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {

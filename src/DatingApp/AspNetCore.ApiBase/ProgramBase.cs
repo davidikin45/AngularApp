@@ -1,4 +1,5 @@
 ﻿using AspnetCore.ApiBase;
+using AspNetCore.ApiBase.Azure;
 using AspNetCore.ApiBase.DependencyInjection;
 using AspNetCore.ApiBase.Hosting;
 using Microsoft.AspNetCore;
@@ -62,6 +63,7 @@ namespace AspNetCore.ApiBase
                 )
                 .UseAutofac()
                 .UseConfiguration(Configuration) ////IWebHostBuilder configuration is added to the app's configuration, but the converse isn't true. ConfigureAppConfiguration doesn't affect the IWebHostBuilder configuration.
+                .UseAzureKeyVault()
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
 

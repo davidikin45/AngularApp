@@ -4,7 +4,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +12,13 @@ namespace AspNetCore.ApiBase.Data.Helpers
 {
     public static class DbContextExtensions
     {
+        #region ConnectionString
+        public static string ConnectionString(this DbContext context)
+        {
+            return context.Database.GetDbConnection().ConnectionString;
+        }
+        #endregion
+
         #region EntityEntry
         public static int GetKeyValue(this EntityEntry entityEntry)
         {
