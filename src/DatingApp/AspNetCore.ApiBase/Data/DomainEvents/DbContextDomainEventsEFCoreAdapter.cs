@@ -14,7 +14,7 @@ namespace AspNetCore.ApiBase.Data.DomainEvents
     public class DbContextDomainEventsEFCoreAdapter : DbContextDomainEventsBase
     {
         private DbContext _dbContext;
-        public DbContextDomainEventsEFCoreAdapter(DbContext dbContext, IDomainEventsDispatcher domainEvents)
+        public DbContextDomainEventsEFCoreAdapter(DbContext dbContext, IDomainEventsMediator domainEvents)
             : base(domainEvents)
         {
             _dbContext = dbContext;

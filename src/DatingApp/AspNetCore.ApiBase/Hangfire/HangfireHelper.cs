@@ -29,7 +29,7 @@ namespace AspNetCore.ApiBase.Hangfire
             var options = new BackgroundJobServerOptions
             {
                 ServerName = serverName,
-                Queues = new string[] { "default" }
+                Queues = new string[] { serverName, "default" }
             };
 
             return StartHangfireServer(
@@ -103,7 +103,7 @@ namespace AspNetCore.ApiBase.Hangfire
             var options = new BackgroundJobServerOptions
             {
                 ServerName = serverName,
-                Queues = new string[] { "default" }
+                Queues = new string[] { serverName, "default" }
             };
             return StartHangfireServer(options, connectionString);
         }

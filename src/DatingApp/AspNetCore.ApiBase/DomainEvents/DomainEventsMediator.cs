@@ -12,13 +12,13 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.DomainEvents
 {
-    public class DomainEventsDispatcher : IDomainEventsDispatcher
+    public class DomainEventsMediator : IDomainEventsMediator
     {
         public static bool HandlePostCommitEventsInProcess = false;
         public static bool DispatchPostCommitEventsInParellel = true;
 
         private readonly IServiceProvider _serviceProvider;
-        public DomainEventsDispatcher(IServiceProvider serviceProvider)
+        public DomainEventsMediator(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
@@ -149,8 +149,8 @@ namespace AspNetCore.ApiBase.DomainEvents
                     //Each Post Commit Domain Event Handling is completely independent. By registering the event AND handler (rather than just the event) in hangfire we get the granularity of retrying at a event/handler level.
                     //Hangfire unfortunately uses System.Type.GetType to get job type. This only looks at the referenced assemblies of the web project and not the dynamic loaded plugins so need to
                     //proxy back through this common assembly.
-                    var exp = GetExpression(typeof(IDomainEventsDispatcher), handlerType.FullName, domainEvent);
-                    QueueJobInHangire(exp, typeof(IDomainEventsDispatcher));
+                    var exp = GetExpression(typeof(IDomainEventsMediator), handlerType.FullName, domainEvent);
+                    QueueJobInHangire(exp, typeof(IDomainEventsMediator));
                 }
                 catch
                 {

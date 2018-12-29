@@ -10,8 +10,8 @@ namespace AspNetCore.ApiBase.Data.DomainEvents
 {
     public abstract class DbContextDomainEventsBase : IDbContextDomainEvents
     {
-        private IDomainEventsDispatcher _domainEvents;
-        public DbContextDomainEventsBase(IDomainEventsDispatcher domainEvents)
+        private IDomainEventsMediator _domainEvents;
+        public DbContextDomainEventsBase(IDomainEventsMediator domainEvents)
         {
             _domainEvents = domainEvents;
         }

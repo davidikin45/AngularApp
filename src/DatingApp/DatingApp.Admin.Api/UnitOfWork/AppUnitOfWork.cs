@@ -17,7 +17,7 @@ namespace DatingApp.Api.UnitOfWork
             AppTenantsContext appContext,
             IdentityContext identityContext,
             IValidationService validationService,
-            IDomainEventsDispatcher domainEventsDispatcher) 
+            IDomainEventsMediator domainEventsDispatcher) 
             : base(true, validationService, domainEventsDispatcher, appContext, identityContext)
         {
  

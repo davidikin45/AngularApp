@@ -18,7 +18,7 @@ namespace AspNetCore.ApiBase.Data.UnitOfWork
     {
         protected List<(DbContext dbContext, DbContextDomainEventsEFCoreAdapter domainEvents)> contextsWithDomainEvents = new List<(DbContext dbContext, DbContextDomainEventsEFCoreAdapter domainEvents)>();
 
-        public UnitOfWorkWithEventsBase(bool validateOnSave, IValidationService validationService, IDomainEventsDispatcher domainEventsDispatcher, params DbContext[] contexts)
+        public UnitOfWorkWithEventsBase(bool validateOnSave, IValidationService validationService, IDomainEventsMediator domainEventsDispatcher, params DbContext[] contexts)
             : base(validateOnSave, validationService, contexts)
         {
             foreach (var context in contexts)

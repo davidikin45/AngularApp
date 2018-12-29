@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.DomainEvents
 {
-    public interface IDomainEventsDispatcher
+    public interface IDomainEventsMediator
     {
         Task DispatchPreCommitAsync(IDomainEvent domainEvent);
         Task DispatchPostCommitAsync(IDomainEvent domainEvent);
