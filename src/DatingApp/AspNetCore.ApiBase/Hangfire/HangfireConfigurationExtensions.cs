@@ -32,6 +32,7 @@ namespace AspNetCore.ApiBase.Hangfire
             return services.AddHangfire(config =>
             {
                 config.UseFilter(new HangfireLoggerAttribute());
+                config.UseFilter(new HangfirePreserveOriginalQueueAttribute());
                 config.UseMemoryStorage();
             });
         }
@@ -41,6 +42,7 @@ namespace AspNetCore.ApiBase.Hangfire
             return services.AddHangfire(config =>
             {
                 config.UseFilter(new HangfireLoggerAttribute());
+                config.UseFilter(new HangfirePreserveOriginalQueueAttribute());
                 config.UseSqlServerStorage(connectionString);
             });
         }
@@ -50,6 +52,7 @@ namespace AspNetCore.ApiBase.Hangfire
             return services.AddHangfire(config =>
             {
                 config.UseFilter(new HangfireLoggerAttribute());
+                config.UseFilter(new HangfirePreserveOriginalQueueAttribute());
                 config.UseSQLiteStorage(connectionString);
             });
         }
