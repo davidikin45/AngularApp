@@ -4,6 +4,8 @@ namespace AspNetCore.ApiBase.Domain
 {
     public abstract class EntityBase<T> : IEntity<T>, IEntityAuditable where T : IEquatable<T>
     {
+        int? _requestedHashCode;
+
         public virtual T Id { get; set; }
 
         object IEntity.Id
@@ -27,10 +29,10 @@ namespace AspNetCore.ApiBase.Domain
             if (ReferenceEquals(this, other))
                 return true;
 
-            if (GetType() != other.GetType())
+            if (this.GetType() != other.GetType())
                 return false;
 
-            if (Id.ToString() == "0" || other.Id.ToString() == "0")
+            if (this.IsTransient() || other.IsTransient())
                 return false;
 
             return Id.Equals(other.Id);
@@ -54,7 +56,21 @@ namespace AspNetCore.ApiBase.Domain
 
         public override int GetHashCode()
         {
-            return (GetType().ToString() + Id.ToString()).GetHashCode();
+            if (!IsTransient())
+            {
+                if (!_requestedHashCode.HasValue)
+                    _requestedHashCode = (GetType().ToString() + this.Id.ToString()).GetHashCode() ^ 31;
+                // XOR for random distribution. See:
+                // https://blogs.msdn.microsoft.com/ericlippert/2011/02/28/guidelines-and-rules-for-gethashcode/
+                return _requestedHashCode.Value;
+            }
+            else
+                return base.GetHashCode();
+        }
+
+        public bool IsTransient()
+        {
+            return Id.Equals(default);
         }
     }
 }

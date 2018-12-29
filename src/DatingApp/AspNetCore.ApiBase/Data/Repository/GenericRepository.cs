@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.Data.Repository
 {
+    //One per Aggregate Root
     public class GenericRepository<TEntity> : GenericReadOnlyRepository<TEntity>, IGenericRepository<TEntity>
    where TEntity : class
     {

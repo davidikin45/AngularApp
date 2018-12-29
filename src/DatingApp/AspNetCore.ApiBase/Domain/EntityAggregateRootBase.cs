@@ -12,9 +12,14 @@ namespace AspNetCore.ApiBase.Domain
 
         //Deferred domain events
         //https://blogs.msdn.microsoft.com/cesardelatorre/2017/03/23/using-domain-events-within-a-net-core-microservice/
-        protected virtual void AddDomainEvent(IDomainEvent newEvent)
+        protected virtual void AddDomainEvent(IDomainEvent domainEvent)
         {
-            _domainEvents.Add(newEvent);
+            _domainEvents.Add(domainEvent);
+        }
+
+        protected virtual void RemoveDomainEvent(IDomainEvent domainEvent)
+        {
+            _domainEvents.Remove(domainEvent);
         }
 
         public virtual void ClearEvents()
@@ -22,9 +27,14 @@ namespace AspNetCore.ApiBase.Domain
             _domainEvents.Clear();
         }
 
-        public void AddDomainCommand(IDomainCommand actionEvent)
+        public void AddDomainCommand(IDomainCommand command)
         {
-            _domainEvents.Add(actionEvent);
+            _domainEvents.Add(command);
+        }
+
+        public void RemoveDomainCommand(IDomainCommand command)
+        {
+            _domainEvents.Remove(command);
         }
 
         //Optimistic Concurrency. Potentially ETags serve the same purpose

@@ -8,7 +8,7 @@ namespace AspNetCore.ApiBase.Tests
     public class ApiTests
     {
         [Fact]
-        public async void GetWithQueryString()
+        public void GetWithQueryString()
         {
             var fields = "abc";
 

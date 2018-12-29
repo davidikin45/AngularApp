@@ -2,7 +2,6 @@
 using AspNetCore.ApiBase.Azure;
 using AspNetCore.ApiBase.Hosting;
 using AspNetCore.ApiBase.MultiTenancy;
-using AspNetCore.ApiBase.MultiTenancy.Data.Tenants;
 using AspNetCore.ApiBase.MultiTenancy.DependencyInjection;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;

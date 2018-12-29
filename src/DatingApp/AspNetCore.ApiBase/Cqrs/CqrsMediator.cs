@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.Cqrs
 {
-    public sealed class CqrsDispatcher : ICqrsDispatcher
+    public sealed class CqrsMediator : ICqrsMediator
     {
         private readonly IServiceProvider _provider;
 
-        public CqrsDispatcher(IServiceProvider provider)
+        public CqrsMediator(IServiceProvider provider)
         {
             _provider = provider;
         }

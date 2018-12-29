@@ -11,7 +11,7 @@ namespace AspNetCore.ApiBase
                 WebHostDefaults.EnvironmentKey, "Development"
             } };
 
-        public static IConfiguration Build(string[] args, string contentRoot)
+        public static IConfigurationRoot Build(string[] args, string contentRoot)
         {
             var configEnvironmentBuilder = new ConfigurationBuilder()
                    .AddInMemoryCollection(InMemoryDefaults)

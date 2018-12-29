@@ -90,6 +90,22 @@ namespace AspNetCore.ApiBase.Domain
             return !(a == b);
         }
 
+        public bool IsEmpty()
+        {
+            Type t = GetType();
+            FieldInfo[] fields = t.GetFields
+              (BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            foreach (FieldInfo field in fields)
+            {
+                object value = field.GetValue(this);
+                if (value != null)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public ValueObject GetCopy()
         {
             return MemberwiseClone() as ValueObject;

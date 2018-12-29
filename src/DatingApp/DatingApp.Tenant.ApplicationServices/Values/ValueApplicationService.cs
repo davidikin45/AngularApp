@@ -1,6 +1,5 @@
 ﻿using AspNetCore.ApiBase.ApplicationServices;
 using AspNetCore.ApiBase.Authorization;
-using AspNetCore.ApiBase.DomainEvents;
 using AspNetCore.ApiBase.Users;
 using AspNetCore.ApiBase.Validation;
 using AutoMapper;

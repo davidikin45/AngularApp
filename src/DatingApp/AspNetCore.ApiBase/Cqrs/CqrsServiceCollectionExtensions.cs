@@ -12,19 +12,19 @@ namespace AspNetCore.ApiBase.Cqrs
     {
         public static void AddCqrs(this IServiceCollection services)
         {
-            services.AddCqrsDispatcher();
+            services.AddCqrsMediator();
             services.AddCqrsHandlers(new List<Assembly>() { Assembly.GetCallingAssembly() });
         }
 
         public static void AddCqrs(this IServiceCollection services, IEnumerable<Assembly> assemblies)
         {
-            services.AddCqrsDispatcher();
+            services.AddCqrsMediator();
             services.AddCqrsHandlers(assemblies);
         }
 
-        public static void AddCqrsDispatcher(this IServiceCollection services)
+        public static void AddCqrsMediator(this IServiceCollection services)
         {
-            services.AddTransient<ICqrsDispatcher, CqrsDispatcher>();
+            services.AddTransient<ICqrsMediator, CqrsMediator>();
         }
 
         public static void AddCqrsHandlers(this IServiceCollection services, IEnumerable<Assembly> assemblies)
