@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase
 {
-    public abstract class ProgramBase<TStartup> where TStartup : class
+    public abstract class ProgramSingleTenantBase<TStartup> where TStartup : class
     {
         public static IConfiguration Configuration;
 
