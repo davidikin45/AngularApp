@@ -1266,7 +1266,7 @@ namespace AspNetCore.ApiBase
                 app.UseWhen(context => context.RequestServices.GetService<ITenantService>() == null,
                      appBranch =>
                      {
-                         appBranch.UseHangfire("app");
+                         appBranch.UseHangfire(new[] { "app" });
                      }
                      );
 

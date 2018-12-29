@@ -9,6 +9,7 @@ using Hangfire.SqlServer;
 using Hangfire.States;
 using Microsoft.AspNetCore.Hosting;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AspNetCore.ApiBase.Hangfire
 {
@@ -16,6 +17,7 @@ namespace AspNetCore.ApiBase.Hangfire
     {
         public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(
             string serverName,
+            string[] applicationPartNames,
             string connectionString,
             IApplicationLifetime applicationLifetime,
             IJobFilterProvider jobFilters,
@@ -29,7 +31,7 @@ namespace AspNetCore.ApiBase.Hangfire
             var options = new BackgroundJobServerOptions
             {
                 ServerName = serverName,
-                Queues = new string[] { serverName, "default" }
+                Queues = (new string[] { "default" }).Concat(applicationPartNames).ToArray()
             };
 
             return StartHangfireServer(
@@ -93,17 +95,17 @@ namespace AspNetCore.ApiBase.Hangfire
             return StartHangfireServer(new BackgroundJobServerOptions(), "");
         }
 
-        public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServerInMemory(string serverName)
+        public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServerInMemory(string serverName, string[] applicationPartNames)
         {
-            return StartHangfireServer(serverName, "");
+            return StartHangfireServer(serverName, applicationPartNames, "");
         }
 
-        public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(string serverName, string connectionString)
+        public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(string serverName, string[] applicationPartNames, string connectionString)
         {
             var options = new BackgroundJobServerOptions
             {
                 ServerName = serverName,
-                Queues = new string[] { serverName, "default" }
+                Queues = (new string[] { "default" }).Concat(applicationPartNames).ToArray()
             };
             return StartHangfireServer(options, connectionString);
         }

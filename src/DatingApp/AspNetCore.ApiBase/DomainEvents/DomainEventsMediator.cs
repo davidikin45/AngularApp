@@ -18,9 +18,11 @@ namespace AspNetCore.ApiBase.DomainEvents
         public static bool DispatchPostCommitEventsInParellel = true;
 
         private readonly IServiceProvider _serviceProvider;
-        public DomainEventsMediator(IServiceProvider serviceProvider)
+        private readonly IBackgroundJobClient _backgroundJobClient;
+        public DomainEventsMediator(IServiceProvider serviceProvider, IBackgroundJobClient backgroundJobClient)
         {
             _serviceProvider = serviceProvider;
+            _backgroundJobClient = backgroundJobClient;
         }
 
         private List<dynamic> GetEventHandlerInstancesForPreCommit(IServiceProvider services, IDomainEvent domainEvent)
@@ -179,8 +181,11 @@ namespace AspNetCore.ApiBase.DomainEvents
             MethodInfo generic = method.MakeGenericMethod(jobType);
             var job = (Job)generic.Invoke(null, new object[] { exp });
 
+            //application parts
             //backgroudjobclient
-            clientFactory.Create(job, new EnqueuedState());
+            var queue = new EnqueuedState();
+
+            clientFactory.Create(job, queue);
         }
 
         private LambdaExpression GetExpression(Type jobType, string handlerName, object domainEvent)

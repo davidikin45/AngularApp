@@ -5,6 +5,7 @@ using Hangfire.SQLite;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Linq;
 
 namespace AspNetCore.ApiBase.Hangfire
 {
@@ -53,9 +54,8 @@ namespace AspNetCore.ApiBase.Hangfire
             });
         }
 
-        public static IApplicationBuilder UseHangfire(this IApplicationBuilder builder, string serverName, string route = "/admin/hangfire")
+        public static IApplicationBuilder UseHangfire(this IApplicationBuilder builder, string[] applicationPartNames, string route = "/admin/hangfire")
         {
-
             builder.UseHangfireDashboard(route, new DashboardOptions
             {
                 Authorization = new[] { new HangfireAuthorizationfilter() },
@@ -66,8 +66,7 @@ namespace AspNetCore.ApiBase.Hangfire
             //https://discuss.hangfire.io/t/one-queue-for-the-whole-farm-and-one-queue-by-server/490
             var options = new BackgroundJobServerOptions
             {
-                ServerName = serverName,
-                Queues = new[] { serverName, "default" }
+                Queues = (new[] { "default" }).Concat(applicationPartNames).ToArray()
             };
 
             //https://discuss.hangfire.io/t/one-queue-for-the-whole-farm-and-one-queue-by-server/490/3
