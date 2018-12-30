@@ -57,7 +57,7 @@ namespace AspNetCore.ApiBase.Hangfire
             });
         }
 
-        public static IApplicationBuilder UseHangfire(this IApplicationBuilder builder, string[] applicationPartNames, string route = "/admin/hangfire")
+        public static IApplicationBuilder UseHangfire(this IApplicationBuilder builder, string serverName, string route = "/admin/hangfire")
         {
             builder.UseHangfireDashboard(route, new DashboardOptions
             {
@@ -69,7 +69,8 @@ namespace AspNetCore.ApiBase.Hangfire
             //https://discuss.hangfire.io/t/one-queue-for-the-whole-farm-and-one-queue-by-server/490
             var options = new BackgroundJobServerOptions
             {
-                Queues = (new[] { "default" }).Concat(applicationPartNames).ToArray()
+                ServerName = serverName,
+                Queues = new[] { serverName, "default" }
             };
 
             //https://discuss.hangfire.io/t/one-queue-for-the-whole-farm-and-one-queue-by-server/490/3

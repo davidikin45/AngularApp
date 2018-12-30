@@ -158,6 +158,9 @@ namespace AspNetCore.ApiBase
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             services.AddTransient(sp => sp.GetService<IOptions<AppSettings>>().Value);
 
+            services.Configure<ServerSettings>(Configuration.GetSection("ServerSettings"));
+            services.AddTransient(sp => sp.GetService<IOptions<ServerSettings>>().Value);
+
             services.Configure<TokenSettings>(Configuration.GetSection("TokenSettings"));
             services.Configure<TokenSettings>(options =>
             {
@@ -976,7 +979,7 @@ namespace AspNetCore.ApiBase
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider, AppSettings appSettings, CacheSettings cacheSettings,
-            SwitchSettings switchSettings, TaskRunnerAfterApplicationConfiguration taskRunner, ISignalRHubMapper signalRHubMapper, ILoggerFactory loggerFactory)
+            SwitchSettings switchSettings, ServerSettings serverSettings, TaskRunnerAfterApplicationConfiguration taskRunner, ISignalRHubMapper signalRHubMapper, ILoggerFactory loggerFactory)
         {
             Logger.LogInformation("Configuring Request Pipeline");
 
@@ -1266,7 +1269,7 @@ namespace AspNetCore.ApiBase
                 app.UseWhen(context => context.RequestServices.GetService<ITenantService>() == null,
                      appBranch =>
                      {
-                         appBranch.UseHangfire(new[] { "app" });
+                         appBranch.UseHangfire(serverSettings.ServerName);
                      }
                      );
 

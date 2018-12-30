@@ -8,8 +8,10 @@ using Hangfire.SQLite;
 using Hangfire.SqlServer;
 using Hangfire.States;
 using Microsoft.AspNetCore.Hosting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace AspNetCore.ApiBase.Hangfire
 {
@@ -17,7 +19,6 @@ namespace AspNetCore.ApiBase.Hangfire
     {
         public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(
             string serverName,
-            string[] applicationPartNames,
             string connectionString,
             IApplicationLifetime applicationLifetime,
             IJobFilterProvider jobFilters,
@@ -31,7 +32,7 @@ namespace AspNetCore.ApiBase.Hangfire
             var options = new BackgroundJobServerOptions
             {
                 ServerName = serverName,
-                Queues = (new string[] { "default" }).Concat(applicationPartNames).ToArray()
+                Queues = new string[] { serverName,  "default" }
             };
 
             return StartHangfireServer(
@@ -105,7 +106,7 @@ namespace AspNetCore.ApiBase.Hangfire
             var options = new BackgroundJobServerOptions
             {
                 ServerName = serverName,
-                Queues = (new string[] { "default" }).Concat(applicationPartNames).ToArray()
+                Queues = new string[] { serverName, "default" }
             };
             return StartHangfireServer(options, connectionString);
         }
@@ -146,6 +147,18 @@ namespace AspNetCore.ApiBase.Hangfire
             var backgroundJobClient = new BackgroundJobClient(storage, backgroundJobFactory, backgroundJobStateChanger);
 
             return (server, recurringJobManager, backgroundJobClient);
+        }
+
+        public static IBackgroundJobClient GetDefaultBackgroundJobClient()
+        {
+            var clientFactoryProperty = typeof(BackgroundJob).GetProperties(BindingFlags.Instance |
+                  BindingFlags.NonPublic |
+                  BindingFlags.Public).Where(p => p.Name == "ClientFactory").First();
+
+            Func<IBackgroundJobClient> clientFactoryFunc = (Func<IBackgroundJobClient>)clientFactoryProperty.GetValue(null, null);
+            var backgroundJobClient = clientFactoryFunc();
+
+            return backgroundJobClient;
         }
     }
 }

@@ -69,5 +69,24 @@ namespace AspNetCore.ApiBase.Extensions
                 return null;
             }
         }
+
+        public static Type[] GetetTypeByName(string className)
+        {
+            List<Type> returnVal = new List<Type>();
+
+            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                Type[] assemblyTypes = a.GetTypes();
+                for (int j = 0; j < assemblyTypes.Length; j++)
+                {
+                    if (assemblyTypes[j].Name == className)
+                    {
+                        returnVal.Add(assemblyTypes[j]);
+                    }
+                }
+            }
+
+            return returnVal.ToArray();
+        }
     }
 }

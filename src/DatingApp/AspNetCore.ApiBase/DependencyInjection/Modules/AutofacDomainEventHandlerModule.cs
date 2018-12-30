@@ -27,7 +27,6 @@ namespace AspNetCore.ApiBase.DependencyInjection.Modules
                               .Where(x => x.GetInterfaces().Any(y => y.IsGenericType && y.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>)))
                               .Select(p => p);
 
-                    //  #4
                     foreach (var type in types)
                     {
                         if (!type.IsAbstract)
@@ -36,6 +35,26 @@ namespace AspNetCore.ApiBase.DependencyInjection.Modules
                             {
                                 builder.RegisterType(type).As(type);
                                 var eventHandlerInterfaces = type.GetInterfaces().Where(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>));
+                                foreach (var eventHandlerInterface in eventHandlerInterfaces)
+                                {
+                                    builder.RegisterType(type).As(eventHandlerInterface);
+                                }
+                            }
+                        }
+                    }
+
+                   types = assembly.GetTypes()
+                              .Where(x => x.GetInterfaces().Any(y => y == typeof(IDynamicDomainEventHandler)))
+                              .Select(p => p);
+
+                    foreach (var type in types)
+                    {
+                        if (!type.IsAbstract)
+                        {
+                            if (!type.IsGenericType)
+                            {
+                                builder.RegisterType(type).As(type);
+                                var eventHandlerInterfaces = type.GetInterfaces().Where(x => x == typeof(IDynamicDomainEventHandler));
                                 foreach (var eventHandlerInterface in eventHandlerInterfaces)
                                 {
                                     builder.RegisterType(type).As(eventHandlerInterface);

@@ -13,7 +13,7 @@ namespace AspNetCore.ApiBase.MultiTenancy.Hangfire
     {
         public static (BackgroundJobServer server, IRecurringJobManager recurringJobManager, IBackgroundJobClient backgroundJobClient) StartHangfireServer(
             string tenantId,
-            string[] applicationPartNames,
+            string serverName,
             string connectionString,
             IApplicationLifetime applicationLifetime,
             IJobFilterProvider jobFilters,
@@ -27,8 +27,7 @@ namespace AspNetCore.ApiBase.MultiTenancy.Hangfire
             var tenantJobActivator = new AspNetCoreMultiTenantJobActivator(mtc, tenantId);
 
             return HangfireHelper.StartHangfireServer(
-                tenantId,
-                applicationPartNames,
+                serverName,
                 connectionString,
                 applicationLifetime,
                 jobFilters,

@@ -1,4 +1,5 @@
-﻿using AspNetCore.ApiBase.Validation;
+﻿using AspNetCore.ApiBase.Settings;
+using AspNetCore.ApiBase.Validation;
 using Hangfire;
 using Hangfire.Common;
 using Hangfire.States;
@@ -6,8 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.DomainEvents
@@ -19,69 +18,123 @@ namespace AspNetCore.ApiBase.DomainEvents
 
         private readonly IServiceProvider _serviceProvider;
         private readonly IBackgroundJobClient _backgroundJobClient;
-        public DomainEventsMediator(IServiceProvider serviceProvider, IBackgroundJobClient backgroundJobClient)
+        private readonly ServerSettings _serverSettings;
+
+        public DomainEventsMediator(IServiceProvider serviceProvider, IBackgroundJobClient backgroundJobClient, ServerSettings serverSettings)
         {
             _serviceProvider = serviceProvider;
             _backgroundJobClient = backgroundJobClient;
+            _serverSettings = serverSettings;
         }
 
-        private List<dynamic> GetEventHandlerInstancesForPreCommit(IServiceProvider services, IDomainEvent domainEvent)
+        #region Get Event Handlers
+        private (List<dynamic> eventHandlers, List<dynamic> dynamicEventHandlers) GetEventHandlerInstancesForPreCommit(IServiceProvider services, DomainEventMessage domainEventMessage)
         {
             List<dynamic> instances = new List<dynamic>();
 
-            var eventHandlerInterfaceType = typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType());
-            var types = typeof(IEnumerable<>).MakeGenericType(eventHandlerInterfaceType);
-            dynamic handlers = services.GetService(types);
-
-            foreach (var handler in handlers)
+            if (domainEventMessage.DomainEventTypeExists)
             {
-                if (handler.HandlePreCommitCondition((dynamic)domainEvent))
+                var domainEvent = domainEventMessage.DomainEvent;
+
+                var eventHandlerInterfaceType = typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType());
+                var types = typeof(IEnumerable<>).MakeGenericType(eventHandlerInterfaceType);
+                dynamic handlers = services.GetService(types);
+
+                foreach (var handler in handlers)
                 {
-                    instances.Add(handler);
+                    if (handler.HandlePreCommitCondition((dynamic)domainEvent))
+                    {
+                        instances.Add(handler);
+                    }
                 }
             }
 
-            return instances;
+            List<dynamic> dynamicInstances = new List<dynamic>();
+
+            var dynamicDomainEvent = domainEventMessage.DomainEventAsDynamic();
+
+            dynamic dynamicHandlers = services.GetService(typeof(IDynamicDomainEventHandler));
+
+            foreach (var handler in dynamicHandlers)
+            {
+                if (handler.EventNames.Contains(domainEventMessage.EventName) && handler.HandlePreCommitCondition((dynamic)dynamicDomainEvent))
+                {
+                    dynamicInstances.Add(handler);
+                }
+            }
+
+            return (instances, dynamicInstances);
         }
 
-        private List<dynamic> GetEventHandlerInstancesForPostCommit(IServiceProvider services, IDomainEvent domainEvent)
+        private (List<dynamic> eventHandlers, List<dynamic> dynamicEventHandlers) GetEventHandlerInstancesForPostCommit(IServiceProvider services, DomainEventMessage domainEventMessage)
         {
             List<dynamic> instances = new List<dynamic>();
 
-            var eventHandlerInterfaceType = typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType());
-            var types = typeof(IEnumerable<>).MakeGenericType(eventHandlerInterfaceType);
-            dynamic handlers = services.GetService(types);
-
-            foreach (var handler in handlers)
+            if (domainEventMessage.DomainEventTypeExists)
             {
-                if (handler.HandlePostCommitCondition((dynamic)domainEvent))
+                var domainEvent = domainEventMessage.DomainEvent;
+
+                var eventHandlerInterfaceType = typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType());
+                var types = typeof(IEnumerable<>).MakeGenericType(eventHandlerInterfaceType);
+                dynamic handlers = services.GetService(types);
+
+                foreach (var handler in handlers)
                 {
-                    instances.Add(handler);
+                    if (handler.HandlePostCommitCondition((dynamic)domainEvent))
+                    {
+                        instances.Add(handler);
+                    }
                 }
             }
 
-            return instances;
+            List<dynamic> dynamicInstances = new List<dynamic>();
+
+            var dynamicDomainEvent = domainEventMessage.DomainEventAsDynamic();
+
+            dynamic dynamicHandlers = services.GetService(typeof(IDynamicDomainEventHandler));
+
+            foreach (var handler in dynamicHandlers)
+            {
+                if (handler.EventNames.Contains(domainEventMessage.EventName) && handler.HandlePostCommitCondition((dynamic)dynamicDomainEvent))
+                {
+                    dynamicInstances.Add(handler);
+                }
+            }
+
+            return (instances, dynamicInstances);
         }
 
-
-        private List<Type> GetEventHandlerTypesForPostCommit(IDomainEvent domainEvent)
+        private List<Type> GetEventHandlerTypesForPostCommit(DomainEventMessage domainEventMessage)
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                var types = GetEventHandlerInstancesForPostCommit(scope.ServiceProvider, domainEvent).Select(x => (Type)x.GetType()).ToList();
+                var handlers = GetEventHandlerInstancesForPostCommit(scope.ServiceProvider, domainEventMessage);
+                var types = handlers.eventHandlers.Select(x => (Type)x.GetType()).Concat(handlers.dynamicEventHandlers.Select(x => (Type)x.GetType())).ToList();
                 return types;
             }
         }
+        #endregion
 
-        //InProcess
+        #region Dispatch Pre Commit InProcess Domain Events
         public async Task DispatchPreCommitAsync(IDomainEvent domainEvent)
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                List<dynamic> handlers = GetEventHandlerInstancesForPreCommit(scope.ServiceProvider, domainEvent);
+                var domainEventMessage = new DomainEventMessage(_serverSettings.ServerName, domainEvent);
+
+                var handlers = GetEventHandlerInstancesForPreCommit(scope.ServiceProvider, domainEventMessage);
 
                 //pre commit events are atomic
-                foreach (var handler in handlers)
+                foreach (var handler in handlers.eventHandlers)
+                {
+                    Result result = await handler.HandlePreCommitAsync((dynamic)domainEvent);
+                    if (result.IsFailure)
+                    {
+                        throw new Exception("Pre Commit Event Failed");
+                    }
+                }
+
+                foreach (var handler in handlers.dynamicEventHandlers)
                 {
                     Result result = await handler.HandlePreCommitAsync((dynamic)domainEvent);
                     if (result.IsFailure)
@@ -92,7 +145,9 @@ namespace AspNetCore.ApiBase.DomainEvents
 
             }
         }
+        #endregion
 
+        #region Dispatch Post Commit Integration Events
         public async Task DispatchPostCommitBatchAsync(IEnumerable<IDomainEvent> domainEvents)
         {
             if (DispatchPostCommitEventsInParellel)
@@ -113,31 +168,72 @@ namespace AspNetCore.ApiBase.DomainEvents
 
         public async Task DispatchPostCommitAsync(IDomainEvent domainEvent)
         {
-            var eventHandlerTypes = GetEventHandlerTypesForPostCommit(domainEvent);
+            var domainEventMessage = new DomainEventMessage(_serverSettings.ServerName, domainEvent);
+
+            if (HandlePostCommitEventsInProcess)
+            {
+                try
+                {
+                    await HandlePostCommitDispatchAsync(domainEventMessage).ConfigureAwait(false);
+                }
+                catch
+                {
+                    //Log InProcess Post commit event failed
+                }
+            }
+            else
+            {
+                var job = Job.FromExpression<IDomainEventsMediator>(m => m.HandlePostCommitDispatchAsync(domainEventMessage));
+
+                foreach (var queueName in _serverSettings.ServerNames)
+                {
+                    try
+                    {
+                        var queue = new EnqueuedState(queueName);
+                        _backgroundJobClient.Create(job, queue);
+                    }
+                    catch
+                    {
+                        //Log Hangfire Post commit event Background enqueue failed
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region Handle Post Commit Integration Events - Generally handled out of process in HangFire
+        //Event Dispatcher
+        public async Task HandlePostCommitDispatchAsync(DomainEventMessage domainEventMessage)
+        {
+            var eventHandlerTypes = GetEventHandlerTypesForPostCommit(domainEventMessage);
+
 
             if (DispatchPostCommitEventsInParellel)
             {
                 await Task.Run(() => Parallel.ForEach(eventHandlerTypes, async handlerType =>
                 {
-                    await DispatchPostCommitAsync(handlerType, domainEvent).ConfigureAwait(false);
+                    var domainEventHandlerMessage = new DomainEventHandlerMessage(handlerType.FullName, typeof(IDynamicDomainEventHandler).IsAssignableFrom(handlerType) ? true : false, domainEventMessage);
+                    await DispatchPostCommitAsync(domainEventHandlerMessage).ConfigureAwait(false);
                 }));
             }
             else
             {
                 foreach (Type handlerType in eventHandlerTypes)
                 {
-                    await DispatchPostCommitAsync(handlerType, domainEvent).ConfigureAwait(false);
+                    var domainEventHandlerMessage = new DomainEventHandlerMessage(handlerType.FullName, typeof(IDynamicDomainEventHandler).IsAssignableFrom(handlerType) ? true : false, domainEventMessage);
+                    await DispatchPostCommitAsync(domainEventHandlerMessage).ConfigureAwait(false);
                 }
             }
+
         }
 
-        private async Task DispatchPostCommitAsync(Type handlerType, IDomainEvent domainEvent)
+        private async Task DispatchPostCommitAsync(DomainEventHandlerMessage domainEventHandlerMessage)
         {
             if (HandlePostCommitEventsInProcess)
             {
                 try
                 {
-                    await HandlePostCommitAsync(handlerType, domainEvent).ConfigureAwait(false);
+                    await HandlePostCommitAsync(domainEventHandlerMessage).ConfigureAwait(false);
                 }
                 catch
                 {
@@ -151,8 +247,12 @@ namespace AspNetCore.ApiBase.DomainEvents
                     //Each Post Commit Domain Event Handling is completely independent. By registering the event AND handler (rather than just the event) in hangfire we get the granularity of retrying at a event/handler level.
                     //Hangfire unfortunately uses System.Type.GetType to get job type. This only looks at the referenced assemblies of the web project and not the dynamic loaded plugins so need to
                     //proxy back through this common assembly.
-                    var exp = GetExpression(typeof(IDomainEventsMediator), handlerType.FullName, domainEvent);
-                    QueueJobInHangire(exp, typeof(IDomainEventsMediator));
+
+                    var job = Job.FromExpression<IDomainEventsMediator>(m => m.HandlePostCommitAsync(domainEventHandlerMessage));
+
+                    var queue = new EnqueuedState(_serverSettings.ServerName);
+                    _backgroundJobClient.Create(job, queue);
+
                 }
                 catch
                 {
@@ -161,54 +261,15 @@ namespace AspNetCore.ApiBase.DomainEvents
             }
         }
 
-        private void QueueJobInHangire(LambdaExpression exp, Type jobType)
+        //Event Handler
+        public async Task HandlePostCommitAsync(DomainEventHandlerMessage domainEventHandlerMessage)
         {
-            MethodInfo method = typeof(BackgroundJob).GetMethods().Where(m => m.Name == "Enqueue").Last();
-            MethodInfo generic = method.MakeGenericMethod(jobType);
-            generic.Invoke(null, new object[] { exp });
-        }
-
-        private void BackgroundEnqeue(LambdaExpression exp, Type jobType)
-        {
-            var clientFactoryProperty = typeof(BackgroundJob).GetProperties(BindingFlags.Instance |
-                   BindingFlags.NonPublic |
-                   BindingFlags.Public).Where(p => p.Name == "ClientFactory").First();
-
-            Func<IBackgroundJobClient> clientFactoryFunc = (Func<IBackgroundJobClient>)clientFactoryProperty.GetValue(null, null);
-            var clientFactory = clientFactoryFunc();
-
-            MethodInfo method = typeof(Job).GetMethods().Where(m => m.Name == "FromExpression").Last();
-            MethodInfo generic = method.MakeGenericMethod(jobType);
-            var job = (Job)generic.Invoke(null, new object[] { exp });
-
-            //application parts
-            //backgroudjobclient
-            var queue = new EnqueuedState();
-
-            clientFactory.Create(job, queue);
-        }
-
-        private LambdaExpression GetExpression(Type jobType, string handlerName, object domainEvent)
-        {
-            var parameterExp = Expression.Parameter(jobType, "type");
-            MethodInfo method = jobType.GetMethod(nameof(HandlePostCommitAsync), BindingFlags.Instance | BindingFlags.Public);
-            MethodInfo genericMethod = method.MakeGenericMethod(domainEvent.GetType());
-            var handlerValue = Expression.Constant(handlerName, typeof(string));
-            var domainEventValue = Expression.Constant(domainEvent, domainEvent.GetType());
-            var handlePostCommitAsyncExp = Expression.Call(parameterExp, genericMethod, handlerValue, domainEventValue);
-
-            return Expression.Lambda(handlePostCommitAsyncExp, parameterExp);
-        }
-
-        //Called from Hangfire
-        public async Task HandlePostCommitAsync<T>(string type, T domainEvent) where T : IDomainEvent
-        {
-            Type handlerType = System.Type.GetType(type);
+            Type handlerType = System.Type.GetType(domainEventHandlerMessage.HandlerType);
             if (handlerType == null)
             {
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    handlerType = assembly.GetType(type);
+                    handlerType = assembly.GetType(domainEventHandlerMessage.HandlerType);
                     if (handlerType != null)
                     {
                         break;
@@ -221,17 +282,25 @@ namespace AspNetCore.ApiBase.DomainEvents
                 throw new Exception("Invalid handler type");
             }
 
-            await HandlePostCommitAsync(handlerType, domainEvent).ConfigureAwait(false);
+            if (domainEventHandlerMessage.IsDynamic)
+            {
+                await HandlePostCommitAsync(handlerType, domainEventHandlerMessage.DomainEventMessage.DomainEventAsDynamic()).ConfigureAwait(false);
+            }
+            else
+            {
+                await HandlePostCommitAsync(handlerType, domainEventHandlerMessage.DomainEventMessage.DomainEvent).ConfigureAwait(false);
+            }
         }
 
-        public async Task HandlePostCommitAsync(Type handlerType, IDomainEvent domainEvent)
+        private async Task HandlePostCommitAsync(Type handlerType, dynamic domainEvent)
         {
             dynamic handler = _serviceProvider.GetService(handlerType);
-            Result result = await handler.HandlePostCommitAsync((dynamic)domainEvent);
+            Result result = await handler.HandlePostCommitAsync(domainEvent);
             if (result.IsFailure)
             {
                 throw new Exception("Post Commit Event Failed");
             }
         }
+        #endregion
     }
 }

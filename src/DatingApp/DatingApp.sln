@@ -43,7 +43,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontends", "Frontends", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontends", "Frontends", "{C53453F5-8B14-4190-89AF-B4EB8BB5D7C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.Testing", "AspNetCore.Testing\AspNetCore.Testing.csproj", "{CE3E18B3-BEE0-4FD5-910D-983838FDEF18}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.Testing", "AspNetCore.Testing\AspNetCore.Testing.csproj", "{CE3E18B3-BEE0-4FD5-910D-983838FDEF18}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{94D51FE0-9C61-49A2-8D5D-ECDBA1E92186}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
