@@ -13,7 +13,6 @@ namespace DatingApp.Admin.Api
 {
     public class AppTenantsContextInitializer : IAsyncInitializer
     {
-        private readonly IConfiguration _configuration;
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly AppTenantsContext _context;
         private readonly IServiceProvider _serviceProvider;

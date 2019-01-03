@@ -561,11 +561,6 @@ namespace AspNetCore.ApiBase.Helpers
                     }
                 }
             }
-        IL_485:
-            if (text2.Length < 5)
-            {
-                text2 = "shell32.dll,0";
-            }
 
             string[] array = text2.Split(new char[]
             {

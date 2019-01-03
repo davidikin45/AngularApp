@@ -1,4 +1,6 @@
-﻿namespace AspNetCore.ApiBase.DomainCommands
+﻿using System;
+
+namespace AspNetCore.ApiBase.DomainCommands
 {
     public abstract class EntityCommand<T> : IDomainCommand where T : class
     {
@@ -26,5 +28,7 @@
 
             return other.Entity.Equals(Entity);
         }
+
+        public override int GetHashCode() => HashCode.Combine(TriggeredBy, Entity.GetHashCode());
     }
 }

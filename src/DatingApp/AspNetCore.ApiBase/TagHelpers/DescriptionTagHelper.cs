@@ -34,7 +34,7 @@ namespace AspNetCore.ApiBase.TagHelpers
         [HtmlAttributeName(DescriptionForAttributeName)]
         public ModelExpression DescriptionFor { get; set; }
 
-        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
+        public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             if (context == null)
             {
@@ -60,6 +60,8 @@ namespace AspNetCore.ApiBase.TagHelpers
             {
                 output.Content.SetContent(metadata.Description);
             }
+
+            return Task.CompletedTask;
         }
     }
 }

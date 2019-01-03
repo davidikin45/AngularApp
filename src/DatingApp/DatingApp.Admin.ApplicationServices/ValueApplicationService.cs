@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace DatingApp.Admin.ApplicationServices
 {
-    [ResourceCollection(ResourceOperations.Tenants.Name)]
+    [ResourceCollection(ResourceCollections.Tenants.Name)]
     public class ValueApplicationService : ApplicationServiceEntityBase<AppTenant, AppTenant, AppTenant, AppTenant, AppTenant, IAppUnitOfWork>, ITenantApplicationService
     {
         public ValueApplicationService(IMapper mapper, IAppUnitOfWork unitOfWork, IAuthorizationService auth, IUserService userService, IValidationService validationService)

@@ -2,7 +2,7 @@
 
 namespace DatingApp.Admin.Core
 {
-    public class ResourceOperations
+    public class ResourceCollections
     {
         public class Tenants
         {

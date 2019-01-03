@@ -51,9 +51,6 @@ namespace AspNetCore.ApiBase.Middleware.ImageProcessing
             _cacheDays = cacheDays;
         }
 
-        private Boolean _outputFile;
-        private Boolean _outputBytes;
-
         private byte[] _responseBytes;
         private string _responseContentType;
         private string _responseFileName;
@@ -255,8 +252,6 @@ namespace AspNetCore.ApiBase.Middleware.ImageProcessing
 
             if (this.width <= 0 && this.height <= 0 && this.size <= 0 && this.maxwidth == 0 && this.maxheight == 0)
             {
-                _outputFile = true;
-
                 if (ImageHelper.IsValidImage(bytes10))
                 {
                     bool changesMade = false;
@@ -275,8 +270,6 @@ namespace AspNetCore.ApiBase.Middleware.ImageProcessing
 
                             if (changesMade)
                             {
-                                _outputFile = false;
-                                _outputBytes = true;
                                 _responseBytes = ImageHelper.imageToPNGByteArray(image);
                                 _responseFileName = Path.ChangeExtension(_responseFileName, ".png");
                                 _responseContentType = "image/png";
@@ -288,8 +281,6 @@ namespace AspNetCore.ApiBase.Middleware.ImageProcessing
             }
             else
             {
-                _outputBytes = true;
-
                 _responseContentType = "image/jpg";
                 Image disposableImage = null;
 

@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DatingApp.Admin.Api.Controllers
 {
-    [ResourceCollection(ResourceOperations.Tenants.Name)]
+    [ResourceCollection(ResourceCollections.Tenants.Name)]
     [ApiVersion("1.0")]
     [Route("api/tenants")]
     public class TenantsController : ApiControllerEntityAuthorizeBase<AppTenant, AppTenant, AppTenant, AppTenant, ITenantApplicationService>

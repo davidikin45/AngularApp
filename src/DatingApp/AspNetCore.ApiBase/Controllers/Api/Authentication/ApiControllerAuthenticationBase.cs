@@ -46,6 +46,8 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
         {
             _resetPasswordEmailTemplate = emailTemplates.ResetPassword;
 
+            _passwordResetCallbackUrl = passwordSettings.PasswordResetCallbackUrl;
+
             _roleManager = roleManager;
             _userManager = userManager;
             _signInManager = signInManager;

@@ -165,7 +165,7 @@ namespace AspNetCore.ApiBase.Data.Helpers
                         try
                         {
                             var command = $"DELETE FROM [__EFMigrationsHistory] WHERE MigrationId = '{migrationId}'";
-                            context.Database.ExecuteSqlCommand(new RawSqlString(command));
+                            context.Database.ExecuteSqlCommand(command);
                             commands.Add(command);
                         }
                         catch

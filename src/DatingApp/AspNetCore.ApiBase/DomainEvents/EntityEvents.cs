@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace AspNetCore.ApiBase.DomainEvents
 {
@@ -29,6 +30,8 @@ namespace AspNetCore.ApiBase.DomainEvents
 
             return other.Entity.Equals(Entity);
         }
+
+        public override int GetHashCode() => HashCode.Combine(CreatedBy, Entity.GetHashCode().ToString());
     }
 
     public class EntityUpdatedEvent<T> : IDomainEvent
@@ -58,6 +61,8 @@ namespace AspNetCore.ApiBase.DomainEvents
 
             return other.Entity.Equals(Entity);
         }
+
+        public override int GetHashCode() => HashCode.Combine(UpdatedBy, Entity.GetHashCode().ToString());
     }
 
     public class EntityDeletedEvent<T> : IDomainEvent
@@ -87,6 +92,8 @@ namespace AspNetCore.ApiBase.DomainEvents
 
             return other.Entity.Equals(Entity);
         }
+
+        public override int GetHashCode() => HashCode.Combine(DeletedBy, Entity.GetHashCode());
     }
 
     public class EntityPropertyUpdatedEvent<T> : IDomainEvent
@@ -125,6 +132,8 @@ namespace AspNetCore.ApiBase.DomainEvents
                 && other.PropertyOldAndNewValue.OldValue.Equals(PropertyOldAndNewValue.OldValue)
                  && other.PropertyOldAndNewValue.NewValue.Equals(PropertyOldAndNewValue.NewValue);
         }
+
+        public override int GetHashCode() => HashCode.Combine(UpdatedBy, PropertyName, Entity.GetHashCode());
     }
 
     public class OldAndNewValue
