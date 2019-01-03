@@ -22,10 +22,10 @@ namespace DatingApp.Admin.Data.Identity
             return new List<SeedRole>()
             {
                new SeedRole(Role.anonymous.ToString(),
-               ResourceOperationsCore.Auth.Scopes.Register,
-               ResourceOperationsCore.Auth.Scopes.Authenticate,
-               ResourceOperationsCore.Auth.Scopes.ForgotPassword,
-               ResourceOperationsCore.Auth.Scopes.ResetPassword
+               ResourceCollectionsCore.Auth.Scopes.Register,
+               ResourceCollectionsCore.Auth.Scopes.Authenticate,
+               ResourceCollectionsCore.Auth.Scopes.ForgotPassword,
+               ResourceCollectionsCore.Auth.Scopes.ResetPassword
                ),
                new SeedRole(Role.authenticated.ToString(),
                ResourceOperations.Tenants.Scopes.Create,
@@ -34,7 +34,7 @@ namespace DatingApp.Admin.Data.Identity
                ResourceOperations.Tenants.Scopes.DeleteOwner
                ),
                new SeedRole(Role.administrator.ToString(),
-               ResourceOperationsCore.Admin.Scopes.Full
+               ResourceCollectionsCore.Admin.Scopes.Full
                )
             };
         }

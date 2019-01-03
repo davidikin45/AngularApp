@@ -16,7 +16,7 @@ namespace AspnetCore.ApiBase.Data.Initializers
 
         public void InitializeSchema(TDbContext context)
         {
-            context.EnsureDeleted();
+            context.EnsureTablesAndMigrationsDeleted();
 
             var script = context.GenerateMigrationScript();
             context.Database.Migrate();

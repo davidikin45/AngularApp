@@ -9,10 +9,10 @@ using System.Reflection;
 
 namespace DND.Common.Testing
 {
-    public abstract class IntegrationTestDbSetupBase<T> where T : class, IDisposable
+    public abstract class IntegrationTestLocalDbSetupBase<T> where T : class, IDisposable
     {
         public string DBName { get; }
-        public IntegrationTestDbSetupBase(string MSSQLLocalDBDbNameOrConnectionString)
+        public IntegrationTestLocalDbSetupBase(string MSSQLLocalDBDbNameOrConnectionString)
         {
             if(MSSQLLocalDBDbNameOrConnectionString.Contains("Server"))
             {
@@ -59,10 +59,12 @@ namespace DND.Common.Testing
                     ExecuteSqlCommand(Master, $@"
                     ALTER DATABASE [{DBName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
                     EXEC sp_detach_db '{DBName}'");
+                    //To remove a database from the current server without deleting the files from the file system, use sp_detach_db.
                     fileNames.ForEach(System.IO.File.Delete);
                 }
                 catch
                 {
+                    //Dropping a database deletes the database from an instance of SQL Server and deletes the physical disk files used by the database.
                     ExecuteSqlCommand(Master, $@"
                     DROP DATABASE [{DBName}];");
                 }

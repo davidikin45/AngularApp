@@ -17,10 +17,10 @@ namespace AspnetCore.ApiBase.Data.Initializers
         public void InitializeSchema(TDbContext context)
         {
             //Delete database relating to this context only
-            context.EnsureDeleted();
+            context.EnsureTablesAndMigrationsDeleted();
 
             //Recreate databases with the current data model. This is useful for development as no migrations are applied.
-            context.EnsureCreated();
+            context.EnsureTablesCreated();
         }
 
         public async Task InitializeDataAsync(TDbContext context, string tenantId)

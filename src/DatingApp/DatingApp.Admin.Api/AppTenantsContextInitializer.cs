@@ -1,4 +1,5 @@
-﻿using AspNetCore.ApiBase.MultiTenancy;
+﻿using AspNetCore.ApiBase.Extensions;
+using AspNetCore.ApiBase.MultiTenancy;
 using AspNetCore.ApiBase.Settings;
 using AspNetCore.ApiBase.Tasks;
 using AutoMapper.Configuration;
@@ -28,14 +29,19 @@ namespace DatingApp.Admin.Api
 
         public async Task ExecuteAsync()
         {
-            if (_hostingEnvironment.IsDevelopment())
+            if (_hostingEnvironment.IsStaging() || _hostingEnvironment.IsProduction())
             {
-                var migrationInitializer = new AppTenantsContextInitializerDropCreate(_serviceProvider, _settings);
+                var migrationInitializer = new AppTenantsContextInitializerMigrate(_serviceProvider, _settings);
+                await migrationInitializer.InitializeAsync(_context);
+            }
+            else if(_hostingEnvironment.IsIntegration()) 
+            {
+                var migrationInitializer = new AppTenantsContextInitializerDropMigrate(_serviceProvider, _settings);
                 await migrationInitializer.InitializeAsync(_context);
             }
             else
             {
-                var migrationInitializer = new AppTenantsContextInitializerMigrate(_serviceProvider, _settings);
+                var migrationInitializer = new AppTenantsContextInitializerDropCreate(_serviceProvider, _settings);
                 await migrationInitializer.InitializeAsync(_context);
             }
         }

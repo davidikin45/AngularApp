@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.Controllers.Api.Authentication
 {
-    [Resource(ResourceOperationsCore.Auth.Name)]
+    [ResourceCollection(ResourceCollectionsCore.Auth.Name)]
     public abstract class ApiControllerAuthenticationBase<TUser> : ApiControllerBase
         where TUser : IdentityUser
     {
@@ -74,7 +74,7 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
         #endregion
 
         #region Authenticate
-        [ResourceAuthorize(ResourceOperationsCore.Auth.Operations.Authenticate)]
+        [ResourceAuthorize(ResourceCollectionsCore.Auth.Operations.Authenticate)]
         [HttpPost("authenticate")]
         public async Task<IActionResult> Authenticate([FromBody] AuthenticateDto authenticateDto)
         {
@@ -151,7 +151,7 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
         #endregion
 
         #region Forgot Password
-        [ResourceAuthorize(ResourceOperationsCore.Auth.Operations.ForgotPassword)]
+        [ResourceAuthorize(ResourceCollectionsCore.Auth.Operations.ForgotPassword)]
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
         {
@@ -172,7 +172,7 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
         #endregion
 
         #region Reset Password
-        [ResourceAuthorize(ResourceOperationsCore.Auth.Operations.ResetPassword)]
+        [ResourceAuthorize(ResourceCollectionsCore.Auth.Operations.ResetPassword)]
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {

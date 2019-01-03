@@ -1,6 +1,6 @@
 ﻿namespace AspNetCore.ApiBase
 {
-    public class ResourceOperationsCore
+    public class ResourceCollectionsCore
     {
         public class Admin
         {

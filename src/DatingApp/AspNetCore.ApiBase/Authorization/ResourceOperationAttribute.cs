@@ -28,11 +28,11 @@ namespace AspNetCore.ApiBase.Authorization
 
             public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
             {
-                string resourceName = null;
-                var resourceAttribute = (ResourceAttribute)context.Controller.GetType().GetCustomAttributes(typeof(ResourceAttribute), true).FirstOrDefault();
+                string collectionId = null;
+                var resourceAttribute = (ResourceCollectionAttribute)context.Controller.GetType().GetCustomAttributes(typeof(ResourceCollectionAttribute), true).FirstOrDefault();
                 if (resourceAttribute != null)
                 {
-                    resourceName = resourceAttribute.Name;
+                    collectionId = resourceAttribute.CollectionId;
                 }
 
                 var anonymousAction = context.ActionDescriptor.GetCustomAttributes<AllowAnonymousAttribute>().FirstOrDefault();
@@ -43,9 +43,9 @@ namespace AspNetCore.ApiBase.Authorization
                     foreach (var operation in _operations)
                     {
                         string resourceOperation = operation;
-                        if (!string.IsNullOrWhiteSpace(resourceName))
+                        if (!string.IsNullOrWhiteSpace(collectionId))
                         {
-                            resourceOperation = resourceName + "." + operation;
+                            resourceOperation = collectionId + "." + operation;
                         }
 
                         var authorizationResult = await _authorizationService.AuthorizeAsync(context.HttpContext.User, resourceOperation);

@@ -10,6 +10,7 @@ namespace AspNetCore.ApiBase.Users
 
         public ClaimsPrincipal User { get; }
         public string UserId { get; } = null;
+        public string UserName { get; } = null;
 
         public UserService(IHttpContextAccessor httpContextAccessor)
         {
@@ -26,18 +27,22 @@ namespace AspNetCore.ApiBase.Users
 
             User = currentContext.User;
 
-            if (!currentContext.User.Identity.IsAuthenticated)
+            if (!User.Identity.IsAuthenticated)
             {
                 return;
             }
 
-            var claim = currentContext.User.FindFirst(ClaimTypes.NameIdentifier);
-            if (claim == null)
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (claim != null)
             {
-                return;
+                UserId = claim.Value;
             }
 
-            UserId = claim.Value;
+            claim = User.FindFirst(ClaimTypes.Name);
+            if (claim != null)
+            {
+                UserName = claim.Value;
+            }
         }
     }
 }

@@ -6,5 +6,6 @@ namespace AspNetCore.ApiBase.Users
     {
         ClaimsPrincipal User { get; }
         string UserId { get; }
+        string UserName { get; }
     }
 }

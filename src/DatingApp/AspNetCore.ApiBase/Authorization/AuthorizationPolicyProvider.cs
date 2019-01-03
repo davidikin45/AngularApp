@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -44,9 +43,9 @@ namespace AspNetCore.ApiBase.Authorization
                 {
                     //must have one or more to pass
                     var scopes = policyName.Split(',').Select(p => p.Trim()).ToList();
-                    scopes.Add(ResourceOperationsCore.Admin.Scopes.Full);
+                    scopes.Add(ResourceCollectionsCore.Admin.Scopes.Full);
 
-                    policy = new AuthorizationPolicyBuilder().RequireClaim("scope", scopes).Build();
+                    policy = new AuthorizationPolicyBuilder().RequireScope(scopes.ToArray()).Build();
                 }
 
                 // Add policy to the AuthorizationOptions, so we don't have to re-create it each time

@@ -94,7 +94,7 @@ namespace AspNetCore.ApiBase.Data.Helpers
         #endregion
 
         #region Ensure Tables Created at a DbContext Level
-        public static void EnsureCreated(this DbContext context)
+        public static void EnsureTablesCreated(this DbContext context)
         {
             var created = context.Database.EnsureCreated();
             if (!created)
@@ -117,7 +117,7 @@ namespace AspNetCore.ApiBase.Data.Helpers
         #endregion
 
         #region Delete Tables and Migrations DbContent Level
-        public static void EnsureDeleted(this DbContext context)
+        public static void EnsureTablesAndMigrationsDeleted(this DbContext context)
         {
             if (context.Database.Exists())
             {

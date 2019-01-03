@@ -1,6 +1,5 @@
 ﻿using AspNetCore.ApiBase.ApplicationServices;
 using AspNetCore.ApiBase.Authorization;
-using AspNetCore.ApiBase.DomainEvents;
 using AspNetCore.ApiBase.MultiTenancy;
 using AspNetCore.ApiBase.Users;
 using AspNetCore.ApiBase.Validation;
@@ -10,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace DatingApp.Admin.ApplicationServices
 {
-    [Resource(ResourceOperations.Tenants.Name)]
+    [ResourceCollection(ResourceOperations.Tenants.Name)]
     public class ValueApplicationService : ApplicationServiceEntityBase<AppTenant, AppTenant, AppTenant, AppTenant, AppTenant, IAppUnitOfWork>, ITenantApplicationService
     {
         public ValueApplicationService(IMapper mapper, IAppUnitOfWork unitOfWork, IAuthorizationService auth, IUserService userService, IValidationService validationService)

@@ -60,7 +60,7 @@ namespace GrabMobile.ApiClient.HttpClientREST
             var builder = new HttpRequestBuilder()
                                 .AddMethod(HttpMethod.Post)
                                 .AddRequestUri(requestUri)
-                                .AddContent(new FormUrlEncodedContent(QueryStringHelper.ToKeyValue(value) ?? new Dictionary<string, string>()))
+                                .AddContent(FormUrlEncodedContentExtensions.FromObject(value))
                                 .AddBearerToken(bearerToken);
 
             return await builder.SendAsync(client, cancellationToken);

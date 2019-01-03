@@ -14,7 +14,7 @@ namespace AspNetCore.ApiBase.Authorization
                                                        OperationAuthorizationRequirement requirement,
                                                        IEntityOwned entity)
         {
-            if (context.User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && c.Value == ResourceOperationsCore.Admin.Scopes.Full).Count() > 0)
+            if (context.User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && c.Value == ResourceCollectionsCore.Admin.Scopes.Full).Count() > 0)
             {
                 context.Succeed(requirement);
             }

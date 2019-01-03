@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -13,6 +12,11 @@ namespace AspNetCore.ApiBase.Validation
         public ValidationService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
+        }
+
+        public bool IsValid(object o)
+        {
+            return ValidateObject(o).Count() == 0;
         }
 
         public IEnumerable<ValidationResult> ValidateObject(object o)

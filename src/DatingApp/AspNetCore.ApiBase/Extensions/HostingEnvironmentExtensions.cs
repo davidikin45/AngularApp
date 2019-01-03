@@ -59,5 +59,10 @@ namespace AspNetCore.ApiBase.Extensions
             return result.StartsWith(hostingEnvironement.WebRootPath,
                 StringComparison.Ordinal);
         }
+
+        public static bool IsIntegration(this IHostingEnvironment hostingEnvironement)
+        {
+            return hostingEnvironement.IsEnvironment("Integration");
+        }
     }
 }

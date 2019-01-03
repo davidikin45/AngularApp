@@ -1,4 +1,5 @@
-﻿using AspNetCore.ApiBase.Tasks;
+﻿using AspNetCore.ApiBase.Extensions;
+using AspNetCore.ApiBase.Tasks;
 using DatingApp.Admin.Data.Identity.Initializers;
 using DatingApp.Admin.Domain;
 using Microsoft.AspNetCore.Hosting;
@@ -22,14 +23,19 @@ namespace DatingApp.Admin.Data.Identity
 
         public async Task ExecuteAsync()
         {
-            if (_hostingEnvironment.IsDevelopment())
+            if (_hostingEnvironment.IsStaging() || _hostingEnvironment.IsProduction())
             {
-                var migrationInitializer = new IdentityContextInitializerDropCreate(_passwordHasher);
+                var migrationInitializer = new IdentityContextInitializerMigrate(_passwordHasher);
+                await migrationInitializer.InitializeAsync(_context);
+            }
+            else if (_hostingEnvironment.IsIntegration())
+            {
+                var migrationInitializer = new IdentityContextInitializerDropMigrate(_passwordHasher);
                 await migrationInitializer.InitializeAsync(_context);
             }
             else
             {
-                var migrationInitializer = new IdentityContextInitializerMigrate(_passwordHasher);
+                var migrationInitializer = new IdentityContextInitializerDropCreate(_passwordHasher);
                 await migrationInitializer.InitializeAsync(_context);
             }
         }

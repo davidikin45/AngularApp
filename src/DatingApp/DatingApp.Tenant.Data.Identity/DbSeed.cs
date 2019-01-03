@@ -23,19 +23,19 @@ namespace DatingApp.Data.Tenant.Identity
             return new List<SeedRole>()
             {
                new SeedRole(Role.anonymous.ToString(),
-               ResourceOperationsCore.Auth.Scopes.Register,
-               ResourceOperationsCore.Auth.Scopes.Authenticate,
-               ResourceOperationsCore.Auth.Scopes.ForgotPassword,
-               ResourceOperationsCore.Auth.Scopes.ResetPassword
+               ResourceCollectionsCore.Auth.Scopes.Register,
+               ResourceCollectionsCore.Auth.Scopes.Authenticate,
+               ResourceCollectionsCore.Auth.Scopes.ForgotPassword,
+               ResourceCollectionsCore.Auth.Scopes.ResetPassword
                ),
                new SeedRole(Role.authenticated.ToString(),
-               ResourceOperations.Values.Scopes.Create,
-               ResourceOperations.Values.Scopes.ReadOwner,
-               ResourceOperations.Values.Scopes.UpdateOwner,
-               ResourceOperations.Values.Scopes.DeleteOwner
+               ResourceCollections.Values.Scopes.Create,
+               ResourceCollections.Values.Scopes.ReadOwner,
+               ResourceCollections.Values.Scopes.UpdateOwner,
+               ResourceCollections.Values.Scopes.DeleteOwner
                ),
                new SeedRole(Role.administrator.ToString(),
-               ResourceOperationsCore.Admin.Scopes.Full
+               ResourceCollectionsCore.Admin.Scopes.Full
                )
             };
         }

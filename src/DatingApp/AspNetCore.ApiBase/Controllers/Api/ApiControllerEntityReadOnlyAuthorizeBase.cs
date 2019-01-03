@@ -66,7 +66,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// </summary>
         /// <param name="resourceParameters">The resource parameters.</param>
         /// <returns></returns>
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Read, ResourceCollectionsCore.CRUD.Operations.ReadOwner)]
         [FormatFilter]
         [Route("")]
         [Route(".{format}")]
@@ -74,7 +74,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         [HttpHead]
         public virtual async Task<ActionResult<WebApiListResponseDto<TDto>>> Search([FromQuery] WebApiPagedSearchOrderingRequestDto resourceParameters)
         {  
-            if(User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && c.Value.EndsWith(ResourceOperationsCore.CRUD.Operations.Read)).Count() == 0)
+            if(User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && c.Value.EndsWith(ResourceCollectionsCore.CRUD.Operations.Read)).Count() == 0)
             {
                 resourceParameters.UserId = UserId;
             }
@@ -153,7 +153,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// Gets all.
         /// </summary>
         /// <returns></returns>
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Read)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Read)]
         [FormatFilter]
         [Route("get-all")]
         [Route("get-all.{format}")]
@@ -173,7 +173,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// Gets all paged.
         /// </summary>
         /// <returns></returns>
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Read)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Read)]
         [FormatFilter]
         [Route("get-all-paged")]
         [Route("get-all-paged.{format}")]
@@ -214,7 +214,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// <param name="id">The identifier.</param>
         /// <param name="fields">The fields.</param>
         /// <returns></returns>
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Read, ResourceCollectionsCore.CRUD.Operations.ReadOwner)]
         [FormatFilter]
         [Route("{id}"), Route("{id}.{format}")]
         //[Route("get/{id}"), Route("get/{id}.{format}")]
@@ -253,7 +253,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// </summary>
         /// <param name="ids">The ids.</param>
         /// <returns></returns>
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Read, ResourceCollectionsCore.CRUD.Operations.ReadOwner)]
         [FormatFilter]
         [Route("({ids})"), Route("({ids}).{format}")]
         //[Route("get/({ids})"), Route("get/({ids}).{format}")]
@@ -279,7 +279,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
             return Success(list);
         }
 
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Read, ResourceCollectionsCore.CRUD.Operations.ReadOwner)]
         [FormatFilter]
         [Route("full-graph/{id}"), Route("full-graph/{id}.{format}")]
         [HttpGet]
@@ -316,10 +316,11 @@ namespace AspNetCore.ApiBase.Controllers.Api
         #region Child Collection List and Details
         /// <summary>
         /// Gets the paged.
+        /// Service/Collection/Resource
         /// </summary>
         /// <param name="resourceParameters">The resource parameters.</param>
         /// <returns></returns>
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Read, ResourceOperationsCore.CRUD.Operations.ReadOwner)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Read, ResourceCollectionsCore.CRUD.Operations.ReadOwner)]
         [FormatFilter]
         [Route("{id}/{*collection}")]
         //[Route("{id}/{*collection}.{format}")]

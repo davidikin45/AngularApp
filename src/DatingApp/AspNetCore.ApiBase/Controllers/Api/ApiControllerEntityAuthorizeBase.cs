@@ -49,7 +49,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
 
         #region New Instance
         [Route("new")]
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Create)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Create)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Create)]
         [HttpGet]
         public virtual ActionResult<TCreateDto> NewDefault()
@@ -75,7 +75,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// </summary>
         /// <param name="dto">The dto.</param>
         /// <returns></returns>
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Create)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Create)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Create)]
         [HttpPost]
         public virtual async Task<ActionResult<TReadDto>> Create([FromBody] TCreateDto dto)
@@ -117,7 +117,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         #endregion
 
         #region Bulk Create
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Create)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Create)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Create)]
         [Route("bulk")]
         [HttpPost]
@@ -138,7 +138,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// </summary>
         /// <param name="id">The identifier.</param>
         /// <returns></returns>
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Update, ResourceCollectionsCore.CRUD.Operations.UpdateOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [FormatFilter]
         [Route("edit/{id}"), Route("edit/{id}.{format}")]
@@ -168,7 +168,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         #endregion
 
         #region Bulk Get for Edit
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Update, ResourceCollectionsCore.CRUD.Operations.UpdateOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [FormatFilter]
         [Route("edit/({ids})"), Route("edit/({ids}).{format}")]
@@ -203,7 +203,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// <param name="id">The identifier.</param>
         /// <param name="dto">The dto.</param>
         /// <returns></returns>
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Update, ResourceCollectionsCore.CRUD.Operations.UpdateOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [Route("{id}")]
         [HttpPut]
@@ -249,7 +249,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// </summary>
         /// <param name="dto">The dto.</param>
         /// <returns></returns>
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Update, ResourceCollectionsCore.CRUD.Operations.UpdateOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [Route("bulk")]
         [HttpPut]
@@ -270,7 +270,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// <param name="id">The identifier.</param>
         /// <param name="dtoPatch">The dto patch.</param>
         /// <returns></returns>
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Update, ResourceCollectionsCore.CRUD.Operations.UpdateOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [Route("{id}")]
         [HttpPatch]
@@ -299,7 +299,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// </summary>
         /// <param name="dto">The dto.</param>
         /// <returns></returns>
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Update, ResourceOperationsCore.CRUD.Operations.UpdateOwner)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Update, ResourceCollectionsCore.CRUD.Operations.UpdateOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Update)]
         [Route("bulk")]
         [HttpPatch]
@@ -314,7 +314,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         #endregion
 
         #region Get for Delete
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Delete, ResourceCollectionsCore.CRUD.Operations.DeleteOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Delete)]
         [FormatFilter]
         [Route("Delete/{id}"), Route("Delete/{id}.{format}")]
@@ -343,7 +343,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         #endregion
 
         #region Bulk Get for Delete
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Delete, ResourceCollectionsCore.CRUD.Operations.DeleteOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Delete)]
         [FormatFilter]
         [Route("delete/({ids})"), Route("delete/({ids}).{format}")]
@@ -377,7 +377,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         /// </summary>
         /// <param name="dto">The dto.</param>
         /// <returns></returns>
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Delete, ResourceCollectionsCore.CRUD.Operations.DeleteOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Delete)]
         [Route("{id}")]
         [HttpDelete]
@@ -411,7 +411,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         #endregion
 
         #region Bulk Delete
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Delete, ResourceOperationsCore.CRUD.Operations.DeleteOwner)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Delete, ResourceCollectionsCore.CRUD.Operations.DeleteOwner)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Delete)]
         [Route("bulk")]
         [HttpDelete]
@@ -426,7 +426,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         #endregion
 
         #region Create New Child Collection Item Instance
-        [ResourceAuthorize(ResourceOperationsCore.CRUD.Operations.Create, ResourceOperationsCore.CRUD.Operations.Update)]
+        [ResourceAuthorize(ResourceCollectionsCore.CRUD.Operations.Create, ResourceCollectionsCore.CRUD.Operations.Update)]
         [Route("new/{*collection}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = ApiScopes.Create)]
         [HttpGet]

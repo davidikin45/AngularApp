@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AspNetCore.ApiBase.Controllers.Api
 {
     //using CSharpFunctionalExtensions;
-    public abstract class ApiControllerCQRSBase : Controller
+    public abstract class ApiControllerCQRSBase : ControllerBase
     {
         protected new IActionResult Ok()
         {

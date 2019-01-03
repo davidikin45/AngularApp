@@ -1,5 +1,4 @@
 ﻿using AspNetCore.ApiBase.ApplicationServices;
-using AspNetCore.ApiBase.DomainEvents;
 using AspNetCore.ApiBase.Email;
 using AspNetCore.ApiBase.Reflection;
 using AspNetCore.ApiBase.Settings;
@@ -9,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AspNetCore.ApiBase.Controllers.Api
 {
-
     //Edit returns a view of the resource being edited, the Update updates the resource it self
 
     //C - Create - POST
@@ -30,13 +28,11 @@ namespace AspNetCore.ApiBase.Controllers.Api
         where TDeleteDto : class
         where IEntityService : IApplicationServiceEntity<TCreateDto, TReadDto, TUpdateDto, TDeleteDto>
     {   
-
         public ApiControllerEntityBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSettings)
         : base(service, mapper , emailService, urlHelper, typeHelperService, appSettings)
         {
           
         }
-
     }
 }
 

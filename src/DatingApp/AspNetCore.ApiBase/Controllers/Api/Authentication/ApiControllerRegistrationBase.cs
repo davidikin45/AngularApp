@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.Controllers.Api.Authentication
 {
-    [Resource(ResourceOperationsCore.Auth.Name)]
+    [ResourceCollection(ResourceCollectionsCore.Auth.Name)]
     public abstract class ApiControllerRegistrationBase<TUser, TRegistrationDto> : ApiControllerAuthenticationBase<TUser>
         where TUser : IdentityUser
         where TRegistrationDto : RegisterDtoBase
@@ -33,7 +33,7 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
         }
 
         #region Register
-        [ResourceAuthorize(ResourceOperationsCore.Auth.Operations.Register)]
+        [ResourceAuthorize(ResourceCollectionsCore.Auth.Operations.Register)]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] TRegistrationDto registerDto)
         {

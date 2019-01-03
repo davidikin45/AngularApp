@@ -31,21 +31,21 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         public async Task AuthorizeResourceOperationAsync(params string[] operations)
         {
-            string resourceName = null;
+            string collectionId = null;
 
-            var resourceAttribute = (ResourceAttribute)this.GetType().GetCustomAttributes(typeof(ResourceAttribute), true).FirstOrDefault();
+            var resourceAttribute = (ResourceCollectionAttribute)this.GetType().GetCustomAttributes(typeof(ResourceCollectionAttribute), true).FirstOrDefault();
             if (resourceAttribute != null)
             {
-                resourceName = resourceAttribute.Name;
+                collectionId = resourceAttribute.CollectionId;
             }
 
             bool success = false;
             foreach (var operation in operations)
             {
                 var operationName = operation;
-                if(!string.IsNullOrWhiteSpace(resourceName))
+                if(!string.IsNullOrWhiteSpace(collectionId))
                 {
-                    operationName = resourceName + "." + operationName;
+                    operationName = collectionId + "." + operationName;
                 }
 
                 var authorizationResult = await AuthorizationService.AuthorizeAsync(UserService.User, operationName);
@@ -58,7 +58,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
            
             if (!success)
             {
-                throw new UnauthorizedErrors(new GeneralError(String.Format(Messages.UnauthorisedServiceOperation, resourceAttribute.Name + "." + operations.FirstOrDefault())));
+                throw new UnauthorizedErrors(new GeneralError(String.Format(Messages.UnauthorisedServiceOperation, resourceAttribute.CollectionId + "." + operations.FirstOrDefault())));
             }
         }
 
@@ -66,21 +66,21 @@ namespace AspNetCore.ApiBase.ApplicationServices
         {
             if(resource != null)
             {
-                string resourceName = null;
+                string collectionId = null;
 
-                var resourceAttribute = (ResourceAttribute)this.GetType().GetCustomAttributes(typeof(ResourceAttribute), true).FirstOrDefault();
+                var resourceAttribute = (ResourceCollectionAttribute)this.GetType().GetCustomAttributes(typeof(ResourceCollectionAttribute), true).FirstOrDefault();
                 if (resourceAttribute != null)
                 {
-                    resourceName = resourceAttribute.Name;
+                    collectionId = resourceAttribute.CollectionId;
                 }
 
                 bool success = false;
                 foreach (var operation in operations)
                 {
                     var operationName = operation;
-                    if (!string.IsNullOrWhiteSpace(resourceName))
+                    if (!string.IsNullOrWhiteSpace(collectionId))
                     {
-                        operationName = resourceName + "." + operationName;
+                        operationName = collectionId + "." + operationName;
                     }
 
                     var authorizationResult = await AuthorizationService.AuthorizeAsync(UserService.User, resource, new OperationAuthorizationRequirement() { Name = operationName });
@@ -93,7 +93,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
                 if (!success)
                 {
-                    throw new UnauthorizedErrors(new GeneralError(String.Format(Messages.UnauthorisedServiceOperation, resourceAttribute.Name + "." + operations.FirstOrDefault())));
+                    throw new UnauthorizedErrors(new GeneralError(String.Format(Messages.UnauthorisedServiceOperation, resourceAttribute.CollectionId + "." + operations.FirstOrDefault())));
                 }
             }
         }

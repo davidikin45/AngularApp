@@ -29,7 +29,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
     [Consumes("application/json", "application/xml")]
     [Produces("application/json", "application/xml")]
     [ApiController]
-    public abstract class ApiControllerBase : Controller
+    public abstract class ApiControllerBase : ControllerBase
     {
         public IMapper Mapper { get; }
         public IEmailService EmailService { get; }
