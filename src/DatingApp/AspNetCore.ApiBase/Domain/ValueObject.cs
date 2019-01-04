@@ -6,8 +6,14 @@ namespace AspNetCore.ApiBase.Domain
 {
     //https://docs.microsoft.com/en-us/ef/core/modeling/owned-entities
     //[Owned]
-    public abstract class ValueObject
+    public abstract class ValueObject<T> : IEquatable<T>
+        where T : ValueObject<T>
     {
+        public bool Equals(T other)
+        {
+            return Equals(other);
+        }
+
         public override bool Equals(object obj)
         {
             if (obj == null)
@@ -74,7 +80,7 @@ namespace AspNetCore.ApiBase.Domain
             return fields;
         }
 
-        public static bool operator ==(ValueObject a, ValueObject b)
+        public static bool operator ==(ValueObject<T> a, ValueObject<T> b)
         {
             if (ReferenceEquals(a, null) && ReferenceEquals(b, null))
                 return true;
@@ -85,7 +91,7 @@ namespace AspNetCore.ApiBase.Domain
             return a.Equals(b);
         }
 
-        public static bool operator !=(ValueObject a, ValueObject b)
+        public static bool operator !=(ValueObject<T> a, ValueObject<T> b)
         {
             return !(a == b);
         }
@@ -106,9 +112,10 @@ namespace AspNetCore.ApiBase.Domain
             return true;
         }
 
-        public ValueObject GetCopy()
+        public ValueObject<T> GetCopy()
         {
-            return MemberwiseClone() as ValueObject;
+            return MemberwiseClone() as ValueObject<T>;
         }
+
     }
 }
