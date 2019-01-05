@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.DomainEvents
 {
-    public interface IDomainEventHandler<T>
+    public interface IDomainEventHandler<T> : IDomainEventHandler
         where T : IDomainEvent
     {
         //Domain Event
@@ -13,6 +13,10 @@ namespace AspNetCore.ApiBase.DomainEvents
         //Integration Event
         bool HandlePostCommitCondition(T domainEvent);
         Task<Result> HandlePostCommitAsync(T domainEvent);
+    }
+
+    public interface IDomainEventHandler
+    {
     }
 
     public interface IDynamicDomainEventHandler

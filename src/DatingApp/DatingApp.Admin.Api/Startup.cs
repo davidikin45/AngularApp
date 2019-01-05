@@ -2,6 +2,7 @@
 using AspNetCore.ApiBase.Extensions;
 using AspNetCore.ApiBase.Hangfire;
 using AspNetCore.ApiBase.HostedServices;
+using AspNetCore.ApiBase.IntegrationEvents;
 using AspNetCore.ApiBase.Tasks;
 using DatingApp.Admin.Core;
 using DatingApp.Admin.Data.Identity;
@@ -67,6 +68,20 @@ namespace DatingApp.Admin.Api
             _recurringJobManager.AddOrUpdate("check-link", Job.FromExpression<Job1>(m => m.Execute()), Cron.Minutely(), new RecurringJobOptions());
             _recurringJobManager.Trigger("check-link");
 
+            return Task.CompletedTask;
+        }
+    }
+
+    public class IntegrationEvents : IAsyncInitializer
+    {
+        private readonly IEventBus _eventBus;
+        public IntegrationEvents(IEventBus eventBus)
+        {
+            _eventBus = eventBus;
+        }
+
+        public Task ExecuteAsync()
+        {
             return Task.CompletedTask;
         }
     }
