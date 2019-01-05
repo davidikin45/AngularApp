@@ -8,6 +8,7 @@ using AspNetCore.ApiBase.Extensions;
 using AspNetCore.ApiBase.Filters;
 using AspNetCore.ApiBase.Hangfire;
 using AspNetCore.ApiBase.Hosting;
+using AspNetCore.ApiBase.IntegrationEvents;
 using AspNetCore.ApiBase.Localization;
 using AspNetCore.ApiBase.Middleware;
 using AspNetCore.ApiBase.MultiTenancy;
@@ -137,7 +138,7 @@ namespace AspNetCore.ApiBase
             ConfigureResponseCompressionServices(services);
             ConfigureLocalizationServices(services);
             ConfigureMvcServices(services);
-            ConfigureCqrsServices(services);
+            ConfigureEventServices(services);
             ConfigureSignalRServices(services);
             ConfigureApiServices(services);
             ConfigureHttpClients(services);
@@ -844,11 +845,13 @@ namespace AspNetCore.ApiBase
         #endregion
 
         #region Cqrs
-        public virtual void ConfigureCqrsServices(IServiceCollection services)
+        public virtual void ConfigureEventServices(IServiceCollection services)
         {
-            Logger.LogInformation("Configuring Cqrs");
+            Logger.LogInformation("Configuring Events");
 
             services.AddCqrs(ApplicationParts);
+            services.AddDomainEvents(ApplicationParts);
+            //services.AddIntegrationEvents(ApplicationParts);
         }
         #endregion
 
@@ -954,7 +957,6 @@ namespace AspNetCore.ApiBase
 
             builder.RegisterModule(new AutofacConventionsDependencyInjectionModule() { Paths = new string[] { BinPath, PluginsPath }, Filter = AssemblyStringFilter });
             builder.RegisterModule(new AutofacTasksModule() { Paths = new string[] { BinPath, PluginsPath }, Filter = AssemblyStringFilter });
-            builder.RegisterModule(new AutofacDomainEventHandlerModule() { Paths = new string[] { BinPath, PluginsPath }, Filter = AssemblyStringFilter });
             builder.RegisterModule(new AutofacDisplayConventionsMetadataModule() { Paths = new string[] { BinPath, PluginsPath }, Filter = AssemblyStringFilter });
             builder.RegisterModule(new AutofacConventionsSignalRHubModule() { Paths = new string[] { BinPath, PluginsPath }, Filter = AssemblyStringFilter });
             builder.RegisterModule(new AutofacAutomapperModule() { Filter = AssemblyBoolFilter });

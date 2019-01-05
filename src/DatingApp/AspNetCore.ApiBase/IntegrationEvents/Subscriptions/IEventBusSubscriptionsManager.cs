@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using static AspNetCore.ApiBase.IntegrationEvents.Subscriptions.InMemoryEventBusSubscriptionsManager;
 
-namespace AspNetCore.ApiBase.IntegrationEvents
+namespace AspNetCore.ApiBase.IntegrationEvents.Subscriptions
 {
     public interface IEventBusSubscriptionsManager
     {
         bool IsEmpty { get; }
         event EventHandler<string> OnEventRemoved;
-        void AddDynamicSubscription<TH>(string eventName)
-           where TH : IDynamicIntegrationEventHandler;
 
         void AddSubscription<T, TH>()
            where T : IntegrationEvent
@@ -18,6 +16,10 @@ namespace AspNetCore.ApiBase.IntegrationEvents
         void RemoveSubscription<T, TH>()
              where TH : IIntegrationEventHandler<T>
              where T : IntegrationEvent;
+
+        void AddDynamicSubscription<TH>(string eventName)
+         where TH : IDynamicIntegrationEventHandler;
+
         void RemoveDynamicSubscription<TH>(string eventName)
             where TH : IDynamicIntegrationEventHandler;
 

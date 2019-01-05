@@ -1,5 +1,7 @@
-﻿using AspNetCore.ApiBase.Validation;
+﻿using AspNetCore.ApiBase.DomainEvents.Subscriptions;
+using AspNetCore.ApiBase.Validation;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.Cqrs
@@ -8,16 +10,19 @@ namespace AspNetCore.ApiBase.Cqrs
     {
         private readonly IServiceProvider _provider;
 
-        public CqrsMediator(IServiceProvider provider)
+        private readonly ICqrsCommandSubscriptionsManager _cqrsCommandSubscriptionManager;
+        private readonly ICqrsQuerySubscriptionsManager _cqrsQuerySubscriptionManager;
+
+        public CqrsMediator(IServiceProvider provider, ICqrsCommandSubscriptionsManager cqrsCommandSubscriptionManager, ICqrsQuerySubscriptionsManager cqrsQuerySubscriptionManager)
         {
             _provider = provider;
+            _cqrsCommandSubscriptionManager = cqrsCommandSubscriptionManager;
+            _cqrsQuerySubscriptionManager = cqrsQuerySubscriptionManager;
         }
 
         public async Task<Result> DispatchAsync(ICommand command)
         {
-            Type type = typeof(ICommandHandler<>);
-            Type[] typeArgs = { command.GetType() };
-            Type handlerType = type.MakeGenericType(typeArgs);
+            Type handlerType = _cqrsCommandSubscriptionManager.GetSubscriptionsForCommand(command).First().HandlerType;
 
             dynamic handler = _provider.GetService(handlerType);
             Result result = await handler.HandleAsync((dynamic)command);
@@ -26,9 +31,7 @@ namespace AspNetCore.ApiBase.Cqrs
 
         public async Task<Result<T>> DispatchAsync<T>(ICommand<T> command)
         {
-            Type type = typeof(ICommandHandler<,>);
-            Type[] typeArgs = { command.GetType(), typeof(T) };
-            Type handlerType = type.MakeGenericType(typeArgs);
+            Type handlerType = _cqrsCommandSubscriptionManager.GetSubscriptionsForCommand(command).First().HandlerType;
 
             dynamic handler = _provider.GetService(handlerType);
             Result<T> result = await handler.HandleAsync((dynamic)command);
@@ -38,9 +41,7 @@ namespace AspNetCore.ApiBase.Cqrs
 
         public async Task<T> DispatchAsync<T>(IQuery<T> query)
         {
-            Type type = typeof(IQueryHandler<,>);
-            Type[] typeArgs = { query.GetType(), typeof(T) };
-            Type handlerType = type.MakeGenericType(typeArgs);
+            Type handlerType = _cqrsQuerySubscriptionManager.GetSubscriptionsForQuery(query).First().HandlerType;
 
             dynamic handler = _provider.GetService(handlerType);
             T result = await handler.HandleAsync((dynamic)query);

@@ -1,5 +1,4 @@
-﻿using AspNetCore.ApiBase.DomainCommands;
-using AspNetCore.ApiBase.DomainEvents;
+﻿using AspNetCore.ApiBase.DomainEvents;
 using System;
 using System.Collections.Generic;
 
@@ -25,16 +24,6 @@ namespace AspNetCore.ApiBase.Domain
         public virtual void ClearEvents()
         {
             _domainEvents.Clear();
-        }
-
-        public void AddDomainCommand(IDomainCommand command)
-        {
-            _domainEvents.Add(command);
-        }
-
-        public void RemoveDomainCommand(IDomainCommand command)
-        {
-            _domainEvents.Remove(command);
         }
 
         //Optimistic Concurrency. Potentially ETags serve the same purpose

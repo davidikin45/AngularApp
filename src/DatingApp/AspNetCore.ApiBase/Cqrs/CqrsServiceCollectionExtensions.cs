@@ -1,6 +1,8 @@
 ﻿using AspNetCore.ApiBase.Cqrs.Decorators;
 using AspNetCore.ApiBase.Cqrs.Decorators.Command;
+using AspNetCore.ApiBase.DomainEvents.Subscriptions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,35 +14,77 @@ namespace AspNetCore.ApiBase.Cqrs
     {
         public static void AddCqrs(this IServiceCollection services)
         {
+            services.AddCqrsSubscriptionManagers();
             services.AddCqrsMediator();
             services.AddCqrsHandlers(new List<Assembly>() { Assembly.GetCallingAssembly() });
         }
 
         public static void AddCqrs(this IServiceCollection services, IEnumerable<Assembly> assemblies)
         {
+            services.AddCqrsSubscriptionManagers();
             services.AddCqrsMediator();
             services.AddCqrsHandlers(assemblies);
         }
 
+        public static void AddCqrsSubscriptionManagers(this IServiceCollection services)
+        {
+            services.AddSingleton<ICqrsCommandSubscriptionsManager, CqrsInMemoryCommandSubscriptionsManager>();
+            services.AddSingleton<ICqrsQuerySubscriptionsManager, CqrsInMemoryQuerySubscriptionsManager>();
+        }
+
         public static void AddCqrsMediator(this IServiceCollection services)
         {
-            services.AddTransient<ICqrsMediator, CqrsMediator>();
+            services.TryAddTransient<ICqrsMediator, CqrsMediator>();
         }
 
         public static void AddCqrsHandlers(this IServiceCollection services, IEnumerable<Assembly> assemblies)
         {
-            List<Type> handlerTypes = assemblies.SelectMany(assembly => assembly.GetTypes())
-                .Where(x => x.GetInterfaces().Any(y => IsHandlerInterface(y)))
+            List<Type> commandHandlerTypes = assemblies.SelectMany(assembly => assembly.GetTypes())
+                .Where(x => x.GetInterfaces().Any(y => IsCommandHandlerInterface(y)))
                 .Where(x => x.Name.EndsWith("Handler"))
                 .ToList();
 
-            foreach (Type type in handlerTypes)
+            foreach (Type commandHandlerType in commandHandlerTypes)
             {
-                AddHandler(services, type);
+                AddHandlerAsService(services, commandHandlerType);
             }
+
+            services.AddSingleton<ICqrsCommandSubscriptionsManager>(sp => {
+                var subManager = new CqrsInMemoryCommandSubscriptionsManager();
+                foreach (Type commandHandlerType in commandHandlerTypes)
+                {
+                    Type interfaceType = commandHandlerType.GetInterfaces().Single(y => IsHandlerInterface(y));
+                    Type commandType = interfaceType.GetGenericArguments()[0];
+
+                    subManager.AddSubscription(commandType, commandHandlerType);
+                }
+                return subManager;
+            });
+
+            List<Type> queryHandlerTypes = assemblies.SelectMany(assembly => assembly.GetTypes())
+                .Where(x => x.GetInterfaces().Any(y => IsQueryHandlerInterface(y)))
+                .Where(x => x.Name.EndsWith("Handler"))
+                .ToList();
+
+            foreach (Type queryHandlerType in queryHandlerTypes)
+            {
+                AddHandlerAsService(services, queryHandlerType);
+            }
+
+            services.AddSingleton<ICqrsQuerySubscriptionsManager>(sp => {
+                var subManager = new CqrsInMemoryQuerySubscriptionsManager();
+                foreach (Type queryHandlerType in queryHandlerTypes)
+                {
+                    Type interfaceType = queryHandlerType.GetInterfaces().Single(y => IsHandlerInterface(y));
+                    Type queryType = interfaceType.GetGenericArguments()[0];
+
+                    subManager.AddSubscription(queryType, queryHandlerType);
+                }
+                return subManager;
+            });
         }
 
-        private static void AddHandler(IServiceCollection services, Type type)
+        private static void AddHandlerAsService(IServiceCollection services, Type type)
         {
             object[] attributes = type.GetCustomAttributes(false);
 
@@ -131,9 +175,27 @@ namespace AspNetCore.ApiBase.Cqrs
             if (!type.IsGenericType)
                 return false;
 
+            return IsCommandHandlerInterface(type) || IsQueryHandlerInterface(type);
+        }
+
+        private static bool IsCommandHandlerInterface(Type type)
+        {
+            if (!type.IsGenericType)
+                return false;
+
+            Type typeDefinition = type.GetGenericTypeDefinition();
+  
+            return typeDefinition == typeof(ICommandHandler<>) || typeDefinition == typeof(ICommandHandler<,>);
+        }
+
+        private static bool IsQueryHandlerInterface(Type type)
+        {
+            if (!type.IsGenericType)
+                return false;
+
             Type typeDefinition = type.GetGenericTypeDefinition();
 
-            return typeDefinition == typeof(ICommandHandler<>) || typeDefinition == typeof(ICommandHandler<,>) || typeDefinition == typeof(IQueryHandler<,>);
+            return typeDefinition == typeof(IQueryHandler<,>);
         }
     }
 }

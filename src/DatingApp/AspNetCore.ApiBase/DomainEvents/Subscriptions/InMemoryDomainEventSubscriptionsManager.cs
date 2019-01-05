@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AspNetCore.ApiBase.IntegrationEvents
+namespace AspNetCore.ApiBase.DomainEvents.Subscriptions
 {
-    public partial class InMemoryEventBusSubscriptionsManager : IEventBusSubscriptionsManager
+    public partial class InMemoryDomainEventSubscriptionsManager : IDomainEventSubscriptionsManager
     {
         private readonly Dictionary<string, List<SubscriptionInfo>> _handlers;
         private readonly List<Type> _eventTypes;
 
         public event EventHandler<string> OnEventRemoved;
 
-        public InMemoryEventBusSubscriptionsManager()
+        public InMemoryDomainEventSubscriptionsManager()
         {
             _handlers = new Dictionary<string, List<SubscriptionInfo>>();
             _eventTypes = new List<Type>();
@@ -21,14 +21,26 @@ namespace AspNetCore.ApiBase.IntegrationEvents
         public void Clear() => _handlers.Clear();
 
         public void AddDynamicSubscription<TH>(string eventName)
-            where TH : IDynamicIntegrationEventHandler
+            where TH : IDynamicDomainEventHandler
         {
             DoAddSubscription(typeof(TH), eventName, isDynamic: true);
         }
 
+        public void AddSubscription(Type eventType, Type eventHandlerType)
+        {
+            var eventName = GetEventKey(eventType);
+
+            DoAddSubscription(eventHandlerType, eventName, isDynamic: false);
+
+            if (!_eventTypes.Contains(eventType))
+            {
+                _eventTypes.Add(eventType);
+            }
+        }
+
         public void AddSubscription<T, TH>()
-            where T : IntegrationEvent
-            where TH : IIntegrationEventHandler<T>
+            where T : IDomainEvent
+            where TH : IDomainEventHandler<T>
         {
             var eventName = GetEventKey<T>();
 
@@ -63,24 +75,21 @@ namespace AspNetCore.ApiBase.IntegrationEvents
             }
         }
 
-
         public void RemoveDynamicSubscription<TH>(string eventName)
-            where TH : IDynamicIntegrationEventHandler
+            where TH : IDynamicDomainEventHandler
         {
             var handlerToRemove = FindDynamicSubscriptionToRemove<TH>(eventName);
             DoRemoveHandler(eventName, handlerToRemove);
         }
 
-
         public void RemoveSubscription<T, TH>()
-            where TH : IIntegrationEventHandler<T>
-            where T : IntegrationEvent
+            where TH : IDomainEventHandler<T>
+            where T : IDomainEvent
         {
             var handlerToRemove = FindSubscriptionToRemove<T, TH>();
             var eventName = GetEventKey<T>();
             DoRemoveHandler(eventName, handlerToRemove);
         }
-
 
         private void DoRemoveHandler(string eventName, SubscriptionInfo subsToRemove)
         {
@@ -101,11 +110,18 @@ namespace AspNetCore.ApiBase.IntegrationEvents
             }
         }
 
-        public IEnumerable<SubscriptionInfo> GetHandlersForEvent<T>() where T : IntegrationEvent
+        public IEnumerable<SubscriptionInfo> GetHandlersForEvent(IDomainEvent @event)
+        {
+            var key = GetEventKey(@event.GetType());
+            return GetHandlersForEvent(key);
+        }
+
+        public IEnumerable<SubscriptionInfo> GetHandlersForEvent<T>() where T : IDomainEvent
         {
             var key = GetEventKey<T>();
             return GetHandlersForEvent(key);
         }
+
         public IEnumerable<SubscriptionInfo> GetHandlersForEvent(string eventName) => _handlers[eventName];
 
         private void RaiseOnEventRemoved(string eventName)
@@ -117,17 +133,15 @@ namespace AspNetCore.ApiBase.IntegrationEvents
             }
         }
 
-
         private SubscriptionInfo FindDynamicSubscriptionToRemove<TH>(string eventName)
-            where TH : IDynamicIntegrationEventHandler
+            where TH : IDynamicDomainEventHandler
         {
             return DoFindSubscriptionToRemove(eventName, typeof(TH));
         }
 
-
         private SubscriptionInfo FindSubscriptionToRemove<T, TH>()
-             where T : IntegrationEvent
-             where TH : IIntegrationEventHandler<T>
+             where T : IDomainEvent
+             where TH : IDomainEventHandler<T>
         {
             var eventName = GetEventKey<T>();
             return DoFindSubscriptionToRemove(eventName, typeof(TH));
@@ -144,7 +158,7 @@ namespace AspNetCore.ApiBase.IntegrationEvents
 
         }
 
-        public bool HasSubscriptionsForEvent<T>() where T : IntegrationEvent
+        public bool HasSubscriptionsForEvent<T>() where T : IDomainEvent
         {
             var key = GetEventKey<T>();
             return HasSubscriptionsForEvent(key);
@@ -155,7 +169,12 @@ namespace AspNetCore.ApiBase.IntegrationEvents
 
         public string GetEventKey<T>()
         {
-            return typeof(T).Name;
+            return GetEventKey(typeof(T));
+        }
+
+        public string GetEventKey(Type domainEventType)
+        {
+            return domainEventType.Name;
         }
     }
 }
