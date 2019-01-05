@@ -1,5 +1,4 @@
-﻿using AspNetCore.ApiBase.Cqrs.Decorators;
-using AspNetCore.ApiBase.Cqrs.Decorators.Command;
+﻿using AspNetCore.ApiBase.Cqrs.Decorators.Command;
 using AspNetCore.ApiBase.DomainEvents.Subscriptions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
