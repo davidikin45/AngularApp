@@ -1,8 +1,10 @@
-﻿using System;
+﻿using AspNetCore.ApiBase.DomainEvents;
+using System;
+using System.Collections.Generic;
 
 namespace AspNetCore.ApiBase.Domain
 {
-    public abstract class EntityBase<T> : IEntity<T>, IEntityAuditable where T : IEquatable<T>
+    public abstract class EntityBase<T> : IEntity<T>, IEntityAuditable, IEntityDomainEvents where T : IEquatable<T>
     {
         int? _requestedHashCode;
 
@@ -23,6 +25,24 @@ namespace AspNetCore.ApiBase.Domain
         public string CreatedBy { get; set; }
         public DateTime? UpdatedOn { get; set; }
         public string UpdatedBy { get; set; }
+
+        private readonly List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
+        public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+
+        public void AddDomainEvent(IDomainEvent eventItem)
+        {
+            _domainEvents.Add(eventItem);
+        }
+
+        public void RemoveDomainEvent(IDomainEvent eventItem)
+        {
+            _domainEvents.Remove(eventItem);
+        }
+
+        public void ClearDomainEvents()
+        {
+            _domainEvents.Clear();
+        }
 
         public override bool Equals(object obj)
         {

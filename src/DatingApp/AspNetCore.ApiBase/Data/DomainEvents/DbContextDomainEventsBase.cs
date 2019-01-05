@@ -283,15 +283,15 @@ namespace AspNetCore.ApiBase.Data.DomainEvents
             foreach (var entity in updatedDeletedInserted)
             {
                 var events = new List<IDomainEvent>();
-                if (entity is IEntityAggregateRoot)
+                if (entity is IEntityDomainEvents)
                 {
-                    var aggRootEntity = ((IEntityAggregateRoot)entity);
-                    var entityEvents = aggRootEntity.DomainEvents.ToArray();
+                    var domainEventsEntity = ((IEntityDomainEvents)entity);
+                    var entityEvents = domainEventsEntity.DomainEvents.ToArray();
                     foreach (var domainEvent in entityEvents)
                     {
                         events.Add(domainEvent);
                     }
-                    aggRootEntity.ClearEvents();
+                    domainEventsEntity.ClearDomainEvents();
                 }
                 dict.Add(entity, events);
             }
