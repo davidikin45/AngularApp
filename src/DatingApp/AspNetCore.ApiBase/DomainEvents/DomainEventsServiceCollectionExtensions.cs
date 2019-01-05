@@ -13,21 +13,14 @@ namespace AspNetCore.ApiBase.Cqrs
     {
         public static void AddDomainEvents(this IServiceCollection services)
         {
-            services.AddDomainEventsSubscriptionManager();
             services.AddDomainEventMediator();
             services.AddDomainEventHandlers(new List<Assembly>() { Assembly.GetCallingAssembly() });
         }
 
         public static void AddDomainEvents(this IServiceCollection services, IEnumerable<Assembly> assemblies)
         {
-            services.AddDomainEventsSubscriptionManager();
             services.AddDomainEventMediator();
             services.AddDomainEventHandlers(assemblies);
-        }
-
-        public static void AddDomainEventsSubscriptionManager(this IServiceCollection services)
-        {
-            services.AddSingleton<IDomainEventSubscriptionsManager, InMemoryDomainEventSubscriptionsManager>();
         }
 
         public static void AddDomainEventMediator(this IServiceCollection services)

@@ -14,22 +14,14 @@ namespace AspNetCore.ApiBase.Cqrs
     {
         public static void AddCqrs(this IServiceCollection services)
         {
-            services.AddCqrsSubscriptionManagers();
             services.AddCqrsMediator();
             services.AddCqrsHandlers(new List<Assembly>() { Assembly.GetCallingAssembly() });
         }
 
         public static void AddCqrs(this IServiceCollection services, IEnumerable<Assembly> assemblies)
         {
-            services.AddCqrsSubscriptionManagers();
             services.AddCqrsMediator();
             services.AddCqrsHandlers(assemblies);
-        }
-
-        public static void AddCqrsSubscriptionManagers(this IServiceCollection services)
-        {
-            services.AddSingleton<ICqrsCommandSubscriptionsManager, CqrsInMemoryCommandSubscriptionsManager>();
-            services.AddSingleton<ICqrsQuerySubscriptionsManager, CqrsInMemoryQuerySubscriptionsManager>();
         }
 
         public static void AddCqrsMediator(this IServiceCollection services)
