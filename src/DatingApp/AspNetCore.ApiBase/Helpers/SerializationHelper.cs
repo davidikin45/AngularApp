@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 
 namespace AspNetCore.ApiBase.Helpers
 {
@@ -41,6 +43,21 @@ namespace AspNetCore.ApiBase.Helpers
             return System.Text.Encoding.UTF8.GetString(byteArray, 0, byteArray.Length);
         }
 
+        public static byte[] SerializeToJsonBytes(this object obj)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
 
+            var json = JsonConvert.SerializeObject(obj);
+            return Encoding.ASCII.GetBytes(json);
+        }
+
+        public static object DeserializefromJsonBytes(this byte[] arrBytes, Type type)
+        {
+            var json = Encoding.Default.GetString(arrBytes);
+            return JsonConvert.DeserializeObject(json, type);
+        }
     }
 }

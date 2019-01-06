@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.IntegrationEvents
 {
+    //Each microservice has a seperate queue 
+    //Publisher > Exchange > Queue > Consumer
     public class EventBusRabbitMQ : IEventBus, IDisposable
     {
         const string BROKER_NAME = "event_bus";
@@ -82,8 +84,8 @@ namespace AspNetCore.ApiBase.IntegrationEvents
                 var eventName = @event.GetType()
                     .Name;
 
-                channel.ExchangeDeclare(exchange: BROKER_NAME,
-                                    type: "direct");
+                //Explicit Exhange.
+                channel.ExchangeDeclare(exchange: BROKER_NAME, type: "direct");
 
                 var message = JsonConvert.SerializeObject(@event);
                 var body = Encoding.UTF8.GetBytes(message);
@@ -92,6 +94,8 @@ namespace AspNetCore.ApiBase.IntegrationEvents
                 {
                     var properties = channel.CreateBasicProperties();
                     properties.DeliveryMode = 2; // persistent
+                    //properties.ReplyTo = "_replyQueueName";
+                    //properties.CorrelationId = Guid.NewGuid().ToString();
 
                     channel.BasicPublish(exchange: BROKER_NAME,
                                      routingKey: eventName,
@@ -169,8 +173,9 @@ namespace AspNetCore.ApiBase.IntegrationEvents
 
             var channel = _persistentConnection.CreateModel();
 
+            //Explicit Exchange
             channel.ExchangeDeclare(exchange: BROKER_NAME,
-                                 type: "direct");
+                                 type: "direct"); //fanout = ignore routingkey
 
             channel.QueueDeclare(queue: _queueName,
                                  durable: true,
@@ -178,15 +183,26 @@ namespace AspNetCore.ApiBase.IntegrationEvents
                                  autoDelete: false,
                                  arguments: null);
 
+            channel.BasicQos(0, 1, false);
 
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += async (model, ea) =>
             {
+                var props = ea.BasicProperties;
                 var eventName = ea.RoutingKey;
                 var message = Encoding.UTF8.GetString(ea.Body);
 
                 await ProcessEvent(eventName, message);
 
+                //var replyProps = _consumerChannel.CreateBasicProperties();
+                //replyProps.CorrelationId = props.CorrelationId;
+                //channel.BasicPublish(exchange: BROKER_NAME,
+                //                   routingKey: props.ReplyTo,
+                //                   mandatory: true,
+                //                   basicProperties: replyProps,
+                //                   body: body);
+
+                //A new message won't be received by consumer until acknowledgement is sent.
                 channel.BasicAck(ea.DeliveryTag, multiple: false);
             };
 
