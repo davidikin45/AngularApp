@@ -63,6 +63,8 @@ namespace AspNetCore.ApiBase.Data
             builder.RemovePluralizingTableNameConvention();
             builder.AddSoftDeleteFilter();
 
+            //Add Seed Data for things like Enumerations > Lookup Tables. Migrations are generated for this data.
+
             builder.AddJsonValues();
             builder.AddMultiLangaugeStringValues();
             builder.AddBackingFields();
