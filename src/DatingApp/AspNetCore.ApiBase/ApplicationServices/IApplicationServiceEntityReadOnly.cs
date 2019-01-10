@@ -15,8 +15,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             Expression<Func<IQueryable<TDto>, IOrderedQueryable<TDto>>> orderBy = null,
             int? pageNo = null,
             int? pageSize = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TDto, Object>>[] includeProperties);
 
         Task<IEnumerable<TDto>> GetAllAsync(
@@ -24,8 +24,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             Expression<Func<IQueryable<TDto>, IOrderedQueryable<TDto>>> orderBy = null,
             int? pageNo = null,
             int? pageSize = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TDto, Object>>[] includeProperties)
             ;
 
@@ -36,8 +36,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
          Expression<Func<IQueryable<TDto>, IOrderedQueryable<TDto>>> orderBy = null,
          int? pageNo = null,
          int? pageSize = null,
-         bool includeAllCompositionRelationshipProperties = false,
-         bool includeAllCompositionAndAggregationRelationshipProperties = false,
+         bool getAggregate = false,
+         bool getAggregateAndAssociatedAggregates = false,
          params Expression<Func<TDto, Object>>[] includeProperties)
          ;
 
@@ -49,8 +49,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             Expression<Func<IQueryable<TDto>, IOrderedQueryable<TDto>>> orderBy = null,
             int? pageNo = null,
             int? pageSize = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TDto, Object>>[] includeProperties)
             ;
 
@@ -59,8 +59,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
             Expression<Func<IQueryable<TDto>, IOrderedQueryable<TDto>>> orderBy = null,
             int? pageNo = null,
             int? pageSize = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TDto, Object>>[] includeProperties)
             ;
 
@@ -70,31 +70,31 @@ namespace AspNetCore.ApiBase.ApplicationServices
             Expression<Func<IQueryable<TDto>, IOrderedQueryable<TDto>>> orderBy = null,
             int? pageNo = null,
             int? pageSize = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TDto, Object>>[] includeProperties)
             ;
 
         TDto GetOne(
             Expression<Func<TDto, bool>> filter = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TDto, Object>>[] includeProperties)
             ;
 
         Task<TDto> GetOneAsync(
             CancellationToken cancellationToken,
             Expression<Func<TDto, bool>> filter = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TDto, Object>>[] includeProperties)
             ;
 
         TDto GetFirst(
             Expression<Func<TDto, bool>> filter = null,
             Expression<Func<IQueryable<TDto>, IOrderedQueryable<TDto>>> orderBy = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TDto, Object>>[] includeProperties)
             ;
 
@@ -102,20 +102,20 @@ namespace AspNetCore.ApiBase.ApplicationServices
             CancellationToken cancellationToken,
             Expression<Func<TDto, bool>> filter = null,
             Expression<Func<IQueryable<TDto>, IOrderedQueryable<TDto>>> orderBy = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TDto, Object>>[] includeProperties)
             ;
 
         TDto GetById(object id, 
-            bool includeAllCompositionRelationshipProperties = false, 
-            bool includeAllCompositionAndAggregationRelationshipProperties = false, 
+            bool getAggregate = false, 
+            bool getAggregateAndAssociatedAggregates = false, 
             params Expression<Func<TDto, Object>>[] includeProperties);
 
         Task<TDto> GetByIdAsync(object id, 
              CancellationToken cancellationToken, 
-             bool includeAllCompositionRelationshipProperties = false, 
-             bool includeAllCompositionAndAggregationRelationshipProperties = false, 
+             bool getAggregate = false, 
+             bool getAggregateAndAssociatedAggregates = false, 
              params Expression<Func<TDto, Object>>[] includeProperties);
 
         TDto GetByIdWithPagedCollectionProperty(object id, 
@@ -145,14 +145,14 @@ namespace AspNetCore.ApiBase.ApplicationServices
             string search = "");
 
         IEnumerable<TDto> GetByIds(IEnumerable<object> ids,
-         bool includeAllCompositionRelationshipProperties = false,
-         bool includeAllCompositionAndAggregationRelationshipProperties = false,
+         bool getAggregate = false,
+         bool getAggregateAndAssociatedAggregates = false,
          params Expression<Func<TDto, Object>>[] includeProperties);
 
         Task<IEnumerable<TDto>> GetByIdsAsync(CancellationToken cancellationToken,
          IEnumerable<object> ids,
-         bool includeAllCompositionRelationshipProperties = false,
-         bool includeAllCompositionAndAggregationRelationshipProperties = false,
+         bool getAggregate = false,
+         bool getAggregateAndAssociatedAggregates = false,
          params Expression<Func<TDto, Object>>[] includeProperties);
 
         int GetCount(Expression<Func<TDto, bool>> filter = null);

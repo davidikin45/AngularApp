@@ -17,8 +17,8 @@ namespace AspNetCore.ApiBase.Data.Repository
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             int? skip = null,
             int? take = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties);
 
         Task<IReadOnlyList<TEntity>> GetAllAsync(
@@ -26,8 +26,8 @@ namespace AspNetCore.ApiBase.Data.Repository
                 Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
                 int? skip = null,
                 int? take = null,
-                bool includeAllCompositionRelationshipProperties = false,
-                bool includeAllCompositionAndAggregationRelationshipProperties = false,
+                bool getAggregate = false,
+                bool getAggregateAndAssociatedAggregates = false,
                 params Expression<Func<TEntity, Object>>[] includeProperties)
                 ;
 
@@ -35,8 +35,8 @@ namespace AspNetCore.ApiBase.Data.Repository
           Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
           int? skip = null,
           int? take = null,
-          bool includeAllCompositionRelationshipProperties = false,
-          bool includeAllCompositionAndAggregationRelationshipProperties = false,
+          bool getAggregate = false,
+          bool getAggregateAndAssociatedAggregates = false,
           params Expression<Func<TEntity, Object>>[] includeProperties);
 
         Task<IReadOnlyList<TEntity>> GetAllNoTrackingAsync(
@@ -44,8 +44,8 @@ namespace AspNetCore.ApiBase.Data.Repository
                 Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
                 int? skip = null,
                 int? take = null,
-                bool includeAllCompositionRelationshipProperties = false,
-                bool includeAllCompositionAndAggregationRelationshipProperties = false,
+                bool getAggregate = false,
+                bool getAggregateAndAssociatedAggregates = false,
                 params Expression<Func<TEntity, Object>>[] includeProperties)
                 ;
 
@@ -56,8 +56,8 @@ namespace AspNetCore.ApiBase.Data.Repository
            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
            int? skip = null,
            int? take = null,
-           bool includeAllCompositionRelationshipProperties = false,
-           bool includeAllCompositionAndAggregationRelationshipProperties = false,
+           bool getAggregate = false,
+           bool getAggregateAndAssociatedAggregates = false,
            params Expression<Func<TEntity, Object>>[] includeProperties)
            ;
 
@@ -69,8 +69,8 @@ namespace AspNetCore.ApiBase.Data.Repository
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             int? skip = null,
             int? take = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
@@ -81,8 +81,8 @@ namespace AspNetCore.ApiBase.Data.Repository
        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
        int? skip = null,
        int? take = null,
-       bool includeAllCompositionRelationshipProperties = false,
-        bool includeAllCompositionAndAggregationRelationshipProperties = false,
+       bool getAggregate = false,
+        bool getAggregateAndAssociatedAggregates = false,
        params Expression<Func<TEntity, Object>>[] includeProperties)
        ;
 
@@ -94,8 +94,8 @@ namespace AspNetCore.ApiBase.Data.Repository
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             int? skip = null,
             int? take = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
@@ -104,8 +104,8 @@ namespace AspNetCore.ApiBase.Data.Repository
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             int? skip = null,
             int? take = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
@@ -115,8 +115,8 @@ namespace AspNetCore.ApiBase.Data.Repository
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             int? skip = null,
             int? take = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
@@ -125,8 +125,8 @@ namespace AspNetCore.ApiBase.Data.Repository
           Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
           int? skip = null,
           int? take = null,
-          bool includeAllCompositionRelationshipProperties = false,
-          bool includeAllCompositionAndAggregationRelationshipProperties = false,
+          bool getAggregate = false,
+          bool getAggregateAndAssociatedAggregates = false,
           params Expression<Func<TEntity, Object>>[] includeProperties)
           ;
 
@@ -136,46 +136,46 @@ namespace AspNetCore.ApiBase.Data.Repository
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             int? skip = null,
             int? take = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
         TEntity GetOne(
             Expression<Func<TEntity, bool>> filter = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
         Task<TEntity> GetOneAsync(
             CancellationToken cancellationToken,
             Expression<Func<TEntity, bool>> filter = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
         TEntity GetOneNoTracking(
         Expression<Func<TEntity, bool>> filter = null,
-        bool includeAllCompositionRelationshipProperties = false,
-        bool includeAllCompositionAndAggregationRelationshipProperties = false,
+        bool getAggregate = false,
+        bool getAggregateAndAssociatedAggregates = false,
         params Expression<Func<TEntity, Object>>[] includeProperties)
         ;
 
         Task<TEntity> GetOneNoTrackingAsync(
             CancellationToken cancellationToken,
             Expression<Func<TEntity, bool>> filter = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
         TEntity GetFirst(
             Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
@@ -183,16 +183,16 @@ namespace AspNetCore.ApiBase.Data.Repository
             CancellationToken cancellationToken,
             Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
         TEntity GetFirstNoTracking(
           Expression<Func<TEntity, bool>> filter = null,
           Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
-          bool includeAllCompositionRelationshipProperties = false,
-          bool includeAllCompositionAndAggregationRelationshipProperties = false,
+          bool getAggregate = false,
+          bool getAggregateAndAssociatedAggregates = false,
           params Expression<Func<TEntity, Object>>[] includeProperties)
           ;
 
@@ -200,36 +200,36 @@ namespace AspNetCore.ApiBase.Data.Repository
             CancellationToken cancellationToken,
             Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
-        TEntity GetById(object id, bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+        TEntity GetById(object id, bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
         Task<TEntity> GetByIdAsync(
             CancellationToken cancellationToken,
             object id,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
 
         TEntity GetByIdNoTracking(
             object id,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties)
           ;
 
         Task<TEntity> GetByIdNoTrackingAsync(CancellationToken cancellationToken,
             object id,
-            bool includeAllCompositionRelationshipProperties = false,
-            bool includeAllCompositionAndAggregationRelationshipProperties = false,
+            bool getAggregate = false,
+            bool getAggregateAndAssociatedAggregates = false,
             params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
@@ -260,28 +260,28 @@ namespace AspNetCore.ApiBase.Data.Repository
             string search = "");
 
         IReadOnlyList<TEntity> GetByIds(IEnumerable<object> ids,
-         bool includeAllCompositionRelationshipProperties = false,
-         bool includeAllCompositionAndAggregationRelationshipProperties = false,
+         bool getAggregate = false,
+         bool getAggregateAndAssociatedAggregates = false,
          params Expression<Func<TEntity, Object>>[] includeProperties)
            ;
 
         Task<IReadOnlyList<TEntity>> GetByIdsAsync(CancellationToken cancellationToken,
             IEnumerable<object> ids,
-         bool includeAllCompositionRelationshipProperties = false,
-         bool includeAllCompositionAndAggregationRelationshipProperties = false,
+         bool getAggregate = false,
+         bool getAggregateAndAssociatedAggregates = false,
          params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
         IReadOnlyList<TEntity> GetByIdsNoTracking(IEnumerable<object> ids,
-         bool includeAllCompositionRelationshipProperties = false,
-         bool includeAllCompositionAndAggregationRelationshipProperties = false,
+         bool getAggregate = false,
+         bool getAggregateAndAssociatedAggregates = false,
          params Expression<Func<TEntity, Object>>[] includeProperties)
        ;
 
         Task<IReadOnlyList<TEntity>> GetByIdsNoTrackingAsync(CancellationToken cancellationToken,
             IEnumerable<object> ids,
-         bool includeAllCompositionRelationshipProperties = false,
-         bool includeAllCompositionAndAggregationRelationshipProperties = false,
+         bool getAggregate = false,
+         bool getAggregateAndAssociatedAggregates = false,
          params Expression<Func<TEntity, Object>>[] includeProperties)
             ;
 
