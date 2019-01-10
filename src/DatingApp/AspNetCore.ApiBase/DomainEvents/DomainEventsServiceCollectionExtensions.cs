@@ -44,10 +44,13 @@ namespace AspNetCore.ApiBase.Cqrs
                 var subManager = new InMemoryDomainEventSubscriptionsManager();
                 foreach (Type domainEventHandlerType in domainEventHandlerTypes.Where(x => x.GetInterfaces().Any(y => IsDomainEventHandlerInterface(y))))
                 {
-                    Type interfaceType = domainEventHandlerType.GetInterfaces().Single(y => IsHandlerInterface(y));
-                    Type commandType = interfaceType.GetGenericArguments()[0];
+                    IEnumerable<Type> interfaceTypes = domainEventHandlerType.GetInterfaces().Where(y => IsHandlerInterface(y));
 
-                    subManager.AddSubscription(commandType, domainEventHandlerType);
+                    foreach (var interfaceType in interfaceTypes)
+                    {
+                        Type commandType = interfaceType.GetGenericArguments()[0];
+                        subManager.AddSubscription(commandType, domainEventHandlerType);
+                    }
                 }
                 return subManager;
             });
@@ -63,10 +66,13 @@ namespace AspNetCore.ApiBase.Cqrs
                 .Reverse()
                 .ToList();
 
-            Type interfaceType = type.GetInterfaces().Single(y => IsHandlerInterface(y));
-            Func<IServiceProvider, object> factory = BuildPipeline(pipeline, interfaceType);
+            IEnumerable<Type> interfaceTypes = type.GetInterfaces().Where(y => IsHandlerInterface(y));
 
-            services.AddTransient(interfaceType, factory);
+            foreach (var interfaceType in interfaceTypes)
+            {
+                Func<IServiceProvider, object> factory = BuildPipeline(pipeline, interfaceType);
+                services.AddTransient(interfaceType, factory);
+            }
         }
 
         private static Func<IServiceProvider, object> BuildPipeline(List<Type> pipeline, Type interfaceType)

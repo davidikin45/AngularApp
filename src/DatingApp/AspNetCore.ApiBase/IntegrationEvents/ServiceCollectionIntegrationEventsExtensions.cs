@@ -79,10 +79,13 @@ namespace AspNetCore.ApiBase.IntegrationEvents
                 var subManager = new InMemoryEventBusSubscriptionsManager();
                 foreach (Type integrationEventHandlerType in integrationEventHandlerTypes.Where(x => x.GetInterfaces().Any(y => IsIntegrationEventHandlerInterface(y))))
                 {
-                    Type interfaceType = integrationEventHandlerType.GetInterfaces().Single(y => IsHandlerInterface(y));
-                    Type eventType = interfaceType.GetGenericArguments()[0];
+                    IEnumerable<Type> interfaceTypes = integrationEventHandlerType.GetInterfaces().Where(y => IsHandlerInterface(y));
+                    foreach (var interfaceType in interfaceTypes)
+                    {
+                        Type eventType = interfaceType.GetGenericArguments()[0];
 
-                    subManager.AddSubscription(eventType, integrationEventHandlerType);
+                        subManager.AddSubscription(eventType, integrationEventHandlerType);
+                    }
                 }
                 return subManager;
             });
@@ -98,10 +101,14 @@ namespace AspNetCore.ApiBase.IntegrationEvents
                 .Reverse()
                 .ToList();
 
-            Type interfaceType = type.GetInterfaces().Single(y => IsHandlerInterface(y));
-            Func<IServiceProvider, object> factory = BuildPipeline(pipeline, interfaceType);
+            IEnumerable<Type> interfaceTypes = type.GetInterfaces().Where(y => IsHandlerInterface(y));
 
-            services.AddTransient(interfaceType, factory);
+            foreach (var interfaceType in interfaceTypes)
+            {
+                Func<IServiceProvider, object> factory = BuildPipeline(pipeline, interfaceType);
+
+                services.AddTransient(interfaceType, factory);
+            }
         }
 
         private static Func<IServiceProvider, object> BuildPipeline(List<Type> pipeline, Type interfaceType)

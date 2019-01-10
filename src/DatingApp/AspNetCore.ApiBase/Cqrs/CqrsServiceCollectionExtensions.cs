@@ -44,10 +44,14 @@ namespace AspNetCore.ApiBase.Cqrs
                 var subManager = new CqrsInMemoryCommandSubscriptionsManager();
                 foreach (Type commandHandlerType in commandHandlerTypes)
                 {
-                    Type interfaceType = commandHandlerType.GetInterfaces().Single(y => IsHandlerInterface(y));
-                    Type commandType = interfaceType.GetGenericArguments()[0];
+                    IEnumerable<Type> interfaceTypes = commandHandlerType.GetInterfaces().Where(y => IsHandlerInterface(y));
 
-                    subManager.AddSubscription(commandType, commandHandlerType);
+                    foreach (Type interfaceType in interfaceTypes)
+                    {
+                        Type commandType = interfaceType.GetGenericArguments()[0];
+
+                        subManager.AddSubscription(commandType, commandHandlerType);
+                    }
                 }
                 return subManager;
             });
@@ -66,10 +70,14 @@ namespace AspNetCore.ApiBase.Cqrs
                 var subManager = new CqrsInMemoryQuerySubscriptionsManager();
                 foreach (Type queryHandlerType in queryHandlerTypes)
                 {
-                    Type interfaceType = queryHandlerType.GetInterfaces().Single(y => IsHandlerInterface(y));
-                    Type queryType = interfaceType.GetGenericArguments()[0];
+                    IEnumerable<Type> interfaceTypes = queryHandlerType.GetInterfaces().Where(y => IsHandlerInterface(y));
 
-                    subManager.AddSubscription(queryType, queryHandlerType);
+                    foreach (var interfaceType in interfaceTypes)
+                    {
+                        Type queryType = interfaceType.GetGenericArguments()[0];
+
+                        subManager.AddSubscription(queryType, queryHandlerType);
+                    }
                 }
                 return subManager;
             });
@@ -85,10 +93,13 @@ namespace AspNetCore.ApiBase.Cqrs
                 .Reverse()
                 .ToList();
 
-            Type interfaceType = type.GetInterfaces().Single(y => IsHandlerInterface(y));
-            Func<IServiceProvider, object> factory = BuildPipeline(pipeline, interfaceType);
+            IEnumerable<Type> interfaceTypes = type.GetInterfaces().Where(y => IsHandlerInterface(y));
 
-            services.AddTransient(interfaceType, factory);
+            foreach (var interfaceType in interfaceTypes)
+            {
+                Func<IServiceProvider, object> factory = BuildPipeline(pipeline, interfaceType);
+                services.AddTransient(interfaceType, factory);
+            }
         }
 
         private static Func<IServiceProvider, object> BuildPipeline(List<Type> pipeline, Type interfaceType)
