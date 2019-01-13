@@ -609,6 +609,9 @@ namespace AspNetCore.ApiBase
             // Add framework services.
             var mvc = services.AddMvc(options =>
             {
+                //Versioning Fix until .NET Core 3.0
+                options.EnableEndpointRouting = false;
+
                 //https://github.com/aspnet/Security/issues/1764
                 options.AllowCombiningAuthorizeFilters = false;
 
@@ -885,9 +888,13 @@ namespace AspNetCore.ApiBase
             {
                 option.ReportApiVersions = true;
                 //Header then QueryString is consistent with how Accept header/FormatFilter works.
-                option.ApiVersionReader = ApiVersionReader.Combine(new HeaderApiVersionReader("api-version"), new QueryStringApiVersionReader("api-version"));
+                option.ApiVersionReader = ApiVersionReader.Combine(new HeaderApiVersionReader("Version"), new QueryStringApiVersionReader("ver","version"));
+                //option.ApiVersionReader = new UrlSegmentApiVersionReader() /v{version:apiVersion}
                 option.DefaultApiVersion = new ApiVersion(1, 0);
                 option.AssumeDefaultVersionWhenUnspecified = true;
+
+                //Add conventions
+                //option.Conventions.Controller<>().HasApiVersion(new ApiVersion(1, 0));
             });
 
             //API rate limiting

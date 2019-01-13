@@ -6,6 +6,7 @@ using AspNetCore.ApiBase.Settings;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 namespace AspNetCore.ApiBase.Controllers.Api
 {
@@ -28,8 +29,8 @@ namespace AspNetCore.ApiBase.Controllers.Api
         where IEntityService : IApplicationServiceEntityReadOnly<TDto>
     {   
 
-        public ApiControllerEntityReadOnlyBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSettings)
-        : base(service, mapper, emailService, urlHelper, typeHelperService, appSettings)
+        public ApiControllerEntityReadOnlyBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, LinkGenerator linkGenerator, ITypeHelperService typeHelperService, AppSettings appSettings)
+        : base(service, mapper, emailService, urlHelper, linkGenerator, typeHelperService, appSettings)
         {
  
         }

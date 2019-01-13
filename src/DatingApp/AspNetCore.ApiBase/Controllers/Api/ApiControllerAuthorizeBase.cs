@@ -4,6 +4,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 namespace AspNetCore.ApiBase.Controllers.Api
 {
@@ -21,8 +22,8 @@ namespace AspNetCore.ApiBase.Controllers.Api
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")] // 40
     public abstract class ApiControllerAuthorizeBase : ApiControllerBase
     {
-        public ApiControllerAuthorizeBase(IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, AppSettings appSettings)
-            :base(mapper, emailService, urlHelper, appSettings)
+        public ApiControllerAuthorizeBase(IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, LinkGenerator linkGenerator, AppSettings appSettings)
+            :base(mapper, emailService, urlHelper, linkGenerator, appSettings)
         {
            
         }

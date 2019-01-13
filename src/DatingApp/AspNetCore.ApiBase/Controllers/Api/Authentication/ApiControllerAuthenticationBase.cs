@@ -6,6 +6,7 @@ using AspNetCore.ApiBase.Users;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -37,12 +38,13 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
             SignInManager<TUser> signInManager,
             TokenSettings tokenSettings,
             IUrlHelper urlHelper,
+            LinkGenerator linkGenerator,
             IEmailService emailSender,
             IMapper mapper,
             PasswordSettings passwordSettings,
             EmailTemplates emailTemplates,
             AppSettings appSettings)
-            :base(mapper, emailSender, urlHelper, appSettings)
+            :base(mapper, emailSender, urlHelper, linkGenerator, appSettings)
         {
             _resetPasswordEmailTemplate = emailTemplates.ResetPassword;
 

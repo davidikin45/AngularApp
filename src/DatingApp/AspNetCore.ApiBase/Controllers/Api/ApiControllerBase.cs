@@ -10,6 +10,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Routing;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -34,7 +35,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
         public IMapper Mapper { get; }
         public IEmailService EmailService { get; }
         public IUrlHelper UrlHelper { get; }
-
+        public LinkGenerator LinkGenerator { get; }
         public AppSettings AppSettings { get; }
 
         public ApiControllerBase()
@@ -42,11 +43,12 @@ namespace AspNetCore.ApiBase.Controllers.Api
 
         }
 
-        public ApiControllerBase(IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, AppSettings appSettings)
+        public ApiControllerBase(IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, LinkGenerator linkGenerator, AppSettings appSettings)
         {
             Mapper = mapper;
             EmailService = emailService;
             UrlHelper = urlHelper;
+            LinkGenerator = linkGenerator;
             AppSettings = appSettings;
         }
 

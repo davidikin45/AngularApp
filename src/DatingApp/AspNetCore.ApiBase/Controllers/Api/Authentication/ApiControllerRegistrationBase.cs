@@ -5,6 +5,7 @@ using AspNetCore.ApiBase.Users;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.Controllers.Api.Authentication
@@ -22,12 +23,13 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
             SignInManager<TUser> signInManager,
             TokenSettings tokenSettings,
             IUrlHelper urlHelper,
+            LinkGenerator linkGenerator,
             IEmailService emailSender,
             IMapper mapper,
             PasswordSettings passwordSettings,
             EmailTemplates emailTemplates,
             AppSettings appSettings)
-            :base(roleManager, userManager, signInManager, tokenSettings, urlHelper, emailSender, mapper, passwordSettings, emailTemplates, appSettings)
+            :base(roleManager, userManager, signInManager, tokenSettings, urlHelper, linkGenerator, emailSender, mapper, passwordSettings, emailTemplates, appSettings)
         {
             _welcomeEmailTemplate = emailTemplates.Welcome;
         }

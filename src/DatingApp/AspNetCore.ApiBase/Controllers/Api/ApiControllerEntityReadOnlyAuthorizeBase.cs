@@ -2,7 +2,6 @@
 using AspNetCore.ApiBase.Authorization;
 using AspNetCore.ApiBase.Controllers.ApiClient;
 using AspNetCore.ApiBase.Data.Helpers;
-using AspNetCore.ApiBase.DomainEvents;
 using AspNetCore.ApiBase.Dtos;
 using AspNetCore.ApiBase.Email;
 using AspNetCore.ApiBase.Extensions;
@@ -16,6 +15,7 @@ using IdentityModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -52,8 +52,8 @@ namespace AspNetCore.ApiBase.Controllers.Api
         public IEntityService Service { get; private set; }
         public ITypeHelperService TypeHelperService { get; private set; }
 
-        public ApiControllerEntityReadOnlyAuthorizeBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSettings)
-        : base(mapper, emailService, urlHelper, appSettings)
+        public ApiControllerEntityReadOnlyAuthorizeBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, LinkGenerator linkGenerator, ITypeHelperService typeHelperService, AppSettings appSettings)
+        : base(mapper, emailService, urlHelper, linkGenerator, appSettings)
         {
             Service = service;
             TypeHelperService = typeHelperService;

@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,8 +42,8 @@ namespace AspNetCore.ApiBase.Controllers.Api
          where TDeleteDto : class
         where IEntityService : IApplicationServiceEntity<TCreateDto, TReadDto, TUpdateDto, TDeleteDto>
     {
-        public ApiControllerEntityAuthorizeBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService, AppSettings appSetings)
-        : base(service, mapper, emailService, urlHelper, typeHelperService, appSetings)
+        public ApiControllerEntityAuthorizeBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, LinkGenerator linkGenerator, ITypeHelperService typeHelperService, AppSettings appSetings)
+        : base(service, mapper, emailService, urlHelper, linkGenerator, typeHelperService, appSetings)
         {
 
         }
