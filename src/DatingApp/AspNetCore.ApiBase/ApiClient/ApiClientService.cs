@@ -5,6 +5,7 @@ using Newtonsoft.Json.Serialization;
 using Polly.Wrap;
 using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace AspNetCore.ApiBase.ApiClient
 {
@@ -30,6 +31,9 @@ namespace AspNetCore.ApiBase.ApiClient
         public ApiClientService(HttpClient client, ApiClientSettings apiClientSettings, IMemoryCache memoryCache = null, ILogger logger = null)
         {
             _client = client;
+            _client.DefaultRequestHeaders.Clear();
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
             _logger = logger;
             _clientSettings = apiClientSettings;
 

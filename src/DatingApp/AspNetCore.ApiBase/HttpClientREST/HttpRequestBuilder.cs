@@ -17,6 +17,7 @@ namespace GrabMobile.ApiClient.HttpClientREST
         private HttpContent content = null;
         private string bearerToken = "";
         private string acceptHeader = "application/json";
+        private string acceptEncodingHeader = "gzip";
         private bool allowAutoRedirect = false;
 
         public HttpRequestBuilder()
@@ -53,6 +54,12 @@ namespace GrabMobile.ApiClient.HttpClientREST
             return this;
         }
 
+        public HttpRequestBuilder AddAcceptEncodingHeader(string acceptEncodingHeader)
+        {
+            this.acceptEncodingHeader = acceptEncodingHeader;
+            return this;
+        }
+
         public HttpRequestBuilder AddAllowAutoRedirect(bool allowAutoRedirect)
         {
             this.allowAutoRedirect = allowAutoRedirect;
@@ -63,13 +70,15 @@ namespace GrabMobile.ApiClient.HttpClientREST
         {
             var handler = new HttpClientHandler();
             handler.AllowAutoRedirect = this.allowAutoRedirect;
+            handler.AutomaticDecompression = System.Net.DecompressionMethods.GZip;
 
             var client = new HttpClient(handler);
 
             return await SendAsync(client, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<HttpResponseMessage> SendAsync(HttpClient client, CancellationToken cancellationToken = default(CancellationToken))
+        //Throws OperationCanceledException on timeout
+        public async Task<HttpResponseMessage> SendAsync(HttpClient client, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption httpCompletionOption = HttpCompletionOption.ResponseContentRead)
         {
             // Check required arguments
             EnsureArguments();
@@ -77,20 +86,26 @@ namespace GrabMobile.ApiClient.HttpClientREST
             var uri = this.requestUri;
 
             // Set up request
-            var request = new HttpRequestMessage(this.method, uri);
+            using (var request = new HttpRequestMessage(this.method, uri))
+            {
+                if (this.content != null)
+                    request.Content = this.content;
 
-            if (this.content != null)
-                request.Content = this.content;
+                if (!string.IsNullOrEmpty(this.bearerToken))
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", this.bearerToken);
 
-            if (!string.IsNullOrEmpty(this.bearerToken))
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", this.bearerToken);
+                request.Headers.Accept.Clear();
+                if (!string.IsNullOrEmpty(this.acceptHeader))
+                    request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(this.acceptHeader));
 
-            request.Headers.Accept.Clear();
-            if (!string.IsNullOrEmpty(this.acceptHeader))
-                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(this.acceptHeader));
+                request.Headers.AcceptEncoding.Clear();
+                if (!string.IsNullOrEmpty(this.acceptEncodingHeader))
+                    request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue(this.acceptEncodingHeader));
 
-            return await client.SendAsync(request, cancellationToken);
+                return await client.SendAsync(request, httpCompletionOption, cancellationToken);
+            }
         }
+
 
         #region " Private "
 

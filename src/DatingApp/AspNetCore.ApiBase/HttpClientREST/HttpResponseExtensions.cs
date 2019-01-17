@@ -1,5 +1,6 @@
 ﻿using AspNetCore.ApiBase.HttpClientREST;
 using Newtonsoft.Json;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -14,6 +15,21 @@ namespace GrabMobile.ApiClient.HttpClientREST
             return string.IsNullOrEmpty(data) ?
                             default(T) :
                             (serializerSettings != null ? JsonConvert.DeserializeObject<T>(data, serializerSettings) : JsonConvert.DeserializeObject<T>(data));
+        }
+
+        public static async Task<T> ContentAsTypeStreamAsync<T>(this HttpResponseMessage response)
+        {
+            using (var stream = await response.Content.ReadAsStreamAsync())
+            {
+                using (var sr = new StreamReader(stream))
+                {
+                    using (var tr = new JsonTextReader(sr))
+                    {
+                        var serializer = new JsonSerializer();
+                        return serializer.Deserialize<T>(tr);
+                    }
+                }
+            }
         }
 
         public static async Task<string> ContentAsJsonAsync(this HttpResponseMessage response, JsonSerializerSettings serializerSettings = null)

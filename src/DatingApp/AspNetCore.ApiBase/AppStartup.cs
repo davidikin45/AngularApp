@@ -61,6 +61,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Reflection;
 
 namespace AspNetCore.ApiBase
@@ -946,6 +948,21 @@ namespace AspNetCore.ApiBase
         public virtual void ConfigureHttpClients(IServiceCollection services)
         {
             Logger.LogInformation("Configuring Http Clients");
+
+
+            //When using typed client its best to put client config in the constructor.
+            //services.AddHttpClient<Client>.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            //{
+            //    AllowAutoRedirect = true,
+            //    AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+            //});
+
+            //services.AddHttpClient("name").ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            //{
+            //    AllowAutoRedirect = true,
+            //    AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+            //});
+
         }
         #endregion
 

@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -49,6 +51,38 @@ namespace GrabMobile.ApiClient.HttpClientREST
                                 .AddBearerToken(bearerToken);
 
             return await builder.SendAsync(client, cancellationToken);
+        }
+
+        public static async Task<HttpResponseMessage> PostAsStream(this HttpClient client, string requestUri, object value, JsonSerializerSettings serializerSettings, CancellationToken cancellationToken = default(CancellationToken))
+           => await PostAsStream(client, requestUri, value, serializerSettings, "", cancellationToken);
+
+        public static async Task<HttpResponseMessage> PostAsStream(this HttpClient client,
+            string requestUri, object value, JsonSerializerSettings serializerSettings, string bearerToken, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var ms = new MemoryStream();
+
+            using (var sw = new StreamWriter(ms, new UTF8Encoding(), 1024, true))
+            {
+                using (var tw = new JsonTextWriter(sw))
+                {
+                    var jsonSerializer = new JsonSerializer();
+                    jsonSerializer.Serialize(tw, value);
+                    tw.Flush();
+                }
+            }
+
+            ms.Seek(0, SeekOrigin.Begin);
+
+            using (var streamContent = new StreamContent(ms))
+            {
+                var builder = new HttpRequestBuilder()
+                    .AddMethod(HttpMethod.Post)
+                    .AddRequestUri(requestUri)
+                    .AddContent(streamContent)
+                    .AddBearerToken(bearerToken);
+
+                return await builder.SendAsync(client, cancellationToken);
+            }
         }
 
         public static async Task<HttpResponseMessage> PostForm(this HttpClient client, string requestUri, object value, CancellationToken cancellationToken = default(CancellationToken))
