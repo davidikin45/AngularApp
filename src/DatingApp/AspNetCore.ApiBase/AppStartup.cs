@@ -8,7 +8,6 @@ using AspNetCore.ApiBase.Extensions;
 using AspNetCore.ApiBase.Filters;
 using AspNetCore.ApiBase.Hangfire;
 using AspNetCore.ApiBase.Hosting;
-using AspNetCore.ApiBase.IntegrationEvents;
 using AspNetCore.ApiBase.Localization;
 using AspNetCore.ApiBase.Middleware;
 using AspNetCore.ApiBase.MultiTenancy;
@@ -23,6 +22,9 @@ using AspNetCore.ApiBase.Tasks;
 using AspNetCore.ApiBase.Validation.Providers;
 using AspNetCoreRateLimit;
 using Autofac;
+using GraphQL;
+using GraphQL.Server;
+using GraphQL.Server.Ui.Playground;
 using Hangfire;
 using IdentityServer4.AccessTokenValidation;
 using LeacockSite.DependencyInjection.Autofac.Modules;
@@ -61,8 +63,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Reflection;
 
 namespace AspNetCore.ApiBase
@@ -943,6 +943,22 @@ namespace AspNetCore.ApiBase
         }
         #endregion
 
+        #region GraphQL
+        public virtual void ConfigureGraphQL(IServiceCollection services)
+        {
+            Logger.LogInformation("Configuring GraphQL");
+
+            services.AddScoped<IDependencyResolver>(s => new FuncDependencyResolver(s.GetRequiredService));
+            
+            services.AddGraphQL(o => { o.ExposeExceptions = true; })
+              .AddGraphTypes(ServiceLifetime.Scoped)
+              .AddUserContextBuilder(httpContext => httpContext.User)
+              .AddDataLoader()
+              .AddWebSockets();
+
+        }
+        #endregion
+
         #region HttpClients
         //https://www.codemag.com/article/1807041/What%E2%80%99s-New-in-ASP.NET-Core-2.1
         public virtual void ConfigureHttpClients(IServiceCollection services)
@@ -1312,6 +1328,10 @@ namespace AspNetCore.ApiBase
                 app.UseCookiePolicy();
             }
 
+            app.UseWebSockets();
+            AddGraphQLSchemas(app);
+            app.UseGraphQLPlayground(new GraphQLPlaygroundOptions());
+
             app.UseMvc(routes =>
             {
                 routes.AllRoutes("/all-routes");
@@ -1332,5 +1352,9 @@ namespace AspNetCore.ApiBase
         public abstract void AddUnitOfWorks(IServiceCollection services);
         public abstract void AddHostedServices(IServiceCollection services);
         public abstract void AddHangfireJobServices(IServiceCollection services);
+        public virtual void AddGraphQLSchemas(IApplicationBuilder app)
+        {
+
+        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using AngleSharp;
-using AngleSharp.Dom.Html;
-using AngleSharp.Network;
+using AngleSharp.Html.Dom;
+using AngleSharp.Io;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;

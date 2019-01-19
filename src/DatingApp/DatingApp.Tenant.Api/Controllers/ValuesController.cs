@@ -7,6 +7,7 @@ using AutoMapper;
 using DatingApp.Tenant.Core;
 using DatingApp.Tenant.Domain;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 namespace DatingApp.Tenant.Api.Controllers
 {
@@ -15,9 +16,9 @@ namespace DatingApp.Tenant.Api.Controllers
     [Route("api/values")]
     public class ValuesController : ApiControllerEntityAuthorizeBase<Value, Value, Value, Value, IValueApplicationService>
     {
-        public ValuesController(IValueApplicationService applicationService, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, ITypeHelperService typeHelperService,
+        public ValuesController(IValueApplicationService applicationService, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, LinkGenerator linkGenerator, ITypeHelperService typeHelperService,
             AppSettings appSettings)
-            :base( applicationService, mapper, emailService, urlHelper, typeHelperService, appSettings)
+            :base( applicationService, mapper, emailService, urlHelper, linkGenerator, typeHelperService, appSettings)
         {
 
         }

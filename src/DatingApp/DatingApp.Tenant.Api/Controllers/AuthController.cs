@@ -7,6 +7,7 @@ using DatingApp.Tenant.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 namespace DatingApp.Tenant.Api.Controllers
 {
@@ -21,12 +22,13 @@ namespace DatingApp.Tenant.Api.Controllers
             SignInManager<User> signInManager,
             TokenSettings tokenSettings,
             IUrlHelper urlHelper,
+            LinkGenerator linkGenerator,
             IEmailService emailSender,
             IMapper mapper,
             PasswordSettings passwordSettings,
             EmailTemplates emailTemplates,
             AppSettings appSettings)
-            : base(roleManager, userManager, signInManager, tokenSettings, urlHelper, emailSender, mapper, passwordSettings, emailTemplates, appSettings)
+            : base(roleManager, userManager, signInManager, tokenSettings, urlHelper, linkGenerator, emailSender, mapper, passwordSettings, emailTemplates, appSettings)
         {
 
         }
