@@ -39,6 +39,12 @@ namespace AspNetCore.ApiBase.Controllers.Mvc
             return LocalRedirect(Request.Headers["Referer"].ToString());
         }
 
+        [HttpGet("culture")]
+        public string GetCulture()
+        {
+            return $"CurrentCulture:{CultureInfo.CurrentCulture.Name}, CurrentUICulture:{CultureInfo.CurrentUICulture.Name}";
+        }
+
         protected string GetSitemapDocument(IEnumerable<SitemapNode> sitemapNodes)
         {
             XNamespace xmlns = "http://www.sitemaps.org/schemas/sitemap/0.9";

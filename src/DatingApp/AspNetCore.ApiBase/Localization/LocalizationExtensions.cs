@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Localization.Routing;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -56,14 +57,42 @@ namespace AspNetCore.ApiBase.Localization
                 }
             }
 
-            app.UseRequestLocalization(new RequestLocalizationOptions
+           var options = new RequestLocalizationOptions
             {
                 DefaultRequestCulture = new RequestCulture(culture: defaultCulture, uiCulture: defaultCulture),
                 // Formatting numbers, dates, etc.
                 SupportedCultures = supportedFormatCultures,
                 // UI strings that we have localized.
                 SupportedUICultures = supportedUICultureInfoList
-            });
+            };
+
+            //Default culture providers
+            //1. Query string
+            //2. Cookie
+            //3. Accept-Language header
+
+            //https://docs.microsoft.com/en-us/aspnet/core/fundamentals/localization?view=aspnetcore-2.2
+            //https://andrewlock.net/url-culture-provider-using-middleware-as-mvc-filter-in-asp-net-core-1-1-0/
+            //https://andrewlock.net/applying-the-routedatarequest-cultureprovider-globally-with-middleware-as-filters/
+            //https://gunnarpeipman.com/aspnet/aspnet-core-simple-localization/
+            //http://sikorsky.pro/en/blog/aspnet-core-culture-route-parameter
+
+            //Route("{culture}/{ui-culture}/[controller]")]
+            //[Route("{culture}/[controller]")]
+
+            var routeDataRequestProvider = new RouteDataRequestCultureProvider() { Options = options, RouteDataStringKey = "culture", UIRouteDataStringKey = "ui-culture" };
+
+            //options.RequestCultureProviders.Insert(0, routeDataRequestProvider);
+
+            options.RequestCultureProviders = new List<IRequestCultureProvider>()
+            {
+                 routeDataRequestProvider,
+                 new QueryStringRequestCultureProvider() { QueryStringKey = "culture", UIQueryStringKey = "ui-culture" },
+                 new CookieRequestCultureProvider(),
+                 new AcceptLanguageHeaderRequestCultureProvider(),
+            };
+
+            app.UseRequestLocalization(options);
 
             return app;
         }

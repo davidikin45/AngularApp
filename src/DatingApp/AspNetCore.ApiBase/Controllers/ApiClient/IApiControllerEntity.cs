@@ -1,6 +1,5 @@
 ﻿using AspNetCore.ApiBase.Alerts;
 using AspNetCore.ApiBase.Dtos;
-using AspNetCore.ApiBase.Validation;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;

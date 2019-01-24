@@ -1,4 +1,5 @@
 ﻿using AspNetCore.ApiBase;
+using AspNetCore.ApiBase.ApiClient;
 using AspNetCore.ApiBase.Extensions;
 using AspNetCore.ApiBase.Hangfire;
 using AspNetCore.ApiBase.HostedServices;
@@ -21,7 +22,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace DatingApp.Tenant.Api
@@ -50,16 +52,18 @@ namespace DatingApp.Tenant.Api
 
         public override void ConfigureHttpClients(IServiceCollection services)
         {
-            services.AddHttpClient<AppApiClient>(async cfg =>
+            base.ConfigureHttpClients(services);
+
+            services.AddHttpClient<AppApiClient>(cfg =>
             {
-                var serviceProvider = services.BuildServiceProvider();
-                var httpContextAccessor = serviceProvider.GetService<IHttpContextAccessor>();
-                var accessToken = await httpContextAccessor.HttpContext.GetTokenAsync("access_token");
-
-                if (accessToken != null)
-                    cfg.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
-
                 cfg.BaseAddress = new System.Uri("https://api.localhost:44372");
+            })
+            .AddHttpMessageHandler<AuthorizationJwtProxyHttpHandler>()
+            .AddHttpMessageHandler<AuthorizationBearerProxyHttpHandler>()
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AllowAutoRedirect = true,
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
             });
         }
 

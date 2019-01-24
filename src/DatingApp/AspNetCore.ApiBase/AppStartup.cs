@@ -1,4 +1,5 @@
 ﻿using AspNetCore.ApiBase.ActionResults;
+using AspNetCore.ApiBase.ApiClient;
 using AspNetCore.ApiBase.Authorization;
 using AspNetCore.ApiBase.Cqrs;
 using AspNetCore.ApiBase.DependencyInjection.Modules;
@@ -64,6 +65,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase
 {
@@ -79,6 +81,7 @@ namespace AspNetCore.ApiBase
 
             HostingEnvironment = hostingEnvironment;
 
+            //AppDomain.CurrentDomain.BaseDirectory
             BinPath = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath);
             Logger.LogInformation($"Bin Folder: {BinPath}");
             PluginsPath = Path.Combine(Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath), PluginsFolder);
@@ -617,8 +620,12 @@ namespace AspNetCore.ApiBase
                 //https://github.com/aspnet/Security/issues/1764
                 options.AllowCombiningAuthorizeFilters = false;
 
+                //Adds {culture=default} to ALL routes
+                options.AddCultureRouteConvention(appSettings.DefaultCulture);
+
                 options.Filters.Add<ExceptionHandlingFilter>();
                 options.Filters.Add<OperationCancelledExceptionFilter>();
+                options.Filters.Add(new MiddlewareFilterAttribute(typeof(LocalizationPipeline)));
 
                 //options.Filters.Add(typeof(ModelValidationFilter));
                 ConfigureMvcCachingProfiles(options);
@@ -804,6 +811,7 @@ namespace AspNetCore.ApiBase
                 options.ConstraintMap.Add("promo", typeof(PromoConstraint));
                 options.ConstraintMap.Add("tokenCheck", typeof(TokenConstraint));
                 options.ConstraintMap.Add("versionCheck", typeof(RouteVersionConstraint));
+                options.ConstraintMap.Add("cultureCheck", typeof(CultureConstraint));
             });
         }
 
@@ -965,15 +973,21 @@ namespace AspNetCore.ApiBase
         {
             Logger.LogInformation("Configuring Http Clients");
 
+            services.AddTransient<AuthorizationBearerProxyHttpHandler>();
+            services.AddTransient<AuthorizationJwtProxyHttpHandler>();
 
             //When using typed client its best to put client config in the constructor.
-            //services.AddHttpClient<Client>.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            //services.AddHttpClient<Client>()
+            //    .AddHttpMessageHandler<AuthorizationProxyHttpHandler>()
+            //    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             //{
             //    AllowAutoRedirect = true,
             //    AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
             //});
 
-            //services.AddHttpClient("name").ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            //services.AddHttpClient("name")
+            //     .AddHttpMessageHandler<AuthorizationProxyHttpHandler>()
+            //    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             //{
             //    AllowAutoRedirect = true,
             //    AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
@@ -1021,7 +1035,8 @@ namespace AspNetCore.ApiBase
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider, AppSettings appSettings, CacheSettings cacheSettings,
-            SwitchSettings switchSettings, ServerSettings serverSettings, TaskRunnerAfterApplicationConfiguration taskRunner, ISignalRHubMapper signalRHubMapper, ILoggerFactory loggerFactory)
+            SwitchSettings switchSettings, ServerSettings serverSettings, TaskRunnerAfterApplicationConfiguration taskRunner, RequestLocalizationOptions localizationOptions,
+            ISignalRHubMapper signalRHubMapper, ILoggerFactory loggerFactory)
         {
             Logger.LogInformation("Configuring Request Pipeline");
 
@@ -1343,6 +1358,8 @@ namespace AspNetCore.ApiBase
                     template: "{feature}/Template/{name}",
                     defaults: new { controller = "Template", action = "Render" }
                 );
+
+                //routes.RedirectCulturelessToDefaultCulture(localizationOptions);
             });
 
             taskRunner.RunTasksAfterApplicationConfiguration();

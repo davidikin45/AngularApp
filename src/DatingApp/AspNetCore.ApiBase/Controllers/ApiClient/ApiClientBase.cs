@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 
 namespace AspNetCore.ApiBase.Controllers.ApiClient
@@ -15,16 +13,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
 
         protected readonly Dictionary<Type, object> repositories = new Dictionary<Type, object>();
 
-        public ApiClientBase(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public ApiClientBase(HttpClient httpClient)
         {
-            var bearerToken = httpContextAccessor.HttpContext.Request
-                          .Headers["Authorization"]
-                          .FirstOrDefault(h => h.StartsWith("bearer ", StringComparison.InvariantCultureIgnoreCase));
-
-            // Add authorization if found
-            if (bearerToken != null)
-                httpClient.DefaultRequestHeaders.Add("Authorization", bearerToken);
-
             settings = new JsonSerializerSettings();
             settings.Formatting = Formatting.Indented;
             settings.DateParseHandling = DateParseHandling.DateTime;
