@@ -58,8 +58,8 @@ namespace DatingApp.Tenant.Api
             {
                 cfg.BaseAddress = new System.Uri("https://api.localhost:44372");
             })
-            .AddHttpMessageHandler<AuthorizationJwtProxyHttpHandler>()
-            .AddHttpMessageHandler<AuthorizationBearerProxyHttpHandler>()
+            .AddHttpMessageHandler<AuthorizationJwtProxyHttpHandler>()//2
+            .AddHttpMessageHandler<AuthorizationBearerProxyHttpHandler>()//1
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
                 AllowAutoRedirect = true,

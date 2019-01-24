@@ -4,6 +4,7 @@ using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,14 +42,18 @@ namespace AspNetCore.ApiBase.Data
         }
 
         public static readonly ILoggerFactory CommandLoggerFactory
-         = new LoggerFactory()
-        .AddDebug((categoryName, logLevel) => (logLevel == LogLevel.Information) && (categoryName == DbLoggerCategory.Database.Command.Name))
-        .AddConsole((categoryName, logLevel) => (logLevel == LogLevel.Information) && (categoryName == DbLoggerCategory.Database.Command.Name));
+         = new ServiceCollection().AddLogging(builder =>
+         {
+             builder.AddDebug().AddConsole().AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Information);
+         }).BuildServiceProvider()
+         .GetService<ILoggerFactory>();
 
         public static readonly ILoggerFactory ChangeTrackerLoggerFactory
-         = new LoggerFactory()
-        .AddDebug((categoryName, logLevel) => (logLevel == LogLevel.Debug) && (categoryName == DbLoggerCategory.ChangeTracking.Name))
-        .AddConsole((categoryName, logLevel) => (logLevel == LogLevel.Debug) && (categoryName == DbLoggerCategory.ChangeTracking.Name));
+         = new ServiceCollection().AddLogging(builder =>
+         {
+             builder.AddDebug().AddConsole().AddFilter(DbLoggerCategory.ChangeTracking.Name, LogLevel.Debug);
+         }).BuildServiceProvider()
+         .GetService<ILoggerFactory>();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
