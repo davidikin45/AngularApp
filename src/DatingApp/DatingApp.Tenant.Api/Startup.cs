@@ -16,9 +16,7 @@ using DatingApp.Tenant.Data;
 using DatingApp.Tenant.Domain;
 using Hangfire;
 using Hangfire.Common;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -50,9 +48,18 @@ namespace DatingApp.Tenant.Api
             services.AddUnitOfWork<IAppUnitOfWork, AppUnitOfWork>();
         }
 
-        public override void ConfigureHttpClients(IServiceCollection services)
+        public override void AddHostedServices(IServiceCollection services)
         {
-            base.ConfigureHttpClients(services);
+            services.AddHostedServiceCronJob<Job2>("* * * * *");
+        }
+
+        public override void AddHangfireJobServices(IServiceCollection services)
+        {
+            services.AddHangfireJob<Job1>();
+        }
+
+        public override void AddHttpClients(IServiceCollection services)
+        {
 
             services.AddHttpClient<AppApiClient>(cfg =>
             {
@@ -65,16 +72,6 @@ namespace DatingApp.Tenant.Api
                 AllowAutoRedirect = true,
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
             });
-        }
-
-        public override void AddHostedServices(IServiceCollection services)
-        {
-            services.AddHostedServiceCronJob<Job2>("* * * * *");
-        }
-
-        public override void AddHangfireJobServices(IServiceCollection services)
-        {
-            services.AddHangfireJob<Job1>();
         }
     }
 

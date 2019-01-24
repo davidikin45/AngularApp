@@ -39,11 +39,6 @@ namespace DatingApp.Admin.Api
             services.AddUnitOfWork<IAppUnitOfWork, AppUnitOfWork>();
         }
 
-        public override void ConfigureHttpClients(IServiceCollection services)
-        {
-
-        }
-
         public override void AddHostedServices(IServiceCollection services)
         {
             services.AddHostedServiceCronJob<Job2>("* * * * *");
@@ -52,6 +47,11 @@ namespace DatingApp.Admin.Api
         public override void AddHangfireJobServices(IServiceCollection services)
         {
             services.AddHangfireJob<Job1>();
+        }
+
+        public override void AddHttpClients(IServiceCollection services)
+        {
+            
         }
     }
 

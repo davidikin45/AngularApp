@@ -66,6 +66,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using static AspNetCore.ApiBase.Localization.LocalizationExtensions;
 
 namespace AspNetCore.ApiBase
 {
@@ -662,6 +663,8 @@ namespace AspNetCore.ApiBase
             //The AddControllersAsServices method does two things - it registers all of the Controllers in your application with the DI container as Transient (if they haven't already been registered) and replaces the IControllerActivator registration with the ServiceBasedControllerActivator
             .AddControllersAsServices();
 
+            services.AddRequestLocalizationOptions(appSettings.DefaultCulture, true, false);
+
             services.AddSingleton<IConfigureOptions<MvcOptions>, ConfigureMvcOptions>();
 
             services.AddCookiePolicy(appSettings.CookieConsentName);
@@ -976,6 +979,8 @@ namespace AspNetCore.ApiBase
             services.AddTransient<AuthorizationBearerProxyHttpHandler>();
             services.AddTransient<AuthorizationJwtProxyHttpHandler>();
 
+            AddHttpClients(services);
+
             //When using typed client its best to put client config in the constructor.
             //services.AddHttpClient<Client>()
             //    .AddHttpMessageHandler<AuthorizationProxyHttpHandler>()
@@ -994,6 +999,8 @@ namespace AspNetCore.ApiBase
             //});
 
         }
+
+        public abstract void AddHttpClients(IServiceCollection services);
         #endregion
 
         #region Identity
@@ -1306,8 +1313,6 @@ namespace AspNetCore.ApiBase
                    List<string> publicUploadFolders = appSettings.PublicUploadFolders.Split(seperator).ToList();
                    appBranch.UseContentHandler(env, AppSettings, publicUploadFolders, cacheSettings.UploadFilesDays);
                });
-
-            app.UseRequestLocalizationCustom(appSettings.DefaultCulture, true, false);
         
             app.UseDefaultFiles();
 
@@ -1347,6 +1352,8 @@ namespace AspNetCore.ApiBase
             AddGraphQLSchemas(app);
             app.UseGraphQLPlayground(new GraphQLPlaygroundOptions());
 
+            //app.UseRequestLocalization(localizationOptions);
+
             app.UseMvc(routes =>
             {
                 routes.AllRoutes("/all-routes");
@@ -1359,7 +1366,14 @@ namespace AspNetCore.ApiBase
                     defaults: new { controller = "Template", action = "Render" }
                 );
 
-                //routes.RedirectCulturelessToDefaultCulture(localizationOptions);
+                //https://docs.microsoft.com/en-us/aspnet/core/mvc/controllers/routing?view=aspnetcore-2.2
+
+                var redirectCulturelessToDefaultCulture = false;
+
+                if(redirectCulturelessToDefaultCulture)
+                {
+                    routes.RedirectCulturelessToDefaultCulture(localizationOptions);
+                }
             });
 
             taskRunner.RunTasksAfterApplicationConfiguration();

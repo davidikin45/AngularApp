@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Localization.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace AspNetCore.ApiBase.Localization
 {
     public static class LocalizationExtensions
     {
-        public static IApplicationBuilder UseRequestLocalizationCustom(this IApplicationBuilder app, string defaultCulture, bool allowCountries, bool allowLanguages, params string[] supportedUICultures)
+        public static IServiceCollection AddRequestLocalizationOptions(this IServiceCollection services, string defaultCulture, bool allowCountries, bool allowLanguages, params string[] supportedUICultures)
         {
             //https://andrewlock.net/adding-localisation-to-an-asp-net-core-application/
             //Default culture should be set to where the majority of traffic comes from.
@@ -96,9 +97,9 @@ namespace AspNetCore.ApiBase.Localization
                  new AcceptLanguageHeaderRequestCultureProvider(),
             };
 
-            app.UseRequestLocalization(options);
+            services.AddSingleton(options);
 
-            return app;
+            return services;
         }
 
         public static MvcOptions AddCultureRouteConvention(this MvcOptions options, string defaultCulture)
