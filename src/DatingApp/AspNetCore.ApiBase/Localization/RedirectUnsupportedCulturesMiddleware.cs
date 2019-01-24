@@ -11,12 +11,14 @@ namespace AspNetCore.ApiBase.Localization
 {
     public class RedirectUnsupportedCulturesMiddleware
     {
+        private readonly bool _redirectCultureless;
         private readonly RequestDelegate _next;
         private readonly string _routeDataStringKey;
 
         public RedirectUnsupportedCulturesMiddleware(
             RequestDelegate next,
-            RequestLocalizationOptions options)
+            RequestLocalizationOptions options, 
+            bool redirectCultureless)
         {
             _next = next;
             var provider = options.RequestCultureProviders
@@ -33,8 +35,7 @@ namespace AspNetCore.ApiBase.Localization
 
             var actualCulture = cultureFeature?.RequestCulture.Culture.Name;
 
-            if (string.IsNullOrEmpty(requestedCulture) ||
-                !string.Equals(requestedCulture, actualCulture, StringComparison.OrdinalIgnoreCase))
+            if ((_redirectCultureless && string.IsNullOrEmpty(requestedCulture)) || (!string.IsNullOrEmpty(requestedCulture) && !string.Equals(requestedCulture, actualCulture, StringComparison.OrdinalIgnoreCase)))
             {
                 var newCulturedPath = GetNewPath(context, actualCulture);
                 context.Response.Redirect(newCulturedPath);
