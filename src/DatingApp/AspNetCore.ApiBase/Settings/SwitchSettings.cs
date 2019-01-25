@@ -17,5 +17,6 @@
         public bool EnableResponseCaching { get; set; }
         public bool EnableETags { get; set; }
         public bool EnableHangfire { get; set; }
+        public bool EnableAlwaysIncludeCultureInUrl { get; set; }
     }
 }

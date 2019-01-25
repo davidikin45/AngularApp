@@ -16,13 +16,13 @@ namespace AspNetCore.ApiBase.ApiClient
         private readonly ApiClientSettings _clientSettings;
         private readonly JsonSerializerSettings _serializerSettings;
 
-        private ApiClientService(string baseUrl, int maxTimeoutSeconds = 100)
+        protected ApiClientService(string baseUrl, int maxTimeoutSeconds = 100)
           : this(new HttpClient() { BaseAddress = new Uri(baseUrl), Timeout = TimeSpan.FromSeconds(maxTimeoutSeconds) }, new ApiClientSettings() { BaseUrl = baseUrl, MaxTimeoutSeconds = maxTimeoutSeconds }, new MemoryCache(new MemoryCacheOptions()), null)
         {
 
         }
 
-        private ApiClientService(ApiClientSettings apiClientSettings)
+        protected ApiClientService(ApiClientSettings apiClientSettings)
            : this(new HttpClient() { BaseAddress = new Uri(apiClientSettings.BaseUrl), Timeout = TimeSpan.FromSeconds(apiClientSettings.MaxTimeoutSeconds) }, apiClientSettings, new MemoryCache(new MemoryCacheOptions()), null)
         {
 

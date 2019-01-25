@@ -36,7 +36,9 @@ namespace DatingApp.Tenant.Api
 
         public override void AddDatabases(IServiceCollection services, string tenantsConnectionString, string sharedIdentityConnectionString, string sharedHangfireConnectionString, string sharedDefaultConnectionString)
         {
-            services.AddMultiTenancyDbContextStore<AppTenantsContext, AppTenant>(tenantsConnectionString);
+            //services.AddMultiTenancyDbContextStore<AppTenantsContext, AppTenant>(tenantsConnectionString);
+            services.AddMultiTenancyStore<TenantsApiClient, AppTenant>();
+
             services.AddMultiTenancy<AppTenant>(Configuration);
 
             services.AddDbContextTenant<IdentityContext>(sharedIdentityConnectionString).AllowDifferentConnectionFilterByTenantAndDifferentSchemaForTenant("IdentityConnection");
@@ -60,10 +62,24 @@ namespace DatingApp.Tenant.Api
 
         public override void AddHttpClients(IServiceCollection services)
         {
+            var apiClientSettings = GetSettings<ApiClientSettings>("ApiClientSettings");
 
-            services.AddHttpClient<AppApiClient>(cfg =>
+            //Todo add polly cache policy
+            services.AddHttpClient<TenantsApiClient>(client =>
             {
-                cfg.BaseAddress = new System.Uri("https://api.localhost:44372");
+                client.Timeout = System.TimeSpan.FromSeconds(apiClientSettings.MaxTimeoutSeconds);
+                client.BaseAddress = new System.Uri(apiClientSettings.BaseUrl);
+            })
+           .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+           {
+               AllowAutoRedirect = true,
+               AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+           });
+
+            services.AddHttpClient<AppApiClient>(client =>
+            {
+                client.Timeout = System.TimeSpan.FromSeconds(apiClientSettings.MaxTimeoutSeconds);
+                client.BaseAddress = new System.Uri(apiClientSettings.BaseUrl);
             })
             .AddHttpMessageHandler<AuthorizationJwtProxyHttpHandler>()//2
             .AddHttpMessageHandler<AuthorizationBearerProxyHttpHandler>()//1

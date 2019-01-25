@@ -24,6 +24,8 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
     public interface IApiControllerEntityReadOnlyClient<TReadDto>
          where TReadDto : class
     {
+        string ResourceCollection { get; }
+
         Task<WebApiListResponseDto<TReadDto>> SearchAsync(WebApiPagedSearchOrderingRequestDto resourceParameters);
 
         Task<List<TReadDto>> GetAllAsync();

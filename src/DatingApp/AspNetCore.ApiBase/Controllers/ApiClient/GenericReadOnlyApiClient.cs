@@ -14,20 +14,20 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
        where TReadDto : class
     {
         protected readonly HttpClient client;
-        protected readonly string resourceCollection;
+        public string ResourceCollection { get; }
         protected readonly JsonSerializerSettings settings;
 
         public GenericReadOnlyApiClient(HttpClient client, JsonSerializerSettings settings, string resourceCollection)
         {
             this.client = client;
-            this.resourceCollection = resourceCollection;
+            ResourceCollection = resourceCollection;
             this.settings = settings;
         }
 
         #region Search
         public async Task<WebApiListResponseDto<TReadDto>> SearchAsync(WebApiPagedSearchOrderingRequestDto resourceParameters = null)
         {
-            var response = await client.GetWithQueryString($"{resourceCollection}", resourceParameters);
+            var response = await client.GetWithQueryString($"{ResourceCollection}", resourceParameters);
 
             await response.EnsureSuccessStatusCodeAsync();
 
@@ -38,7 +38,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #region GetAll
         public async Task<List<TReadDto>> GetAllAsync()
         {
-            var response = await client.Get($"{resourceCollection}/get-all");
+            var response = await client.Get($"{ResourceCollection}/get-all");
 
             await response.EnsureSuccessStatusCodeAsync();
 
@@ -47,7 +47,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
 
         public async Task<List<TReadDto>> GetAllPagedAsync()
         {
-            var response = await client.Get($"{resourceCollection}/get-all-paged");
+            var response = await client.Get($"{ResourceCollection}/get-all-paged");
 
             await response.EnsureSuccessStatusCodeAsync();
 
@@ -58,7 +58,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #region GetById
         public async Task<TReadDto> GetByIdAsync(object id, WebApiParamsDto parameters = null)
         {
-            var response = await client.GetWithQueryString($"{resourceCollection}/{id}", parameters);
+            var response = await client.GetWithQueryString($"{ResourceCollection}/{id}", parameters);
 
             TReadDto item = null;
             if (response.IsSuccessStatusCode)
@@ -71,7 +71,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
 
         public async Task<List<TReadDto>> BulkGetByIdsAsync(IEnumerable<object> ids)
         {
-            var response = await client.Get($"{resourceCollection}/{String.Join(',', ids)}");
+            var response = await client.Get($"{ResourceCollection}/{String.Join(',', ids)}");
 
             await response.EnsureSuccessStatusCodeAsync();
 
@@ -80,7 +80,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
 
         public async Task<TReadDto> GetByIdFullGraphAsync(object id, WebApiParamsDto parameters = null)
         {
-            var response = await client.GetWithQueryString($"{resourceCollection}/full-graph/{id}", parameters);
+            var response = await client.GetWithQueryString($"{ResourceCollection}/full-graph/{id}", parameters);
 
             TReadDto item = null;
             if (response.IsSuccessStatusCode)
@@ -96,7 +96,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task<WebApiListResponseDto<TChildCollectionItemDto>> GetByIdChildCollectionAsync<TChildCollectionItemDto>(object id, string collection, WebApiPagedSearchOrderingRequestDto resourceParameters)
      where TChildCollectionItemDto : class
         {
-            var response = await client.GetWithQueryString($"{resourceCollection}/{id}/{collection}", resourceParameters);
+            var response = await client.GetWithQueryString($"{ResourceCollection}/{id}/{collection}", resourceParameters);
 
             await response.EnsureSuccessStatusCodeAsync();
 
@@ -106,7 +106,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         public async Task<TChildCollectionItemDto> GetByIdChildCollectionItemAsync<TChildCollectionItemDto>(object id, string collection, string collectionItemId)
             where TChildCollectionItemDto : class
         {
-            var response = await client.Get($"{resourceCollection}/{id}/{collection}/{collectionItemId}");
+            var response = await client.Get($"{ResourceCollection}/{id}/{collection}/{collectionItemId}");
 
             TChildCollectionItemDto item = null;
             if (response.IsSuccessStatusCode)

@@ -168,6 +168,9 @@ namespace AspNetCore.ApiBase
             services.Configure<ServerSettings>(Configuration.GetSection("ServerSettings"));
             services.AddTransient(sp => sp.GetService<IOptions<ServerSettings>>().Value);
 
+            services.Configure<ApiClientSettings>(Configuration.GetSection("ApiClientSettings"));
+            services.AddTransient(sp => sp.GetService<IOptions<ApiClientSettings>>().Value);
+
             services.Configure<TokenSettings>(Configuration.GetSection("TokenSettings"));
             services.Configure<TokenSettings>(options =>
             {
@@ -610,6 +613,7 @@ namespace AspNetCore.ApiBase
             Logger.LogInformation("Configuring Mvc");
 
             var appSettings = GetSettings<AppSettings>("AppSettings");
+            var switchSettings = GetSettings<SwitchSettings>("SwitchSettings");
             var authorizationSettings = GetSettings<AuthorizationSettings>("AuthorizationSettings");
 
             // Add framework services.
@@ -622,10 +626,11 @@ namespace AspNetCore.ApiBase
                 options.AllowCombiningAuthorizeFilters = false;
 
                 //Adds {culture=default} to ALL routes
-                options.AddCultureRouteConvention(appSettings.DefaultCulture);
+                options.AddCultureRouteConvention(switchSettings.EnableAlwaysIncludeCultureInUrl ? null : appSettings.DefaultCulture);
 
                 options.Filters.Add<ExceptionHandlingFilter>();
                 options.Filters.Add<OperationCancelledExceptionFilter>();
+
                 options.Filters.Add(new MiddlewareFilterAttribute(typeof(LocalizationPipeline)));
 
                 //options.Filters.Add(typeof(ModelValidationFilter));
@@ -1367,10 +1372,7 @@ namespace AspNetCore.ApiBase
                 );
 
                 //https://docs.microsoft.com/en-us/aspnet/core/mvc/controllers/routing?view=aspnetcore-2.2
-
-                var redirectCulturelessToDefaultCulture = false;
-
-                if(redirectCulturelessToDefaultCulture)
+                if(switchSettings.EnableAlwaysIncludeCultureInUrl)
                 {
                     routes.RedirectCulturelessToDefaultCulture(localizationOptions);
                 }
