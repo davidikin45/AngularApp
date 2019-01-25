@@ -34,7 +34,6 @@ namespace AspNetCore.ApiBase.Controllers.Api
     {
         public IMapper Mapper { get; }
         public IEmailService EmailService { get; }
-        public IUrlHelper UrlHelper { get; }
         public LinkGenerator LinkGenerator { get; }
         public AppSettings AppSettings { get; }
 
@@ -43,11 +42,10 @@ namespace AspNetCore.ApiBase.Controllers.Api
 
         }
 
-        public ApiControllerBase(IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, LinkGenerator linkGenerator, AppSettings appSettings)
+        public ApiControllerBase(IMapper mapper, IEmailService emailService, LinkGenerator linkGenerator, AppSettings appSettings)
         {
             Mapper = mapper;
             EmailService = emailService;
-            UrlHelper = urlHelper;
             LinkGenerator = linkGenerator;
             AppSettings = appSettings;
         }

@@ -52,8 +52,8 @@ namespace AspNetCore.ApiBase.Controllers.Api
         public IEntityService Service { get; private set; }
         public ITypeHelperService TypeHelperService { get; private set; }
 
-        public ApiControllerEntityReadOnlyAuthorizeBase(IEntityService service, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, LinkGenerator linkGenerator, ITypeHelperService typeHelperService, AppSettings appSettings)
-        : base(mapper, emailService, urlHelper, linkGenerator, appSettings)
+        public ApiControllerEntityReadOnlyAuthorizeBase(IEntityService service, IMapper mapper, IEmailService emailService, LinkGenerator linkGenerator, ITypeHelperService typeHelperService, AppSettings appSettings)
+        : base(mapper, emailService, linkGenerator, appSettings)
         {
             Service = service;
             TypeHelperService = typeHelperService;
@@ -467,8 +467,8 @@ ResourceUriType type)
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return UrlHelper.Action(nameof(Search),
-                          UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
+                    return Url.Action(nameof(Search),
+                          Url.ActionContext.RouteData.Values["controller"].ToString(),
                       new
                       {
                           fields = resourceParameters.Fields,
@@ -478,10 +478,10 @@ ResourceUriType type)
                           page = resourceParameters.Page - 1,
                           pageSize = resourceParameters.PageSize
                       },
-                      UrlHelper.ActionContext.HttpContext.Request.Scheme);
+                      Url.ActionContext.HttpContext.Request.Scheme);
                 case ResourceUriType.NextPage:
-                    return UrlHelper.Action(nameof(Search),
-                          UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
+                    return Url.Action(nameof(Search),
+                          Url.ActionContext.RouteData.Values["controller"].ToString(),
                       new
                       {
                           fields = resourceParameters.Fields,
@@ -491,11 +491,11 @@ ResourceUriType type)
                           page = resourceParameters.Page + 1,
                           pageSize = resourceParameters.PageSize
                       },
-                      UrlHelper.ActionContext.HttpContext.Request.Scheme);
+                      Url.ActionContext.HttpContext.Request.Scheme);
 
                 default:
-                    return UrlHelper.Action(nameof(Search),
-                    UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
+                    return Url.Action(nameof(Search),
+                    Url.ActionContext.RouteData.Values["controller"].ToString(),
                     new
                     {
                         fields = resourceParameters.Fields,
@@ -505,7 +505,7 @@ ResourceUriType type)
                         page = resourceParameters.Page,
                         pageSize = resourceParameters.PageSize
                     },
-                      UrlHelper.ActionContext.HttpContext.Request.Scheme);
+                      Url.ActionContext.HttpContext.Request.Scheme);
             }
         }
 
@@ -517,8 +517,8 @@ ResourceUriType type)
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return UrlHelper.Action(nameof(BulkGetByIds),
-                          UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
+                    return Url.Action(nameof(BulkGetByIds),
+                          Url.ActionContext.RouteData.Values["controller"].ToString(),
                       new
                       {
                           collection = collection,
@@ -526,10 +526,10 @@ ResourceUriType type)
                           page = resourceParameters.Page - 1,
                           pageSize = resourceParameters.PageSize
                       },
-                      UrlHelper.ActionContext.HttpContext.Request.Scheme);
+                      Url.ActionContext.HttpContext.Request.Scheme);
                 case ResourceUriType.NextPage:
-                    return UrlHelper.Action(nameof(BulkGetByIds),
-                          UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
+                    return Url.Action(nameof(BulkGetByIds),
+                          Url.ActionContext.RouteData.Values["controller"].ToString(),
                       new
                       {
                           collection = collection,
@@ -537,11 +537,11 @@ ResourceUriType type)
                           page = resourceParameters.Page + 1,
                           pageSize = resourceParameters.PageSize
                       },
-                      UrlHelper.ActionContext.HttpContext.Request.Scheme);
+                      Url.ActionContext.HttpContext.Request.Scheme);
 
                 default:
-                    return UrlHelper.Action(nameof(BulkGetByIds),
-                    UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
+                    return Url.Action(nameof(BulkGetByIds),
+                    Url.ActionContext.RouteData.Values["controller"].ToString(),
                     new
                     {
                         collection = collection,
@@ -549,7 +549,7 @@ ResourceUriType type)
                         page = resourceParameters.Page,
                         pageSize = resourceParameters.PageSize
                     },
-                      UrlHelper.ActionContext.HttpContext.Request.Scheme);
+                      Url.ActionContext.HttpContext.Request.Scheme);
             }
         }
 
@@ -558,7 +558,7 @@ ResourceUriType type)
             var links = new List<LinkDto>();
 
             links.Add(
-           new LinkDto(UrlHelper.Action("Create", UrlHelper.ActionContext.RouteData.Values["controller"].ToString(), UrlHelper.ActionContext.HttpContext.Request.Scheme),
+           new LinkDto(Url.Action("Create", Url.ActionContext.RouteData.Values["controller"].ToString(), Url.ActionContext.HttpContext.Request.Scheme),
            "create",
            HttpMethod.Post.Method));
 
@@ -578,32 +578,32 @@ ResourceUriType type)
             if (string.IsNullOrWhiteSpace(fields))
             {
                 links.Add(
-                  new LinkDto(UrlHelper.Action(action, UrlHelper.ActionContext.RouteData.Values["controller"].ToString(), new { id = id }, UrlHelper.ActionContext.HttpContext.Request.Scheme),
+                  new LinkDto(Url.Action(action, Url.ActionContext.RouteData.Values["controller"].ToString(), new { id = id }, Url.ActionContext.HttpContext.Request.Scheme),
                   "self",
                   HttpMethod.Get.Method));
             }
             else
             {
                 links.Add(
-                  new LinkDto(UrlHelper.Action(action, UrlHelper.ActionContext.RouteData.Values["controller"].ToString(), new { id = id, fields = fields }, UrlHelper.ActionContext.HttpContext.Request.Scheme),
+                  new LinkDto(Url.Action(action, Url.ActionContext.RouteData.Values["controller"].ToString(), new { id = id, fields = fields }, Url.ActionContext.HttpContext.Request.Scheme),
                   "self",
                   HttpMethod.Get.Method));
             }
 
             links.Add(
-              new LinkDto(UrlHelper.Action("Delete", UrlHelper.ActionContext.RouteData.Values["controller"].ToString(), new { id = id }, UrlHelper.ActionContext.HttpContext.Request.Scheme),
+              new LinkDto(Url.Action("Delete", Url.ActionContext.RouteData.Values["controller"].ToString(), new { id = id }, Url.ActionContext.HttpContext.Request.Scheme),
               "delete",
               HttpMethod.Delete.Method));
 
             links.Add(
-                new LinkDto(UrlHelper.Action("Update", UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
-                new { id = id }, UrlHelper.ActionContext.HttpContext.Request.Scheme),
+                new LinkDto(Url.Action("Update", Url.ActionContext.RouteData.Values["controller"].ToString(),
+                new { id = id }, Url.ActionContext.HttpContext.Request.Scheme),
                 "update",
                  HttpMethod.Put.Method));
 
             links.Add(
-                new LinkDto(UrlHelper.Action("UpdatePartial", UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
-                new { id = id }, UrlHelper.ActionContext.HttpContext.Request.Scheme),
+                new LinkDto(Url.Action("UpdatePartial", Url.ActionContext.RouteData.Values["controller"].ToString(),
+                new { id = id }, Url.ActionContext.HttpContext.Request.Scheme),
                 "partially_update",
                 new HttpMethod("PATCH").Method));
 
@@ -619,14 +619,14 @@ ResourceUriType type)
             if (string.IsNullOrWhiteSpace(fields))
             {
                 links.Add(
-                  new LinkDto(UrlHelper.Action(nameof(BulkGetByIds), UrlHelper.ActionContext.RouteData.Values["controller"].ToString(), new {  id = id, collection = collection }, UrlHelper.ActionContext.HttpContext.Request.Scheme),
+                  new LinkDto(Url.Action(nameof(BulkGetByIds), Url.ActionContext.RouteData.Values["controller"].ToString(), new {  id = id, collection = collection }, Url.ActionContext.HttpContext.Request.Scheme),
                   "self",
                   HttpMethod.Get.Method));
             }
             else
             {
                 links.Add(
-                  new LinkDto(UrlHelper.Action(nameof(BulkGetByIds), UrlHelper.ActionContext.RouteData.Values["controller"].ToString(), new { id = id, collection = collection, fields = fields }, UrlHelper.ActionContext.HttpContext.Request.Scheme),
+                  new LinkDto(Url.Action(nameof(BulkGetByIds), Url.ActionContext.RouteData.Values["controller"].ToString(), new { id = id, collection = collection, fields = fields }, Url.ActionContext.HttpContext.Request.Scheme),
                   "self",
                   HttpMethod.Get.Method));
             }
@@ -634,19 +634,19 @@ ResourceUriType type)
             //Create links for Collection Item Delete and Update. Not sure if we want to allow this.
 
             //links.Add(
-            //  new LinkDto(UrlHelper.Action("Delete", UrlHelper.ActionContext.RouteData.Values["controller"].ToString(), new { id = id }, UrlHelper.ActionContext.HttpContext.Request.Scheme),
+            //  new LinkDto(Url.Action("Delete", Url.ActionContext.RouteData.Values["controller"].ToString(), new { id = id }, Url.ActionContext.HttpContext.Request.Scheme),
             //  "delete",
             //  "DELETE"));
 
             //links.Add(
-            //    new LinkDto(UrlHelper.Action("Update", UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
-            //    new { id = id }, UrlHelper.ActionContext.HttpContext.Request.Scheme),
+            //    new LinkDto(Url.Action("Update", Url.ActionContext.RouteData.Values["controller"].ToString(),
+            //    new { id = id }, Url.ActionContext.HttpContext.Request.Scheme),
             //    "update",
             //    "PUT"));
 
             //links.Add(
-            //    new LinkDto(UrlHelper.Action("UpdatePartial", UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
-            //    new { id = id }, UrlHelper.ActionContext.HttpContext.Request.Scheme),
+            //    new LinkDto(Url.Action("UpdatePartial", Url.ActionContext.RouteData.Values["controller"].ToString(),
+            //    new { id = id }, Url.ActionContext.HttpContext.Request.Scheme),
             //    "partially_update",
             //    "PATCH"));
 
@@ -664,8 +664,8 @@ ResourceUriType type)
                , "self", HttpMethod.Get.Method));
 
             links.Add(
-           new LinkDto(UrlHelper.Action("Create", UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
-          null, UrlHelper.ActionContext.HttpContext.Request.Scheme),
+           new LinkDto(Url.Action("Create", Url.ActionContext.RouteData.Values["controller"].ToString(),
+          null, Url.ActionContext.HttpContext.Request.Scheme),
            "add",
            HttpMethod.Post.Method));
 
@@ -708,8 +708,8 @@ ResourceUriType type)
 
             //Todo if want to allow Add to collection property
           //  links.Add(
-          // new LinkDto(UrlHelper.Action("Create", UrlHelper.ActionContext.RouteData.Values["controller"].ToString(),
-          //null, UrlHelper.ActionContext.HttpContext.Request.Scheme),
+          // new LinkDto(Url.Action("Create", Url.ActionContext.RouteData.Values["controller"].ToString(),
+          //null, Url.ActionContext.HttpContext.Request.Scheme),
           // "add",
           // "POST"));
 

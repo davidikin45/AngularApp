@@ -16,9 +16,9 @@ namespace DatingApp.Admin.Api.Controllers
     [Route("api/tenants")]
     public class TenantsController : ApiControllerEntityAuthorizeBase<AppTenant, AppTenant, AppTenant, AppTenant, ITenantApplicationService>
     {
-        public TenantsController(ITenantApplicationService applicationService, IMapper mapper, IEmailService emailService, IUrlHelper urlHelper, LinkGenerator linkGenerator, ITypeHelperService typeHelperService,
+        public TenantsController(ITenantApplicationService applicationService, IMapper mapper, IEmailService emailService, LinkGenerator linkGenerator, ITypeHelperService typeHelperService,
             AppSettings appSettings)
-            :base( applicationService, mapper, emailService, urlHelper, linkGenerator, typeHelperService, appSettings)
+            :base( applicationService, mapper, emailService, linkGenerator, typeHelperService, appSettings)
         {
 
         }

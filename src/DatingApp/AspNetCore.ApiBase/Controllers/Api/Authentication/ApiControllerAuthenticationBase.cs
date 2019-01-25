@@ -37,14 +37,13 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
             UserManager<TUser> userManager,
             SignInManager<TUser> signInManager,
             TokenSettings tokenSettings,
-            IUrlHelper urlHelper,
             LinkGenerator linkGenerator,
             IEmailService emailSender,
             IMapper mapper,
             PasswordSettings passwordSettings,
             EmailTemplates emailTemplates,
             AppSettings appSettings)
-            :base(mapper, emailSender, urlHelper, linkGenerator, appSettings)
+            :base(mapper, emailSender, linkGenerator, appSettings)
         {
             _resetPasswordEmailTemplate = emailTemplates.ResetPassword;
 

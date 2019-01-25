@@ -22,14 +22,13 @@ namespace AspNetCore.ApiBase.Controllers.Api.Authentication
             UserManager<TUser> userManager,
             SignInManager<TUser> signInManager,
             TokenSettings tokenSettings,
-            IUrlHelper urlHelper,
             LinkGenerator linkGenerator,
             IEmailService emailSender,
             IMapper mapper,
             PasswordSettings passwordSettings,
             EmailTemplates emailTemplates,
             AppSettings appSettings)
-            :base(roleManager, userManager, signInManager, tokenSettings, urlHelper, linkGenerator, emailSender, mapper, passwordSettings, emailTemplates, appSettings)
+            :base(roleManager, userManager, signInManager, tokenSettings, linkGenerator, emailSender, mapper, passwordSettings, emailTemplates, appSettings)
         {
             _welcomeEmailTemplate = emailTemplates.Welcome;
         }
