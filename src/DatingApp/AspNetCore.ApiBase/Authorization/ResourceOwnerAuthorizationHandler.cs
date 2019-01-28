@@ -18,6 +18,22 @@ namespace AspNetCore.ApiBase.Authorization
             {
                 context.Succeed(requirement);
             }
+            else if (context.User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && requirement.Name.Contains(ResourceCollectionsCore.Admin.Scopes.Create) && c.Value == ResourceCollectionsCore.Admin.Scopes.Create).Count() > 0)
+            {
+                context.Succeed(requirement);
+            }
+            else if (context.User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && requirement.Name.Contains(ResourceCollectionsCore.Admin.Scopes.Read) && c.Value == ResourceCollectionsCore.Admin.Scopes.Read).Count() > 0)
+            {
+                context.Succeed(requirement);
+            }
+            else if (context.User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && requirement.Name.Contains(ResourceCollectionsCore.Admin.Scopes.Update) && c.Value == ResourceCollectionsCore.Admin.Scopes.Update).Count() > 0)
+            {
+                context.Succeed(requirement);
+            }
+            else if (context.User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && requirement.Name.Contains(ResourceCollectionsCore.Admin.Scopes.Delete) && c.Value == ResourceCollectionsCore.Admin.Scopes.Delete).Count() > 0)
+            {
+                context.Succeed(requirement);
+            }
             else if (!requirement.Name.Contains("-if-owner") && context.User.Claims.Where(c => c.Type == JwtClaimTypes.Scope && c.Value == requirement.Name).Count() > 0)
             {
                 context.Succeed(requirement);

@@ -3,6 +3,7 @@ using AspNetCore.ApiBase.Dtos;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.Controllers.ApiClient
@@ -42,12 +43,12 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         where TUpdateDto : class
         where TDeleteDto : class
     {
-        Task<TCreateDto> NewDefaultAsync();
+        Task<TCreateDto> NewDefaultAsync(CancellationToken cancellationToken);
 
         Task<TReadDto> CreateAsync(TCreateDto dto);
         Task<List<WebApiMessage>> BulkCreateAsync(TCreateDto[] dtos);
 
-        Task<TUpdateDto> GetByIdForEditAsync(object id);
+        Task<TUpdateDto> GetByIdForEditAsync(object id, CancellationToken cancellationToken);
         Task<List<TUpdateDto>> BulkGetByIdsForEditAsync(IEnumerable<object> ids);
 
         Task UpdateAsync(object id, TUpdateDto dto);
@@ -56,12 +57,12 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         Task UpdatePartialAsync(object id, JsonPatchDocument dtoPatch);
         Task<List<WebApiMessage>> BulkUpdatePartialAsync(BulkDto<JsonPatchDocument>[] dtos);
 
-        Task<TDeleteDto> GetByIdForDeleteAsync(object id);
+        Task<TDeleteDto> GetByIdForDeleteAsync(object id, CancellationToken cancellationToken);
         Task<List<TDeleteDto>> BulkGetByIdsForDeleteAsync(IEnumerable<object> ids);
 
-        Task DeleteAsync(object id, [FromBody] TDeleteDto dto);
-        Task<List<WebApiMessage>> BulkDeleteAsync([FromBody] TDeleteDto[] dtos);
+        Task DeleteAsync(object id, TDeleteDto dto);
+        Task<List<WebApiMessage>> BulkDeleteAsync(TDeleteDto[] dtos);
 
-        Task<CollectionItemTypeDto> NewCollectionItemAsync<CollectionItemTypeDto>(string collection);
+        Task<CollectionItemTypeDto> NewCollectionItemAsync<CollectionItemTypeDto>(string collection, CancellationToken cancellationToken);
     }
 }

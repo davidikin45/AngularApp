@@ -8,6 +8,8 @@ namespace DatingApp.Admin.Domain
         anonymous,
         [Display(Name = "Authenticated")]
         authenticated,
+        [Display(Name = "Api")]
+        api,
         [Display(Name = "Administrator")]
         administrator
     }

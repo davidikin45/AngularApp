@@ -24,14 +24,15 @@ namespace AspNetCore.ApiBase.ApiClient
 
             HttpStatusCode[] httpStatusCodesWorthRetrying = {
                HttpStatusCode.RequestTimeout, // 408
+               HttpStatusCode.TooManyRequests, // 429
                //HttpStatusCode.InternalServerError, // 500
-               //HttpStatusCode.BadGateway, // 502
-               //HttpStatusCode.ServiceUnavailable, // 503
-               //HttpStatusCode.GatewayTimeout // 504
+               HttpStatusCode.BadGateway, // 502
+               HttpStatusCode.ServiceUnavailable, // 503
+               HttpStatusCode.GatewayTimeout // 504
             };
 
             var waitAndRetryPolicy = Policy
-             .Handle<HttpRequestException>() //HttpClient Timeout
+             .Handle<HttpRequestException>() //HttpClient Timeout or CancellationToken
              .Or<TimeoutRejectedException>()
              .OrResult<HttpResponseMessage>(r => httpStatusCodesWorthRetrying.Contains(r.StatusCode))
              .WaitAndRetryAsync(additionalRetries,

@@ -103,7 +103,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
             var data = dataTask.Result;
             var total = totalTask.Result;
 
-            var paginationMetadata = new WebApiPagedResponseDto<TDto>
+            var paginationMetadata = new PagingInfoDto
             {
                 Page = resourceParameters.Page.HasValue ? resourceParameters.Page.Value : 1,
                 PageSize = resourceParameters.PageSize.HasValue ? resourceParameters.PageSize.Value : data.Count(),
@@ -191,7 +191,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
             var data = dataTask.Result;
             var total = totalTask.Result;
 
-            var paginationMetadata = new WebApiPagedResponseDto<TDto>
+            var paginationMetadata = new PagingInfoDto
             {
                 Page = 1,
                 PageSize = total,
@@ -361,7 +361,7 @@ namespace AspNetCore.ApiBase.Controllers.Api
 
             IEnumerable<Object> list = ((IEnumerable<Object>)RelationshipHelper.GetCollectionExpressionData(collection, typeof(TDto), result));
 
-            var paginationMetadata = new WebApiPagedResponseDto<TDto>
+            var paginationMetadata = new PagingInfoDto
             {
                 Page = resourceParameters.Page.HasValue ? resourceParameters.Page.Value : 1,
                 PageSize = resourceParameters.PageSize.HasValue ? resourceParameters.PageSize.Value : list.Count(),

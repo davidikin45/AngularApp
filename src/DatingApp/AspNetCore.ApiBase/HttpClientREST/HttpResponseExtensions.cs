@@ -1,7 +1,10 @@
-﻿using AspNetCore.ApiBase.HttpClientREST;
+﻿using AspNetCore.ApiBase.Dtos;
+using AspNetCore.ApiBase.HttpClientREST;
 using Newtonsoft.Json;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace GrabMobile.ApiClient.HttpClientREST
@@ -30,13 +33,6 @@ namespace GrabMobile.ApiClient.HttpClientREST
                     }
                 }
             }
-        }
-
-        public static async Task<string> ContentAsJsonAsync(this HttpResponseMessage response, JsonSerializerSettings serializerSettings = null)
-        {
-            var data = await response.Content.ReadAsStringAsync();
-
-            return serializerSettings != null ? JsonConvert.SerializeObject(data) : JsonConvert.SerializeObject(data, serializerSettings);
         }
 
         public static async Task<dynamic> ContentAsDynamicAsync(this HttpResponseMessage response, JsonSerializerSettings serializerSettings = null)
@@ -84,6 +80,20 @@ namespace GrabMobile.ApiClient.HttpClientREST
 
             throw new SimpleHttpResponseException(response.StatusCode, response.ReasonPhrase, content);
         }
+
+        public static PagingInfoDto FindAndParsePagingInfo(this HttpResponseHeaders responseHeaders)
+        {
+            // find the "X-Pagination" info in header
+            if (responseHeaders.Contains("X-Pagination"))
+            {
+                var xPag = responseHeaders.First(ph => ph.Key == "X-Pagination").Value;
+
+                // parse the value - this is a JSON-string.
+                return JsonConvert.DeserializeObject<PagingInfoDto>(xPag.First());
+            }
+            return null;
+        }
+
 
     }
 }

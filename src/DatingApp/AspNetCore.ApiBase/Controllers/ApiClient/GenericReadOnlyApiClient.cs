@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.Controllers.ApiClient
@@ -25,18 +26,18 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         }
 
         #region Search
-        public async Task<WebApiListResponseDto<TReadDto>> SearchAsync(WebApiPagedSearchOrderingRequestDto resourceParameters = null)
+        public async Task<(WebApiListResponseDto<TReadDto> data, PagingInfoDto pagingInfo)> SearchAsync(WebApiPagedSearchOrderingRequestDto resourceParameters = null, CancellationToken cancellationToken = default)
         {
             var response = await client.GetWithQueryString($"{ResourceCollection}", resourceParameters);
 
             await response.EnsureSuccessStatusCodeAsync();
 
-            return await response.ContentAsTypeAsync<WebApiListResponseDto<TReadDto>>();
+            return (await response.ContentAsTypeAsync<WebApiListResponseDto<TReadDto>>(), response.Headers.FindAndParsePagingInfo());
         }
         #endregion
 
         #region GetAll
-        public async Task<List<TReadDto>> GetAllAsync()
+        public async Task<List<TReadDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             var response = await client.Get($"{ResourceCollection}/get-all");
 
@@ -45,7 +46,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
             return await response.ContentAsTypeAsync<List<TReadDto>>();
         }
 
-        public async Task<List<TReadDto>> GetAllPagedAsync()
+        public async Task<List<TReadDto>> GetAllPagedAsync(CancellationToken cancellationToken = default)
         {
             var response = await client.Get($"{ResourceCollection}/get-all-paged");
 
@@ -56,7 +57,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #endregion
 
         #region GetById
-        public async Task<TReadDto> GetByIdAsync(object id, WebApiParamsDto parameters = null)
+        public async Task<TReadDto> GetByIdAsync(object id, WebApiParamsDto parameters = null, CancellationToken cancellationToken = default)
         {
             var response = await client.GetWithQueryString($"{ResourceCollection}/{id}", parameters);
 
@@ -69,7 +70,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
             return item;
         }
 
-        public async Task<List<TReadDto>> BulkGetByIdsAsync(IEnumerable<object> ids)
+        public async Task<List<TReadDto>> BulkGetByIdsAsync(IEnumerable<object> ids, CancellationToken cancellationToken = default)
         {
             var response = await client.Get($"{ResourceCollection}/{String.Join(',', ids)}");
 
@@ -78,7 +79,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
             return await response.ContentAsTypeAsync<List<TReadDto>>();
         }
 
-        public async Task<TReadDto> GetByIdFullGraphAsync(object id, WebApiParamsDto parameters = null)
+        public async Task<TReadDto> GetByIdFullGraphAsync(object id, WebApiParamsDto parameters = null, CancellationToken cancellationToken = default)
         {
             var response = await client.GetWithQueryString($"{ResourceCollection}/full-graph/{id}", parameters);
 
@@ -93,17 +94,17 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #endregion
 
         #region Child Collection
-        public async Task<WebApiListResponseDto<TChildCollectionItemDto>> GetByIdChildCollectionAsync<TChildCollectionItemDto>(object id, string collection, WebApiPagedSearchOrderingRequestDto resourceParameters)
+        public async Task<(WebApiListResponseDto<TChildCollectionItemDto> data, PagingInfoDto pagingInfo)> GetByIdChildCollectionAsync<TChildCollectionItemDto>(object id, string collection, WebApiPagedSearchOrderingRequestDto resourceParameters, CancellationToken cancellationToken = default)
      where TChildCollectionItemDto : class
         {
             var response = await client.GetWithQueryString($"{ResourceCollection}/{id}/{collection}", resourceParameters);
 
             await response.EnsureSuccessStatusCodeAsync();
 
-            return await response.ContentAsTypeAsync<WebApiListResponseDto<TChildCollectionItemDto>>();
+            return (await response.ContentAsTypeAsync<WebApiListResponseDto<TChildCollectionItemDto>>(), response.Headers.FindAndParsePagingInfo());
         }
 
-        public async Task<TChildCollectionItemDto> GetByIdChildCollectionItemAsync<TChildCollectionItemDto>(object id, string collection, string collectionItemId)
+        public async Task<TChildCollectionItemDto> GetByIdChildCollectionItemAsync<TChildCollectionItemDto>(object id, string collection, string collectionItemId, CancellationToken cancellationToken = default)
             where TChildCollectionItemDto : class
         {
             var response = await client.Get($"{ResourceCollection}/{id}/{collection}/{collectionItemId}");

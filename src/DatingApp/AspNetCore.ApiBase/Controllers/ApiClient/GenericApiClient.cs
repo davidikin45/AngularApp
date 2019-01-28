@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.Controllers.ApiClient
@@ -24,7 +25,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         }
 
         #region New Instance
-        public async Task<TCreateDto> NewDefaultAsync()
+        public async Task<TCreateDto> NewDefaultAsync(CancellationToken cancellationToken = default)
         {
             var response = await client.Get($"{ResourceCollection}/new");
 
@@ -57,7 +58,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #endregion
 
         #region Get for Edit
-        public async Task<TUpdateDto> GetByIdForEditAsync(object id)
+        public async Task<TUpdateDto> GetByIdForEditAsync(object id, CancellationToken cancellationToken = default)
         {
             var response = await client.Get($"{ResourceCollection}/edit/{id}");
 
@@ -122,7 +123,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #endregion
 
         #region Get For Delete
-        public async Task<TDeleteDto> GetByIdForDeleteAsync(object id)
+        public async Task<TDeleteDto> GetByIdForDeleteAsync(object id, CancellationToken cancellationToken = default)
         {
             var response = await client.Get($"{ResourceCollection}/delete/{id}");
 
@@ -168,7 +169,7 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
         #endregion
 
         #region Child Collection Item
-        public async Task<CollectionItemTypeDto> NewCollectionItemAsync<CollectionItemTypeDto>(string collection)
+        public async Task<CollectionItemTypeDto> NewCollectionItemAsync<CollectionItemTypeDto>(string collection, CancellationToken cancellationToken = default)
         {
             var response = await client.Get($"{ResourceCollection}/new/{collection}");
 

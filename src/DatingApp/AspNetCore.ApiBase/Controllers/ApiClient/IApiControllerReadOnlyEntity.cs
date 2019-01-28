@@ -1,6 +1,7 @@
 ﻿using AspNetCore.ApiBase.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AspNetCore.ApiBase.Controllers.ApiClient
@@ -26,17 +27,17 @@ namespace AspNetCore.ApiBase.Controllers.ApiClient
     {
         string ResourceCollection { get; }
 
-        Task<WebApiListResponseDto<TReadDto>> SearchAsync(WebApiPagedSearchOrderingRequestDto resourceParameters);
+        Task<(WebApiListResponseDto<TReadDto> data, PagingInfoDto pagingInfo)> SearchAsync(WebApiPagedSearchOrderingRequestDto resourceParameters, CancellationToken cancellationToken);
 
-        Task<List<TReadDto>> GetAllAsync();
-        Task<List<TReadDto>> GetAllPagedAsync();
+        Task<List<TReadDto>> GetAllAsync(CancellationToken cancellationToken);
+        Task<List<TReadDto>> GetAllPagedAsync(CancellationToken cancellationToken);
 
-        Task<TReadDto> GetByIdAsync(object id, WebApiParamsDto parameters);
-        Task<TReadDto> GetByIdFullGraphAsync(object id, WebApiParamsDto parameters);
+        Task<TReadDto> GetByIdAsync(object id, WebApiParamsDto parameters, CancellationToken cancellationToken);
+        Task<TReadDto> GetByIdFullGraphAsync(object id, WebApiParamsDto parameters, CancellationToken cancellationToken);
 
-        Task<List<TReadDto>> BulkGetByIdsAsync(IEnumerable<object> ids);
+        Task<List<TReadDto>> BulkGetByIdsAsync(IEnumerable<object> ids, CancellationToken cancellationToken);
 
-        Task<WebApiListResponseDto<TCollectionItemDto>> GetByIdChildCollectionAsync<TCollectionItemDto>(object id, string collection, WebApiPagedSearchOrderingRequestDto resourceParameters) where TCollectionItemDto : class;
-        Task<TCollectionItemDto> GetByIdChildCollectionItemAsync<TCollectionItemDto>(object id, string collection, string collectionItemId) where TCollectionItemDto : class;
+        Task<(WebApiListResponseDto<TCollectionItemDto> data, PagingInfoDto pagingInfo)> GetByIdChildCollectionAsync<TCollectionItemDto>(object id, string collection, WebApiPagedSearchOrderingRequestDto resourceParameters, CancellationToken cancellationToken) where TCollectionItemDto : class;
+        Task<TCollectionItemDto> GetByIdChildCollectionItemAsync<TCollectionItemDto>(object id, string collection, string collectionItemId, CancellationToken cancellationToken) where TCollectionItemDto : class;
     }
 }

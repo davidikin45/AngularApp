@@ -11,7 +11,7 @@ namespace AspNetCore.ApiBase.Security
     public static class JwtTokenHelper
     {
         //Assymetric
-        public static JwtToken CreateJwtTokenSigningWithRsaSecurityKey(string userId, string userName, IEnumerable<string> roles, int minuteExpiry, RsaSecurityKey key, string issuer, string audience, params string[] scopes)
+        public static JwtToken CreateJwtTokenSigningWithRsaSecurityKey(string userId, string userName, IEnumerable<string> roles, int? minuteExpiry, RsaSecurityKey key, string issuer, string audience, params string[] scopes)
         {
             var claims = new List<Claim>()
                         {
@@ -40,7 +40,7 @@ namespace AspNetCore.ApiBase.Security
         }
 
         //Assymetric
-        public static JwtToken CreateJwtTokenSigningWithCertificateSecurityKey(string userId, string userName, IEnumerable<string> roles, int minuteExpiry, X509SecurityKey key, string issuer, string audience, params string[] scopes)
+        public static JwtToken CreateJwtTokenSigningWithCertificateSecurityKey(string userId, string userName, IEnumerable<string> roles, int? minuteExpiry, X509SecurityKey key, string issuer, string audience, params string[] scopes)
         {
             var claims = new List<Claim>()
                         {
@@ -69,7 +69,7 @@ namespace AspNetCore.ApiBase.Security
         }
 
         //Symmetric
-        public static JwtToken CreateJwtTokenSigningWithKey(string userId, string userName, IEnumerable<string> roles, int minuteExpiry, string hmacKey, string issuer, string audience, params string[] scopes)
+        public static JwtToken CreateJwtTokenSigningWithKey(string userId, string userName, IEnumerable<string> roles, int? minuteExpiry, string hmacKey, string issuer, string audience, params string[] scopes)
         {
             var claims = new List<Claim>()
                         {
@@ -99,13 +99,13 @@ namespace AspNetCore.ApiBase.Security
             return CreateJwtToken(minuteExpiry, issuer, audience, claims, creds);
         }
 
-        private static JwtToken CreateJwtToken(int minuteExpiry, string issuer, string audience, List<Claim> claims, SigningCredentials creds)
+        private static JwtToken CreateJwtToken(int? minuteExpiry, string issuer, string audience, List<Claim> claims, SigningCredentials creds)
         {
             var token = new JwtSecurityToken(
                         issuer,
                         audience,
                         claims,
-                        expires: DateTime.UtcNow.AddMinutes(minuteExpiry),
+                        expires: minuteExpiry.HasValue ? DateTime.UtcNow.AddMinutes(minuteExpiry.Value) : (DateTime?)null,
                         signingCredentials: creds);
 
             var results = new JwtToken

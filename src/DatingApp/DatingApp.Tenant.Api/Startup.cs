@@ -9,7 +9,6 @@ using AspNetCore.ApiBase.Tasks;
 using DatingApp.Api.Jobs;
 using DatingApp.Api.UnitOfWork;
 using DatingApp.Data.Tenant.Identity;
-using DatingApp.Data.Tenants;
 using DatingApp.Tenant.Api.ApiClient;
 using DatingApp.Tenant.Core;
 using DatingApp.Tenant.Data;
@@ -17,6 +16,7 @@ using DatingApp.Tenant.Domain;
 using Hangfire;
 using Hangfire.Common;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -74,6 +74,10 @@ namespace DatingApp.Tenant.Api
            {
                AllowAutoRedirect = true,
                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+           })
+           .AddPolicyHandler((sp, req) => {
+               var cache = sp.GetService<IMemoryCache>();
+               return PolicyHolder.GetRequestPolicy(cache, 1800);
            });
 
             services.AddHttpClient<AppApiClient>(client =>

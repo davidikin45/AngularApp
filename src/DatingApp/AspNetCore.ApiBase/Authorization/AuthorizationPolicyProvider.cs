@@ -43,7 +43,21 @@ namespace AspNetCore.ApiBase.Authorization
                 {
                     //must have one or more to pass
                     var scopes = policyName.Split(',').Select(p => p.Trim()).ToList();
-                    scopes.Add(ResourceCollectionsCore.Admin.Scopes.Full);
+
+                    if (!scopes.Contains(ResourceCollectionsCore.Admin.Scopes.Full))
+                        scopes.Add(ResourceCollectionsCore.Admin.Scopes.Full);
+
+                    if (!scopes.Contains(ResourceCollectionsCore.Admin.Scopes.Create) && scopes.Any(s => s.Contains(ResourceCollectionsCore.Admin.Scopes.Create)))
+                        scopes.Add(ResourceCollectionsCore.Admin.Scopes.Create);
+
+                    if (!scopes.Contains(ResourceCollectionsCore.Admin.Scopes.Read) && scopes.Any(s => s.Contains(ResourceCollectionsCore.Admin.Scopes.Read)))
+                        scopes.Add(ResourceCollectionsCore.Admin.Scopes.Read);
+
+                    if (!scopes.Contains(ResourceCollectionsCore.Admin.Scopes.Update) && scopes.Any(s => s.Contains(ResourceCollectionsCore.Admin.Scopes.Update)))
+                        scopes.Add(ResourceCollectionsCore.Admin.Scopes.Update);
+
+                    if (!scopes.Contains(ResourceCollectionsCore.Admin.Scopes.Delete) && scopes.Any(s => s.Contains(ResourceCollectionsCore.Admin.Scopes.Delete)))
+                        scopes.Add(ResourceCollectionsCore.Admin.Scopes.Delete);
 
                     policy = new AuthorizationPolicyBuilder().RequireScope(scopes.ToArray()).Build();
                 }

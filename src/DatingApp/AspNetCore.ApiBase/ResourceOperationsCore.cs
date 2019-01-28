@@ -7,6 +7,10 @@
             public class Scopes
             {
                 public const string Full = "full";
+                public const string Create = "create";
+                public const string Read = "read";
+                public const string Update = "update";
+                public const string Delete = "delete";
             }
         }
 
