@@ -49,6 +49,7 @@ using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -616,6 +617,17 @@ namespace AspNetCore.ApiBase
             var switchSettings = GetSettings<SwitchSettings>("SwitchSettings");
             var authorizationSettings = GetSettings<AuthorizationSettings>("AuthorizationSettings");
 
+            //settings will automatically be used by JsonConvert.SerializeObject/DeserializeObject
+            var defaultSettings = new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+                Formatting = Formatting.Indented,
+                Converters =  new List<JsonConverter>() { new Newtonsoft.Json.Converters.StringEnumConverter() },
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
+
+            JsonConvert.DefaultSettings = () => defaultSettings;
+
             // Add framework services.
             var mvc = services.AddMvc(options =>
             {
@@ -651,9 +663,11 @@ namespace AspNetCore.ApiBase
             .AddXmlSerializerFormatters() //XML Opt out. Contract Serializer is Opt in
             .AddJsonOptions(opt =>
             {
-                opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-                opt.SerializerSettings.Formatting = Formatting.Indented;
-                opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                //https://github.com/aspnet/Mvc/blob/32e21e2a5c63e20bd62b9c1699932207b962fc50/src/Microsoft.AspNetCore.Mvc.Formatters.Json/JsonSerializerSettingsProvider.cs#L31-L41
+                opt.SerializerSettings.ReferenceLoopHandling = defaultSettings.ReferenceLoopHandling;
+                opt.SerializerSettings.Formatting = defaultSettings.Formatting;
+                opt.SerializerSettings.Converters = defaultSettings.Converters;
+                opt.SerializerSettings.ContractResolver = defaultSettings.ContractResolver;
             })
             .AddCookieTempDataProvider(options =>
             {

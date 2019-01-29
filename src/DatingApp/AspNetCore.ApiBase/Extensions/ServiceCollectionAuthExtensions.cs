@@ -239,6 +239,7 @@ namespace AspNetCore.ApiBase.Extensions
                 //https://docs.microsoft.com/en-us/aspnet/core/security/cors?view=aspnetcore-2.1
                 options.AddPolicy(name,
                   builder => builder
+                  .SetIsOriginAllowedToAllowWildcardSubdomains()
                   .WithOrigins(domains)
                   .AllowAnyMethod()
                   .AllowAnyHeader());

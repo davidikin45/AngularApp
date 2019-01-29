@@ -31,7 +31,7 @@ namespace AspNetCore.ApiBase.Controllers.MvcApiClient
         where IEntityService : IApiControllerEntityReadOnlyClient<TDto>
     {
         public IEntityService Service { get; private set; }
-        public Boolean Admin { get; set; }
+        public Boolean Admin { get; private set; }
 
         public MvcControllerEntityReadOnlyClientAuthorizeBase(Boolean admin, IEntityService service, IMapper mapper, IEmailService emailService, AppSettings appSettings)
         : base(mapper, emailService, appSettings)
@@ -198,9 +198,7 @@ namespace AspNetCore.ApiBase.Controllers.MvcApiClient
             Object data = null;
             try
             {
-                var response = await Service.GetByIdChildCollectionItemAsync<JObject>(id, collection.Substring(0, collection.LastIndexOf('\\')), collection.Substring(collection.LastIndexOf('\\')), cts.Token);
-
-                var collectionItem = RelationshipHelper.GetCollectionExpressionData(collection, typeof(TDto), response);
+                var collectionItem = await Service.GetByIdChildCollectionItemAsync<JObject>(id, collection.Substring(0, collection.LastIndexOf('\\')), collection.Substring(collection.LastIndexOf('\\')), cts.Token);
 
                 if (collectionItem == null)
                 {

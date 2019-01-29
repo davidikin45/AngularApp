@@ -1,6 +1,5 @@
 ﻿using AspNetCore.ApiBase.Data.Repository;
 using AspNetCore.ApiBase.Data.UnitOfWork;
-using AspNetCore.ApiBase.DomainEvents;
 using AspNetCore.ApiBase.Users;
 using AspNetCore.ApiBase.Validation;
 using AutoMapper;
@@ -33,8 +32,8 @@ namespace AspNetCore.ApiBase.ApplicationServices
 
         }
 
-        public virtual bool getAggregate => false;
-        public virtual bool getAggregateAndAssociatedAggregates => false;
+        public virtual bool GetAggregate => false;
+        public virtual bool GetAggregateAndAssociatedAggregates => false;
 
         #region GetAll
         public virtual IEnumerable<TDto> GetAll(
@@ -53,7 +52,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var entityList = Repository.GetAll(orderByConverted, pageNo, pageSize, getAggregate || getAggregate, getAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted);
+            var entityList = Repository.GetAll(orderByConverted, pageNo, pageSize, GetAggregate || getAggregate, GetAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted);
 
             IEnumerable<TDto> dtoList = entityList.ToList().Select(Mapper.Map<TEntity, TDto>);
 
@@ -77,7 +76,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var entityList = await Repository.GetAllAsync(cancellationToken, orderByConverted, pageNo, pageSize, getAggregate || getAggregate, getAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted).ConfigureAwait(false);
+            var entityList = await Repository.GetAllAsync(cancellationToken, orderByConverted, pageNo, pageSize, GetAggregate || getAggregate, GetAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted).ConfigureAwait(false);
 
             IEnumerable<TDto> dtoList = entityList.ToList().Select(Mapper.Map<TEntity, TDto>);
 
@@ -106,7 +105,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var entityList = Repository.Search(ownedBy, search, filterConverted, orderByConverted, pageNo, pageSize, getAggregate || getAggregate, getAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted);
+            var entityList = Repository.Search(ownedBy, search, filterConverted, orderByConverted, pageNo, pageSize, GetAggregate || getAggregate, GetAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted);
 
             var entities = entityList.ToList();
 
@@ -141,7 +140,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var entityList = await Repository.SearchAsync(cancellationToken, ownedBy, search, filterConverted, orderByConverted, pageNo, pageSize, getAggregate || getAggregate, getAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted).ConfigureAwait(false);
+            var entityList = await Repository.SearchAsync(cancellationToken, ownedBy, search, filterConverted, orderByConverted, pageNo, pageSize, GetAggregate || getAggregate, GetAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted).ConfigureAwait(false);
 
             var entities = entityList.ToList();
 
@@ -200,7 +199,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var entityList = Repository.Get(filterConverted, orderByConverted, pageNo, pageSize, getAggregate || getAggregate, getAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted);
+            var entityList = Repository.Get(filterConverted, orderByConverted, pageNo, pageSize, GetAggregate || getAggregate, GetAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted);
 
             var entities = entityList.ToList();
 
@@ -233,7 +232,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var entityList = await Repository.GetAsync(cancellationToken, filterConverted, orderByConverted, pageNo, pageSize, getAggregate || getAggregate, getAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted).ConfigureAwait(false);
+            var entityList = await Repository.GetAsync(cancellationToken, filterConverted, orderByConverted, pageNo, pageSize, GetAggregate || getAggregate, GetAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted).ConfigureAwait(false);
 
             var entities = entityList.ToList();
 
@@ -285,7 +284,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var bo = Repository.GetOne(filterConverted, getAggregate || getAggregate, getAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted);
+            var bo = Repository.GetOne(filterConverted, GetAggregate || getAggregate, GetAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted);
 
             AuthorizeResourceOperationAsync(bo, ResourceCollectionsCore.CRUD.Operations.Read, ResourceCollectionsCore.CRUD.Operations.ReadOwner).Wait();
 
@@ -307,7 +306,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var bo = await Repository.GetOneAsync(cancellationToken, filterConverted, getAggregate || getAggregate, getAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted).ConfigureAwait(false);
+            var bo = await Repository.GetOneAsync(cancellationToken, filterConverted, GetAggregate || getAggregate, GetAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted).ConfigureAwait(false);
 
             await AuthorizeResourceOperationAsync(bo, ResourceCollectionsCore.CRUD.Operations.Read, ResourceCollectionsCore.CRUD.Operations.ReadOwner);
 
@@ -332,7 +331,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var bo = Repository.GetFirst(filterConverted, orderByConverted, getAggregate || getAggregate, getAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted);
+            var bo = Repository.GetFirst(filterConverted, orderByConverted, GetAggregate || getAggregate, GetAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted);
 
             AuthorizeResourceOperationAsync(bo, ResourceCollectionsCore.CRUD.Operations.Read, ResourceCollectionsCore.CRUD.Operations.ReadOwner).Wait();
 
@@ -356,7 +355,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var bo = await Repository.GetFirstAsync(cancellationToken, filterConverted, orderByConverted, getAggregate || getAggregate, getAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted).ConfigureAwait(false);
+            var bo = await Repository.GetFirstAsync(cancellationToken, filterConverted, orderByConverted, GetAggregate || getAggregate, GetAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted).ConfigureAwait(false);
 
             await AuthorizeResourceOperationAsync(bo, ResourceCollectionsCore.CRUD.Operations.Read, ResourceCollectionsCore.CRUD.Operations.ReadOwner);
 
@@ -376,7 +375,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var bo = Repository.GetById(id, getAggregate || getAggregate, getAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted);
+            var bo = Repository.GetById(id, GetAggregate || getAggregate, GetAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted);
 
             AuthorizeResourceOperationAsync(bo, ResourceCollectionsCore.CRUD.Operations.Read, ResourceCollectionsCore.CRUD.Operations.ReadOwner).Wait();
 
@@ -396,7 +395,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var bo = await Repository.GetByIdAsync(cancellationToken, id, getAggregate || getAggregate, getAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted).ConfigureAwait(false);
+            var bo = await Repository.GetByIdAsync(cancellationToken, id, GetAggregate || getAggregate, GetAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted).ConfigureAwait(false);
 
             await AuthorizeResourceOperationAsync(bo, ResourceCollectionsCore.CRUD.Operations.Read, ResourceCollectionsCore.CRUD.Operations.ReadOwner);
 
@@ -472,7 +471,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var result = Repository.GetByIds(ids, getAggregate || getAggregate, getAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted);
+            var result = Repository.GetByIds(ids, GetAggregate || getAggregate, GetAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted);
 
             var entities = result.ToList();
 
@@ -497,7 +496,7 @@ namespace AspNetCore.ApiBase.ApplicationServices
             AddIncludes(list);
             includesConverted = list.ToArray();
 
-            var result = await Repository.GetByIdsAsync(cancellationToken, ids, getAggregate || getAggregate, getAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted).ConfigureAwait(false);
+            var result = await Repository.GetByIdsAsync(cancellationToken, ids, GetAggregate || getAggregate, GetAggregateAndAssociatedAggregates || getAggregateAndAssociatedAggregates, includesConverted).ConfigureAwait(false);
 
             var entities = result.ToList();
 

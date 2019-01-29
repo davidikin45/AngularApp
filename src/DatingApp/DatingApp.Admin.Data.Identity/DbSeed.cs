@@ -33,6 +33,9 @@ namespace DatingApp.Admin.Data.Identity
                ResourceCollections.Tenants.Scopes.UpdateOwner,
                ResourceCollections.Tenants.Scopes.DeleteOwner
                ),
+               new SeedRole(Role.read_only.ToString(),
+               ResourceCollectionsCore.Admin.Scopes.Read
+               ),
                new SeedRole(Role.administrator.ToString(),
                ResourceCollectionsCore.Admin.Scopes.Full
                )
@@ -43,7 +46,8 @@ namespace DatingApp.Admin.Data.Identity
         {
             return new List<SeedUser>()
             {
-                 new SeedUser(User.CreateUser(_passwordHasher, "admin", "admin@admin.com", "password"), true, Role.administrator.ToString())
+                 new SeedUser(User.CreateUser(_passwordHasher, "admin", "admin@admin.com", "password"), true, Role.administrator.ToString()),
+                 new SeedUser(User.CreateUser(_passwordHasher, "api", "api@api.com", "password"), true, Role.read_only.ToString())
             };
         }
     }
